@@ -21,8 +21,7 @@ var rootCmd = &cobra.Command{
 	Short: "Execute commands at scale",
 	Long: `Executor is an application that allows command execution at scale.
 
-executor run "ls -l"
-`,
+executor run "ls -l"`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -38,12 +37,6 @@ func init() {
 	var project string
 	var keyPath string
 	var forceNewKey bool
-
-	rootCmd.PersistentPreRun = func(cmd *cobra.Command, args []string) {
-		if err := setUpLogs(os.Stdout, verbosity); err != nil {
-			log.Fatal(err)
-		}
-	}
 
 	cobra.OnInitialize(initConfig)
 
@@ -64,7 +57,6 @@ func init() {
 func initConfig() {
 	if cfgFile != "" {
 		viper.SetConfigFile(cfgFile)
-		log.Debug("Using config file ", viper.ConfigFileUsed())
 	} else {
 		home, err := homedir.Dir()
 		if err != nil {
@@ -80,6 +72,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
+	setUpLogs(os.Stdout, viper.GetString("verbosity"))
 }
 
 func setUpLogs(out io.Writer, level string) error {
