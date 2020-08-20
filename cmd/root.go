@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
@@ -72,11 +71,10 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		log.Fatal(err)
 	}
-	setUpLogs(os.Stdout, viper.GetString("verbosity"))
+	setUpLogs(viper.GetString("verbosity"))
 }
 
-func setUpLogs(out io.Writer, level string) error {
-	log.SetOutput(out)
+func setUpLogs(level string) error {
 	lvl, err := log.ParseLevel(level)
 	if err != nil {
 		return err
