@@ -6,25 +6,46 @@ import (
 )
 
 // GetIPAddresses returns a list of external IP addresses used for the SHH connection
-func GetIPAddresses(instances *compute.InstanceAggregatedList) []string {
+func GetIPAddresses(instances []*compute.Instance) []string {
 	log.Info("Fetching list of external IP addresses")
 	addresses := []string{}
-	for _, v := range instances.Items {
-		for _, instance := range v.Instances {
-			addresses = append(addresses, instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22")
-		}
+	for _, instance := range instances {
+		addresses = append(addresses, instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22")
 	}
+
 	return addresses
 }
 
+// // UpdateSSHKeys returns a dictionary of instance names and their sshKeys metadata entry
+// func UpdateSSHKeys(instance *compute.Instance, key string) {
+// 	log.Info("Fetching sshKeys from instance metadata")
+
+// 	// computeService.Instances.Update()
+// }
+
 // GetInstances returns a list of external IP addresses used for the SHH connection
-func GetInstances(project string, filter string) (*compute.InstanceAggregatedList, error) {
+func GetInstances(project string, filter string) ([]*compute.Instance, error) {
 	log.Info("Fetching list of GCE instances")
 	listCall := computeService.Instances.AggregatedList(project)
 	listCall.Filter(filter)
-	instances, err := listCall.Do()
+	list, err := listCall.Do()
 	if err != nil {
 		return nil, err
+	}
+
+	instances := []*compute.Instance{}
+	// var fInstances *compute.InstanceAggregatedList
+	// fInstances = &compute.InstanceAggregatedList{}
+	for _, item := range list.Items {
+		for _, instance := range item.Instances {
+			for _, m := range instance.Metadata.Items {
+				if m.Key == "sshKeys" || m.Key == "block-project-ssh-keys" {
+					log.Warningln(instance.Name, "Ignoring, this instance is blocking project wide SSH keys")
+					continue
+				}
+				instances = append(instances, instance)
+			}
+		}
 	}
 
 	return instances, nil

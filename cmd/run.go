@@ -64,6 +64,7 @@ func run(cmd *cobra.Command, args []string) {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
+
 	addresses := gcp.GetIPAddresses(instances)
 
 	err = helpers.Execute(args[0], addresses, privKey)
