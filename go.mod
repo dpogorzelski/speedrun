@@ -18,10 +18,10 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.7.1
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
-	github.com/yahoo/vssh v0.0.0-20200730163636-1a184d5b1d77
+	github.com/yahoo/vssh v0.0.0-20200822183201-0cc0988ac82c
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
-	golang.org/x/sys v0.0.0-20200821140526-fda516888d29 // indirect
+	golang.org/x/sys v0.0.0-20200824131525-c12d262b63d8 // indirect
 	google.golang.org/api v0.30.0
-	gopkg.in/ini.v1 v1.60.0 // indirect
+	gopkg.in/ini.v1 v1.60.1 // indirect
 )

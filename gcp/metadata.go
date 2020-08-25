@@ -66,43 +66,48 @@ func UpdateProjectMetadata(project string, pubKey ssh.PublicKey) error {
 	return nil
 }
 
-// func UpdateInstanceMetadata(project string, instance *compute.Instance, pubKey ssh.PublicKey) error {
-// 	authorizedKey, err := formatSSHPubKey(pubKey)
-// 	if err != nil {
-// 		return err
-// 	}
+// UpdateInstanceMetadata adds ssh public key to the intsance metadata
+func UpdateInstanceMetadata(project string, instances []*compute.Instance, pubKey ssh.PublicKey) error {
+	authorizedKey, err := formatSSHPubKey(pubKey)
+	if err != nil {
+		return err
+	}
 
-// 	entry, err := createMetadataEntry(authorizedKey)
-// 	if err != nil {
-// 		return err
-// 	}
+	entry, err := createMetadataEntry(authorizedKey)
+	if err != nil {
+		return err
+	}
 
-// 	has, same, i := hasEntry(instance.Metadata, entry)
-// 	var items []*compute.MetadataItems
+	for _, instance := range instances {
+		has, same, i := hasEntry(instance.Metadata, entry)
+		var items []*compute.MetadataItems
 
-// 	if has && same {
-// 		log.Info("Public key already present in metadata")
-// 		return nil
-// 	} else if has && !same {
-// 		items = updateMetadata(instance.Metadata, entry, i)
-// 	} else if !has {
-// 		items = appendToMetadata(instance.Metadata, entry)
-// 	}
+		if has && same {
+			log.Info("Public key already present in metadata")
+			return nil
+		} else if has && !same {
+			items = updateMetadata(instance.Metadata, entry, i)
+		} else if !has {
+			items = appendToMetadata(instance.Metadata, entry)
+		}
 
-// 	metadata := compute.Metadata{
-// 		Fingerprint: instance.Metadata.Fingerprint,
-// 		Items:       items,
-// 	}
+		metadata := compute.Metadata{
+			Fingerprint: instance.Metadata.Fingerprint,
+			Items:       items,
+		}
 
-// 	instance.Metadata = &metadata
-// 	call := computeService.Instances.Update(project, instance.Zone, instance.Name, instance)
-// 	_, err = call.Do()
-// 	if err != nil {
-// 		return err
-// 	}
+		instance.Metadata = &metadata
+		s := strings.Split(instance.Zone, "/")
+		zone := s[len(s)-1]
+		call := computeService.Instances.Update(project, zone, instance.Name, instance)
+		_, err = call.Do()
+		if err != nil {
+			return err
+		}
+	}
 
-// 	return nil
-// }
+	return nil
+}
 
 func formatSSHPubKey(pubKey ssh.PublicKey) (string, error) {
 	authorizedKey := ssh.MarshalAuthorizedKey(pubKey)

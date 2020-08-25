@@ -64,7 +64,16 @@ func run(cmd *cobra.Command, args []string) {
 		log.Error(err.Error())
 		os.Exit(1)
 	}
+	if len(instances) == 0 {
+		log.Info("No instances found")
+		os.Exit(0)
+	}
 
+	err = gcp.UpdateInstanceMetadata(project, instances, pubKey)
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
 	addresses := gcp.GetIPAddresses(instances)
 
 	err = helpers.Execute(args[0], addresses, privKey)

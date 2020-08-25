@@ -368,6 +368,8 @@ github.com/yahoo/vssh v0.0.0-20200725011721-d23ad655b000 h1:83LD4h/7U/hCA4DrVqba
 github.com/yahoo/vssh v0.0.0-20200725011721-d23ad655b000/go.mod h1:jlMwL65p7h2KWE8YtsG4NtzGkhLO42Q3XK8Act2ccsQ=
 github.com/yahoo/vssh v0.0.0-20200730163636-1a184d5b1d77 h1:FH06sOFUjhe6N3sHBMIdzQDvLAKEfkWvInCr91imhEw=
 github.com/yahoo/vssh v0.0.0-20200730163636-1a184d5b1d77/go.mod h1:jlMwL65p7h2KWE8YtsG4NtzGkhLO42Q3XK8Act2ccsQ=
+github.com/yahoo/vssh v0.0.0-20200822183201-0cc0988ac82c h1:9jpVO6lwF6giV0f3Zh9zkRMAhno/UaX+v7kUiIe0Uy0=
+github.com/yahoo/vssh v0.0.0-20200822183201-0cc0988ac82c/go.mod h1:jlMwL65p7h2KWE8YtsG4NtzGkhLO42Q3XK8Act2ccsQ=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
@@ -548,6 +550,8 @@ golang.org/x/sys v0.0.0-20200820212457-1fb795427249 h1:tKP05IMsVLZ4VeeCEFmrIUmxA
 golang.org/x/sys v0.0.0-20200820212457-1fb795427249/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/sys v0.0.0-20200821140526-fda516888d29 h1:mNuhGagCf3lDDm5C0376C/sxh6V7fy9WbdEu/YDNA04=
 golang.org/x/sys v0.0.0-20200821140526-fda516888d29/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+golang.org/x/sys v0.0.0-20200824131525-c12d262b63d8 h1:AvbQYmiaaaza3cW3QXRyPo5kYgpFIzOAfeAAN7m3qQ4=
+golang.org/x/sys v0.0.0-20200824131525-c12d262b63d8/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
 golang.org/x/text v0.0.0-20170915032832-14c0d48ead0c/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.0/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
 golang.org/x/text v0.3.1-0.20180807135948-17ff2d5776d2/go.mod h1:NqM8EUOU14njkJ3fqMW+pc6Ldnwhi/IjpwHt7yyuwOQ=
@@ -718,6 +722,8 @@ gopkg.in/ini.v1 v1.57.0 h1:9unxIsFcTt4I55uWluz+UmL95q4kdJ0buvQ1ZIqVQww=
 gopkg.in/ini.v1 v1.57.0/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
 gopkg.in/ini.v1 v1.60.0 h1:P5ZzC7RJO04094NJYlEnBdFK2wwmnCAy/+7sAzvWs60=
 gopkg.in/ini.v1 v1.60.0/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
+gopkg.in/ini.v1 v1.60.1 h1:P5y5shSkb0CFe44qEeMBgn8JLow09MP17jlJHanke5g=
+gopkg.in/ini.v1 v1.60.1/go.mod h1:pNLf8WUiyNEtQjuu5G5vTm06TEv9tsIgeAvK8hOrP4k=
 gopkg.in/op/go-logging.v1 v1.0.0-20160211212156-b2cb9fa56473/go.mod h1:N1eN2tsCx0Ydtgjl4cqmbRCsY4/+z4cYDeqwZTk6zog=
 gopkg.in/resty.v1 v1.12.0/go.mod h1:mDo4pnntr5jdWRML875a/NmxYqAlA73dVijT2AXvQQo=
 gopkg.in/tomb.v1 v1.0.0-20141024135613-dd632973f1e7/go.mod h1:dt/ZhP58zS4L8KSrWDmTeBkI65Dw0HsyUHuEVlX15mw=
