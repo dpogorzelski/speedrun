@@ -44,7 +44,7 @@ func UpdateProjectMetadata(project string, pubKey ssh.PublicKey) error {
 	var items []*compute.MetadataItems
 
 	if has && same {
-		log.Info("Public key already present in metadata")
+		log.Info("Public key already present in project metadata")
 		return nil
 	} else if has && !same {
 		items = updateMetadata(projectData.CommonInstanceMetadata, entry, i)
@@ -83,7 +83,7 @@ func UpdateInstanceMetadata(project string, instances []*compute.Instance, pubKe
 		var items []*compute.MetadataItems
 
 		if has && same {
-			log.Info("Public key already present in metadata")
+			log.Info("Public key already present in instance metadata")
 			return nil
 		} else if has && !same {
 			items = updateMetadata(instance.Metadata, entry, i)
