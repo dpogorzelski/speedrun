@@ -110,7 +110,7 @@ func determineKeyFilePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	path := filepath.Join(homeDir, ".executor", fileName)
+	path := filepath.Join(homeDir, ".nyx", fileName)
 	log.Debugf("Determined private key file path %s", path)
 	return path, nil
 }

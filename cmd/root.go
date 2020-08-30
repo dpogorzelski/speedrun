@@ -16,11 +16,11 @@ var cfgFile string
 var verbosity string
 
 var rootCmd = &cobra.Command{
-	Use:   "executor",
+	Use:   "nyx",
 	Short: "Execute commands at scale",
-	Long: `Executor is an application that allows command execution at scale.
+	Long: `Nyx is an application that allows command execution at scale.
 
-executor run "ls -l"`,
+nyx run "ls -l"`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -39,7 +39,7 @@ func init() {
 
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.executor/config)")
+	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nyx/config)")
 	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
 	viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
 
@@ -63,7 +63,7 @@ func initConfig() {
 		}
 
 		viper.SetConfigName("config")
-		viper.AddConfigPath(filepath.Join(home, ".executor"))
+		viper.AddConfigPath(filepath.Join(home, ".nyx"))
 	}
 
 	viper.AutomaticEnv()

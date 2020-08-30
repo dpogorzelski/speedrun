@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-executor
+nyx
 TODO
 .vscode
 

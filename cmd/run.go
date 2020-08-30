@@ -5,8 +5,8 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	"executor/gcp"
-	"executor/helpers"
+	"nyx/gcp"
+	"nyx/helpers"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"

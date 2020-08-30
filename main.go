@@ -1,6 +1,6 @@
 package main
 
-import "executor/cmd"
+import "nyx/cmd"
 
 func main() {
 	cmd.Execute()
