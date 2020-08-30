@@ -77,7 +77,7 @@ func loadKeyPair() (ssh.PublicKey, ssh.Signer, error) {
 
 	file, err := readKeyFile(privateKeyPath)
 	if err != nil {
-		return nil, nil, err
+		return nil, nil, fmt.Errorf("Couldn't load private key from the expected location. Use --force-new-key to generate a new one: %v", err)
 	}
 
 	log.Debugf("Parsing private key")
