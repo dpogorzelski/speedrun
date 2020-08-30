@@ -62,7 +62,8 @@ func initConfig() {
 			log.Fatal(err)
 		}
 
-		viper.SetConfigName("config")
+		viper.SetConfigName("config.toml")
+		viper.SetConfigType("toml")
 		viper.AddConfigPath(filepath.Join(home, ".nyx"))
 	}
 
