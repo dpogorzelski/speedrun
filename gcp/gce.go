@@ -36,11 +36,6 @@ func GetInstances(project string, filter string) ([]*compute.Instance, error) {
 	instances := []*compute.Instance{}
 	for _, item := range list.Items {
 		for _, instance := range item.Instances {
-			// for _, m := range instance.Metadata.Items {
-			// 	if m.Key == "sshKeys" || m.Key == "block-project-ssh-keys" {
-			// 		instances = append(instances, instance)
-			// 	}
-			// }
 			instances = append(instances, instance)
 		}
 	}
