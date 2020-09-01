@@ -38,7 +38,7 @@ func GetInstances(project string, filter string) ([]*compute.Instance, error) {
 		for _, instance := range item.Instances {
 			// for _, m := range instance.Metadata.Items {
 			// 	if m.Key == "sshKeys" || m.Key == "block-project-ssh-keys" {
-			// 		log.Debugln(instance.Name, "Ignoring, this instance is blocking project wide SSH keys")
+			// 		instances = append(instances, instance)
 			// 	}
 			// }
 			instances = append(instances, instance)

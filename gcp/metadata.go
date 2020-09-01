@@ -44,7 +44,7 @@ func UpdateProjectMetadata(project string, pubKey ssh.PublicKey) error {
 	var items []*compute.MetadataItems
 
 	if has && same {
-		log.Info("Public key already present in project metadata")
+		log.Debug("Public key already present in project metadata")
 		return nil
 	} else if has && !same {
 		items = updateMetadata(projectData.CommonInstanceMetadata, entry, i)
@@ -82,9 +82,14 @@ func UpdateInstanceMetadata(project string, instances []*compute.Instance, pubKe
 		has, same, i := hasEntry(instance.Metadata, entry)
 		var items []*compute.MetadataItems
 
+		if isBlocking(instance) != true {
+			log.Debugf("%s can use project wide ssh keys, skipping", instance.Name)
+			continue
+		}
+
 		if has && same {
-			log.Info("Public key already present in instance metadata")
-			return nil
+			log.Debugf("%s public key already present in instance metadata", instance.Name)
+			continue
 		} else if has && !same {
 			items = updateMetadata(instance.Metadata, entry, i)
 		} else if !has {
@@ -107,6 +112,15 @@ func UpdateInstanceMetadata(project string, instances []*compute.Instance, pubKe
 	}
 
 	return nil
+}
+
+func isBlocking(i *compute.Instance) bool {
+	for _, m := range i.Metadata.Items {
+		if m.Key == "sshKeys" || m.Key == "block-project-ssh-keys" {
+			return true
+		}
+	}
+	return false
 }
 
 func formatSSHPubKey(pubKey ssh.PublicKey) (string, error) {
@@ -163,7 +177,7 @@ func createMetadataEntry(pubKey string) (string, error) {
 }
 
 func appendToMetadata(md *compute.Metadata, entry string) []*compute.MetadataItems {
-	log.Info("Appending new public key to metadata")
+	log.Debug("Appending new public key to metadata")
 
 	var entries []string
 	flatMD := flattenMetadata(md)
@@ -180,7 +194,7 @@ func appendToMetadata(md *compute.Metadata, entry string) []*compute.MetadataIte
 }
 
 func updateMetadata(md *compute.Metadata, entry string, i int) []*compute.MetadataItems {
-	log.Info("Updating existing metadata entry with new public key")
+	log.Debug("Updating existing metadata entry with new public key")
 
 	var entries []string
 	flatMD := flattenMetadata(md)
