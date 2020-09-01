@@ -16,13 +16,6 @@ func GetIPAddresses(instances []*compute.Instance) []string {
 	return addresses
 }
 
-// // UpdateSSHKeys returns a dictionary of instance names and their sshKeys metadata entry
-// func UpdateSSHKeys(instance *compute.Instance, key string) {
-// 	log.Info("Fetching sshKeys from instance metadata")
-
-// 	// computeService.Instances.Update()
-// }
-
 // GetInstances returns a list of external IP addresses used for the SHH connection
 func GetInstances(project string, filter string) ([]*compute.Instance, error) {
 	log.Info("Fetching list of GCE instances")
