@@ -12,7 +12,7 @@ require (
 	github.com/onsi/ginkgo v1.14.0 // indirect
 	github.com/pelletier/go-toml v1.8.0 // indirect
 	github.com/sirupsen/logrus v1.6.0
-	github.com/spf13/afero v1.3.4 // indirect
+	github.com/spf13/afero v1.3.5 // indirect
 	github.com/spf13/cast v1.3.1 // indirect
 	github.com/spf13/cobra v1.0.0
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
@@ -22,9 +22,9 @@ require (
 	github.com/yahoo/vssh v0.0.0-20200822183201-0cc0988ac82c
 	golang.org/x/crypto v0.0.0-20200820211705-5c72a883971a
 	golang.org/x/net v0.0.0-20200822124328-c89045814202 // indirect
-	golang.org/x/sys v0.0.0-20200828194041-157a740278f4 // indirect
-	google.golang.org/api v0.30.0
-	google.golang.org/genproto v0.0.0-20200829155447-2bf3329a0021 // indirect
+	golang.org/x/sys v0.0.0-20200831180312-196b9ba8737a // indirect
+	google.golang.org/api v0.31.0
+	google.golang.org/genproto v0.0.0-20200901141002-b3bf27a9dbd1 // indirect
 	google.golang.org/grpc v1.31.1 // indirect
 	gopkg.in/ini.v1 v1.60.2 // indirect
 )

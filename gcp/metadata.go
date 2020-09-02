@@ -67,7 +67,7 @@ func UpdateProjectMetadata(project string, pubKey ssh.PublicKey) error {
 }
 
 // UpdateInstanceMetadata adds ssh public key to the intsance metadata
-func UpdateInstanceMetadata(project string, instances []*compute.Instance, pubKey ssh.PublicKey) error {
+func UpdateInstanceMetadata(project string, instance *compute.Instance, pubKey ssh.PublicKey) error {
 	authorizedKey, err := formatSSHPubKey(pubKey)
 	if err != nil {
 		return err
@@ -78,37 +78,35 @@ func UpdateInstanceMetadata(project string, instances []*compute.Instance, pubKe
 		return err
 	}
 
-	for _, instance := range instances {
-		has, same, i := hasEntry(instance.Metadata, entry)
-		var items []*compute.MetadataItems
+	has, same, i := hasEntry(instance.Metadata, entry)
+	var items []*compute.MetadataItems
 
-		if isBlocking(instance) != true {
-			log.Debugf("%s can use project wide ssh keys, skipping instnance metadata update", instance.Name)
-			continue
-		}
+	if isBlocking(instance) != true {
+		log.Debugf("%s can use project wide ssh keys, skipping instnance metadata update", instance.Name)
+		return nil
+	}
 
-		if has && same {
-			log.Debugf("%s public key already present in instance metadata", instance.Name)
-			continue
-		} else if has && !same {
-			items = updateMetadata(instance.Metadata, entry, i)
-		} else if !has {
-			items = appendToMetadata(instance.Metadata, entry)
-		}
+	if has && same {
+		log.Debugf("%s public key already present in instance metadata", instance.Name)
+		return nil
+	} else if has && !same {
+		items = updateMetadata(instance.Metadata, entry, i)
+	} else if !has {
+		items = appendToMetadata(instance.Metadata, entry)
+	}
 
-		metadata := compute.Metadata{
-			Fingerprint: instance.Metadata.Fingerprint,
-			Items:       items,
-		}
+	metadata := compute.Metadata{
+		Fingerprint: instance.Metadata.Fingerprint,
+		Items:       items,
+	}
 
-		instance.Metadata = &metadata
-		s := strings.Split(instance.Zone, "/")
-		zone := s[len(s)-1]
-		call := computeService.Instances.Update(project, zone, instance.Name, instance)
-		_, err = call.Do()
-		if err != nil {
-			return err
-		}
+	instance.Metadata = &metadata
+	s := strings.Split(instance.Zone, "/")
+	zone := s[len(s)-1]
+	call := computeService.Instances.Update(project, zone, instance.Name, instance)
+	_, err = call.Do()
+	if err != nil {
+		return err
 	}
 
 	return nil

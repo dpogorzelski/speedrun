@@ -69,10 +69,12 @@ func run(cmd *cobra.Command, args []string) {
 		os.Exit(0)
 	}
 
-	err = gcp.UpdateInstanceMetadata(project, instances, pubKey)
-	if err != nil {
-		log.Error(err.Error())
-		os.Exit(1)
+	for _, instance := range instances {
+		err = gcp.UpdateInstanceMetadata(project, instance, pubKey)
+		if err != nil {
+			log.Error(err.Error())
+			os.Exit(1)
+		}
 	}
 	addresses := gcp.GetIPAddresses(instances)
 
