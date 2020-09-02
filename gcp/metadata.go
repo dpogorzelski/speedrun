@@ -83,7 +83,7 @@ func UpdateInstanceMetadata(project string, instances []*compute.Instance, pubKe
 		var items []*compute.MetadataItems
 
 		if isBlocking(instance) != true {
-			log.Debugf("%s can use project wide ssh keys, skipping", instance.Name)
+			log.Debugf("%s can use project wide ssh keys, skipping instnance metadata update", instance.Name)
 			continue
 		}
 
