@@ -72,12 +72,12 @@ func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *comput
 	defer wg.Done()
 	authorizedKey, err := formatSSHPubKey(pubKey)
 	if err != nil {
-		return
+		log.Warnf("%s failed to update metadata: ", err)
 	}
 
 	entry, err := createMetadataEntry(authorizedKey)
 	if err != nil {
-		return
+		log.Warnf("%s failed to update metadata: ", err)
 	}
 
 	has, same, i := hasEntry(instance.Metadata, entry)
@@ -108,8 +108,7 @@ func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *comput
 	call := computeService.Instances.Update(project, zone, instance.Name, instance)
 	_, err = call.Do()
 	if err != nil {
-		log.Errorf("%s failed to update metadata: ", err)
-		return
+		log.Warnf("%s failed to update metadata: ", err)
 	}
 }
 
