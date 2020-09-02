@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"os"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 
@@ -69,13 +70,13 @@ func run(cmd *cobra.Command, args []string) {
 		os.Exit(0)
 	}
 
+	var wg sync.WaitGroup
+
 	for _, instance := range instances {
-		err = gcp.UpdateInstanceMetadata(project, instance, pubKey)
-		if err != nil {
-			log.Error(err.Error())
-			os.Exit(1)
-		}
+		wg.Add(1)
+		go gcp.UpdateInstanceMetadata(&wg, project, instance, pubKey)
 	}
+	wg.Wait()
 	addresses := gcp.GetIPAddresses(instances)
 
 	err = helpers.Execute(args[0], addresses, privKey)

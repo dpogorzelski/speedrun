@@ -6,6 +6,7 @@ import (
 	"os/user"
 	"sort"
 	"strings"
+	"sync"
 
 	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
@@ -67,15 +68,16 @@ func UpdateProjectMetadata(project string, pubKey ssh.PublicKey) error {
 }
 
 // UpdateInstanceMetadata adds ssh public key to the intsance metadata
-func UpdateInstanceMetadata(project string, instance *compute.Instance, pubKey ssh.PublicKey) error {
+func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *compute.Instance, pubKey ssh.PublicKey) {
+	defer wg.Done()
 	authorizedKey, err := formatSSHPubKey(pubKey)
 	if err != nil {
-		return err
+		return
 	}
 
 	entry, err := createMetadataEntry(authorizedKey)
 	if err != nil {
-		return err
+		return
 	}
 
 	has, same, i := hasEntry(instance.Metadata, entry)
@@ -83,12 +85,12 @@ func UpdateInstanceMetadata(project string, instance *compute.Instance, pubKey s
 
 	if isBlocking(instance) != true {
 		log.Debugf("%s can use project wide ssh keys, skipping instnance metadata update", instance.Name)
-		return nil
+		return
 	}
 
 	if has && same {
 		log.Debugf("%s public key already present in instance metadata", instance.Name)
-		return nil
+		return
 	} else if has && !same {
 		items = updateMetadata(instance.Metadata, entry, i)
 	} else if !has {
@@ -106,10 +108,9 @@ func UpdateInstanceMetadata(project string, instance *compute.Instance, pubKey s
 	call := computeService.Instances.Update(project, zone, instance.Name, instance)
 	_, err = call.Do()
 	if err != nil {
-		return err
+		log.Errorf("%s failed to update metadata: ", err)
+		return
 	}
-
-	return nil
 }
 
 func isBlocking(i *compute.Instance) bool {
