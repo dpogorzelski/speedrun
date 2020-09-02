@@ -36,12 +36,6 @@ func run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 
-	// keyPath, err := cmd.Flags().GetString("key-path")
-	// if err != nil {
-	// 	log.Error(err.Error())
-	// 	os.Exit(1)
-	// }
-
 	forceNewKey, err := cmd.Flags().GetBool("force-new-key")
 	if err != nil {
 		log.Error(err.Error())
@@ -49,12 +43,6 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	pubKey, privKey, err := helpers.GetKeyPair(forceNewKey)
-	if err != nil {
-		log.Error(err.Error())
-		os.Exit(1)
-	}
-
-	err = gcp.UpdateProjectMetadata(project, pubKey)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -71,15 +59,13 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	var wg sync.WaitGroup
-
 	for _, instance := range instances {
 		wg.Add(1)
 		go gcp.UpdateInstanceMetadata(&wg, project, instance, pubKey)
 	}
 	wg.Wait()
-	addresses := gcp.GetIPAddresses(instances)
 
-	err = helpers.Execute(args[0], addresses, privKey)
+	err = helpers.Execute(args[0], instances, privKey)
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)

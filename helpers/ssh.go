@@ -19,6 +19,7 @@ import (
 	log "github.com/sirupsen/logrus"
 	"github.com/yahoo/vssh"
 	"golang.org/x/crypto/ssh"
+	"google.golang.org/api/compute/v1"
 )
 
 // GetKeyPair returns a public key, either new or existing depending on the force bool value. The key is formatted for use in authorized_keys files or GCP metadata.
@@ -153,7 +154,7 @@ func getSSHConfig(user string, key ssh.Signer) (*ssh.ClientConfig, error) {
 }
 
 // Execute runs agiven command on servers in the addresses list
-func Execute(command string, addresses []string, key ssh.Signer) error {
+func Execute(command string, instances []*compute.Instance, key ssh.Signer) error {
 	vs := vssh.New().Start()
 	user, err := user.Current()
 	if err != nil {
@@ -164,12 +165,14 @@ func Execute(command string, addresses []string, key ssh.Signer) error {
 	if err != nil {
 		return err
 	}
-	for _, addr := range addresses {
-		err := vs.AddClient(addr, config, vssh.SetMaxSessions(10))
+
+	for _, instance := range instances {
+		err := vs.AddClient(instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22", config, vssh.SetMaxSessions(100))
 		if err != nil {
 			return err
 		}
 	}
+
 	vs.Wait()
 
 	ctx, cancel := context.WithCancel(context.Background())

@@ -13,60 +13,6 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-// func updateInstanceMetadata(project string, instance *compute.Instance, pubKey []byte) error {
-// 	metaItems := append(instance.Metadata.Items, &compute.MetadataItems{})
-// 	metadata := compute.Metadata{
-// 		Fingerprint: instance.Metadata.Fingerprint,
-// 		Items:       metaItems,
-// 	}
-// 	computeService.Instances.SetMetadata(project, instance.Zone, instance.Name, &metadata)
-// 	return nil
-// }
-
-// UpdateProjectMetadata adds public key to the project metadata to allow SSH connections to GCE instances with the corresponding private key
-func UpdateProjectMetadata(project string, pubKey ssh.PublicKey) error {
-	authorizedKey, err := formatSSHPubKey(pubKey)
-	if err != nil {
-		return err
-	}
-
-	entry, err := createMetadataEntry(authorizedKey)
-	if err != nil {
-		return err
-	}
-
-	getProject := computeService.Projects.Get(project)
-	projectData, err := getProject.Do()
-	if err != nil {
-		return err
-	}
-
-	has, same, i := hasEntry(projectData.CommonInstanceMetadata, entry)
-	var items []*compute.MetadataItems
-
-	if has && same {
-		log.Debug("Public key already present in project metadata")
-		return nil
-	} else if has && !same {
-		items = updateMetadata(projectData.CommonInstanceMetadata, entry, i)
-	} else if !has {
-		items = appendToMetadata(projectData.CommonInstanceMetadata, entry)
-	}
-
-	metadata := compute.Metadata{
-		Fingerprint: projectData.CommonInstanceMetadata.Fingerprint,
-		Items:       items,
-	}
-
-	setMetadata := computeService.Projects.SetCommonInstanceMetadata(project, &metadata)
-	_, err = setMetadata.Do()
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
 // UpdateInstanceMetadata adds ssh public key to the intsance metadata
 func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *compute.Instance, pubKey ssh.PublicKey) {
 	defer wg.Done()
@@ -82,11 +28,6 @@ func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *comput
 
 	has, same, i := hasEntry(instance.Metadata, entry)
 	var items []*compute.MetadataItems
-
-	if isBlocking(instance) != true {
-		log.Debugf("%s can use project wide ssh keys, skipping instnance metadata update", instance.Name)
-		return
-	}
 
 	if has && same {
 		log.Debugf("%s public key already present in instance metadata", instance.Name)
@@ -110,15 +51,6 @@ func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *comput
 	if err != nil {
 		log.Warnf("%s failed to update metadata: ", err)
 	}
-}
-
-func isBlocking(i *compute.Instance) bool {
-	for _, m := range i.Metadata.Items {
-		if m.Key == "sshKeys" || m.Key == "block-project-ssh-keys" {
-			return true
-		}
-	}
-	return false
 }
 
 func formatSSHPubKey(pubKey ssh.PublicKey) (string, error) {
