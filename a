@@ -1,157 +1,0 @@
-[K⣾ Fetching list of GCE instances [K⣽ Fetching list of GCE instances [K⣻ Fetching list of GCE instances [K⢿ Fetching list of GCE instances [K⡿ Fetching list of GCE instances [K⣟ Fetching list of GCE instances [K⣯ Fetching list of GCE instances [K⣷ Fetching list of GCE instances [K⣾ Fetching list of GCE instances [K⣽ Fetching list of GCE instances [K⣻ Fetching list of GCE instances [K⢿ Fetching list of GCE instances [K· Fetching list of GCE instances
-[K· Updating GCE metadata
-[K⡿ Running [cat /etc/ntp.conf] [K⣟ Running [cat /etc/ntp.conf] [K⣯ Running [cat /etc/ntp.conf] [K⣷ Running [cat /etc/ntp.conf] [K⣾ Running [cat /etc/ntp.conf] [K⣽ Running [cat /etc/ntp.conf] [K⣻ Running [cat /etc/ntp.conf] [K⢿ Running [cat /etc/ntp.conf] [K⡿ Running [cat /etc/ntp.conf] [K⣟ Running [cat /etc/ntp.conf] [K⣯ Running [cat /etc/ntp.conf] [K⣷ Running [cat /etc/ntp.conf] [K⣾ Running [cat /etc/ntp.conf] [K⣽ Running [cat /etc/ntp.conf] [K⣻ Running [cat /etc/ntp.conf] [K⢿ Running [cat /etc/ntp.conf] [K⡿ Running [cat /etc/ntp.conf] [K· Running [cat /etc/ntp.conf]:
-morning-us-east4-pc-auto-scaler-2k56:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-moderation-service-22zg:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-money-x4rh:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-remnants-mwtq:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-name-01:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-remnants-18db:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-saltstack:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-content-patching-service-h8qp:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-profile-cache-backend-hbmj:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-proxy-5hhb:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-blocklist-6b1c:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-match-32t8:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-auth-1t02:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-server-list-cddq:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-proxy-7x9q:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-match-v1nj:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-user-logs-g397:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-group-5v70:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-user-logs-nd2z:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-blocklist-0sw9:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-proxylist-server-2bvf:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-tracking2-04tt:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-profile-cache-backend-1nm3:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-cs-k8vb:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-clans-lnzf:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-messaging-0xll:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-tracking2-zd8h:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-group-9l32:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-locky-dw23:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-push-message-xpv4:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-profile-cache-front-nh18:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-push-message-4bs0:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-profile-cache-front-lw5x:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-content-patching-service-45xq:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-public-key-store-lzmk:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-proxy-ping-mr2j:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-messaging-qdjz:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-public-key-store-61zd:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-server-list-qvmp:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-clans-6nbz:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-proxylist-server-9p5g:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-proxy-ping-t8xp:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-cs-80w4:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-auth-q66x:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-profile-client-xj36:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-moderation-service-zzm8:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-web:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-profile-client-129c:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-money-qm7c:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-locky-f4bx:
-cat: /etc/ntp.conf: No such file or directory
-
-morning-pc-gameserver-pjnch38lrq:
-cat: /etc/ntp.conf: No such file or directory
-
-Success: 0 Failure: 51 Error: 0
