@@ -18,7 +18,6 @@ func GetIPAddresses(instances []*compute.Instance) []string {
 
 // GetInstances returns a list of external IP addresses used for the SHH connection
 func GetInstances(project string, filter string) ([]*compute.Instance, error) {
-	log.Info("Fetching list of GCE instances")
 	listCall := computeService.Instances.AggregatedList(project)
 	listCall.Filter(filter)
 	list, err := listCall.Do()

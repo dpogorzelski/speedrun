@@ -81,8 +81,10 @@ func setUpLogs(level string) error {
 		return err
 	}
 	log.SetLevel(lvl)
+	// log.SetOutput()
 	formatter := &prefixed.TextFormatter{
-		DisableTimestamp: true,
+		DisableTimestamp: false,
+		FullTimestamp:    true,
 	}
 	// formatter.SetColorScheme(&prefixed.ColorScheme{
 	// 	PrefixStyle: "cyan",

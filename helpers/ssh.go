@@ -14,13 +14,40 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
-	"github.com/sirupsen/logrus"
 	log "github.com/sirupsen/logrus"
 	"github.com/yahoo/vssh"
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/api/compute/v1"
 )
+
+type result struct {
+	errors    map[string]error
+	failures  map[string]string
+	successes map[string]string
+}
+
+type instanceList map[string]string
+
+type Run struct {
+	res       result
+	instances instanceList
+}
+
+const (
+	GREEN = iota
+	YELLOW
+	RED
+)
+
+func NewRun() *Run {
+	r := Run{}
+	r.res.errors = make(map[string]error)
+	r.res.failures = make(map[string]string)
+	r.res.successes = make(map[string]string)
+	return &r
+}
 
 // GetKeyPair returns a public key, either new or existing depending on the force bool value. The key is formatted for use in authorized_keys files or GCP metadata.
 func GetKeyPair(force bool) (ssh.PublicKey, ssh.Signer, error) {
@@ -154,57 +181,88 @@ func getSSHConfig(user string, key ssh.Signer) (*ssh.ClientConfig, error) {
 }
 
 // Execute runs agiven command on servers in the addresses list
-func Execute(command string, instances []*compute.Instance, key ssh.Signer) error {
+func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Run, error) {
 	vs := vssh.New().Start()
 	user, err := user.Current()
+	run := NewRun()
 	if err != nil {
-		return err
+		return run, err
 	}
 
 	config, err := getSSHConfig(user.Username, key)
 	if err != nil {
-		return err
+		return run, err
 	}
 
+	instanceDict := map[string]string{}
 	for _, instance := range instances {
-		err := vs.AddClient(instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22", config, vssh.SetMaxSessions(100))
+		instanceDict[instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22"] = instance.Name
+	}
+
+	for addr := range instanceDict {
+		err := vs.AddClient(addr, config, vssh.SetMaxSessions(10))
 		if err != nil {
-			return err
+			return run, err
 		}
 	}
-
 	vs.Wait()
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-
-	timeout, err := time.ParseDuration("10s")
+	timeout, err := time.ParseDuration("20s")
 	if err != nil {
-		return err
+		return run, err
 	}
-	respChan := vs.Run(ctx, command, timeout)
+
+	respChan := vs.Run(ctx, command, timeout, vssh.SetLimitReaderStdout(4096))
 
 	for resp := range respChan {
 		if err := resp.Err(); err != nil {
-			log.WithFields(logrus.Fields{
-				"prefix": resp.ID(),
-			}).Errorln(err)
+			run.res.errors[instanceDict[resp.ID()]] = err
 			continue
 		}
-		outTxt, _, _ := resp.GetText(vs)
-		outTxt = padOutput(outTxt)
+
+		output, _, _ := resp.GetText(vs)
 		if resp.ExitStatus() == 0 {
-			log.WithFields(logrus.Fields{
-				"prefix": resp.ID(),
-			}).Infof("\n%s", outTxt)
+			run.res.successes[instanceDict[resp.ID()]] = output
 		} else {
-			log.WithFields(logrus.Fields{
-				"prefix": resp.ID(),
-			}).Errorf("\n%s", outTxt)
+			run.res.failures[instanceDict[resp.ID()]] = output
 		}
 
 	}
-	return nil
+	return run, nil
+}
+
+// PrintResult prints the results of the ssh command run
+func (r Run) PrintResult() {
+	green := color.New(color.FgGreen).SprintfFunc()
+	yellow := color.New(color.FgYellow).SprintfFunc()
+	red := color.New(color.FgRed).SprintfFunc()
+
+	for k, v := range r.res.successes {
+		fmt.Printf("%s:\n%s\n", green(k), v)
+	}
+
+	for k, v := range r.res.failures {
+		fmt.Printf("%s:\n%s\n", yellow(k), v)
+	}
+
+	for k, v := range r.res.errors {
+		fmt.Printf("%s:\n%s\n", red(k), v.Error())
+	}
+	fmt.Printf("%s: %d %s: %d %s: %d\n", green("Success"), len(r.res.successes), yellow("Failure"), len(r.res.failures), red("Error"), len(r.res.errors))
+}
+
+// Status function returns true if there are no errors or failures in a run, false otherwise
+func (r Run) Status() interface{} {
+	if len(r.res.errors) > 0 {
+		return RED
+	}
+
+	if len(r.res.failures) > 0 {
+		return YELLOW
+	}
+	return GREEN
 }
 
 func padOutput(body string) string {
