@@ -2,11 +2,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/mitchellh/go-homedir"
 	"os"
 	"path/filepath"
 	"sync"
 	"time"
+
+	"github.com/mitchellh/go-homedir"
 
 	"github.com/fatih/color"
 	log "github.com/sirupsen/logrus"
@@ -40,15 +41,23 @@ var runCmd = &cobra.Command{
 
 func init() {
 	var filter string
+	var onlyFailures bool
 
 	rootCmd.AddCommand(runCmd)
 	runCmd.PersistentFlags().StringVar(&filter, "filter", "", "gcloud resource filter")
+	runCmd.PersistentFlags().BoolVar(&onlyFailures, "only-failures", false, "print only failures and errors")
 }
 
 func run(cmd *cobra.Command, args []string) {
 	project := viper.GetString("project")
 
 	filter, err := cmd.Flags().GetString("filter")
+	if err != nil {
+		log.Error(err.Error())
+		os.Exit(1)
+	}
+
+	onlyFailures, err := cmd.Flags().GetBool("only-failures")
 	if err != nil {
 		log.Error(err.Error())
 		os.Exit(1)
@@ -110,6 +119,6 @@ func run(cmd *cobra.Command, args []string) {
 		os.Exit(1)
 	}
 	s.Stop()
-	result.PrintResult()
+	result.PrintResult(onlyFailures)
 	//clearProjectMetadata()
 }

@@ -234,13 +234,15 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 }
 
 // PrintResult prints the results of the ssh command run
-func (r Run) PrintResult() {
+func (r Run) PrintResult(failures bool) {
 	green := color.New(color.FgGreen).SprintfFunc()
 	yellow := color.New(color.FgYellow).SprintfFunc()
 	red := color.New(color.FgRed).SprintfFunc()
 
-	for k, v := range r.res.successes {
-		fmt.Printf("%s:\n%s\n", green(k), v)
+	if failures {
+		for k, v := range r.res.successes {
+			fmt.Printf("%s:\n%s\n", green(k), v)
+		}
 	}
 
 	for k, v := range r.res.failures {
