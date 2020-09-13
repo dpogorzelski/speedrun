@@ -248,7 +248,7 @@ func (r Run) PrintResult() {
 	}
 
 	for k, v := range r.res.errors {
-		fmt.Printf("%s:\n%s\n", red(k), v.Error())
+		fmt.Printf("%s:\n%s\n\n", red(k), v.Error())
 	}
 	fmt.Printf("%s: %d %s: %d %s: %d\n", green("Success"), len(r.res.successes), yellow("Failure"), len(r.res.failures), red("Error"), len(r.res.errors))
 }
