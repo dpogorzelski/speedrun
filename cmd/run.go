@@ -2,7 +2,9 @@ package cmd
 
 import (
 	"fmt"
+	"github.com/mitchellh/go-homedir"
 	"os"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -23,6 +25,17 @@ var runCmd = &cobra.Command{
 	Short: "Run commands on GCE instances",
 	Args:  cobra.ExactArgs(1),
 	Run:   run,
+	PreRun: func(cmd *cobra.Command, args []string) {
+		home, err := homedir.Dir()
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		configDir := filepath.Join(home, ".nyx")
+		if _, err := os.Stat(configDir); os.IsNotExist(err) {
+			log.Fatal("Try running 'nyx init' first")
+		}
+	},
 }
 
 func init() {

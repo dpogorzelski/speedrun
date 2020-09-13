@@ -56,7 +56,7 @@ func GetKeyPair(force bool) (ssh.PublicKey, ssh.Signer, error) {
 	var err error
 
 	if force {
-		sshPubKey, signer, err = generateKeyPair()
+		sshPubKey, signer, err = GenerateKeyPair()
 		if err != nil {
 			return nil, nil, err
 		}
@@ -69,7 +69,7 @@ func GetKeyPair(force bool) (ssh.PublicKey, ssh.Signer, error) {
 	return sshPubKey, signer, nil
 }
 
-func generateKeyPair() (ssh.PublicKey, ssh.Signer, error) {
+func GenerateKeyPair() (ssh.PublicKey, ssh.Signer, error) {
 	_, privKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, nil, err
@@ -129,7 +129,7 @@ func determineKeyFileName() (string, error) {
 }
 
 func determineKeyFilePath() (string, error) {
-	homeDir, err := homedir.Dir()
+	home, err := homedir.Dir()
 	if err != nil {
 		return "", err
 	}
@@ -138,7 +138,7 @@ func determineKeyFilePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	path := filepath.Join(homeDir, ".nyx", fileName)
+	path := filepath.Join(home, ".nyx", fileName)
 	log.Debugf("Determined private key file path %s", path)
 	return path, nil
 }

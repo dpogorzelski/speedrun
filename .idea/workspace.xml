@@ -2,18 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c533d874-066b-4ff1-8b94-a80873dab7ad" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/root.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/root.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/cmd/run.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/run.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/gcp/gce.go" beforeDir="false" afterPath="$PROJECT_DIR$/gcp/gce.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/helpers/ssh.go" beforeDir="false" afterPath="$PROJECT_DIR$/helpers/ssh.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
-  <component name="GOROOT" path="/usr/local/Cellar/go/1.15/libexec" />
+  <component name="GOROOT" path="/usr/local/Cellar/go/1.15.2/libexec" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -33,9 +34,25 @@
     <property name="go.sdk.automatically.set" value="true" />
     <property name="go.tried.to.enable.integration.vgo.integrator" value="true" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="settings.editor.selected.configurable" value="editor.preferences.fonts.default" />
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="VgoProject">
     <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="WindowStateProjectService">
+    <state x="686" y="567" key="#GOROOT" timestamp="1599730963000">
+      <screen x="0" y="23" width="2560" height="1332" />
+    </state>
+    <state x="686" y="567" key="#GOROOT/-1440.-867.1440.2537/0.23.2560.1332@0.23.2560.1332" timestamp="1599730963000" />
+    <state x="550" y="415" key="EditFileWatcherDialog" timestamp="1599912753114">
+      <screen x="0" y="23" width="2560" height="1332" />
+    </state>
+    <state x="550" y="415" key="EditFileWatcherDialog/-1440.-867.1440.2537/0.23.2560.1332@0.23.2560.1332" timestamp="1599912753114" />
+    <state x="259" y="197" key="SettingsEditor" timestamp="1599984261208">
+      <screen x="0" y="23" width="1680" height="942" />
+    </state>
+    <state x="395" y="269" key="SettingsEditor/-1440.-867.1440.2537/0.23.2560.1332@0.23.2560.1332" timestamp="1599912753759" />
+    <state x="259" y="197" key="SettingsEditor/0.23.1680.942@0.23.1680.942" timestamp="1599984261208" />
   </component>
 </project>

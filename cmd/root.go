@@ -2,14 +2,13 @@ package cmd
 
 import (
 	"fmt"
-	"os"
-	"path/filepath"
-
 	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"os"
+	"path/filepath"
 )
 
 var cfgFile string
@@ -18,9 +17,7 @@ var verbosity string
 var rootCmd = &cobra.Command{
 	Use:   "nyx",
 	Short: "Execute commands at scale",
-	Long: `Nyx is an application that allows command execution at scale.
-
-nyx run "ls -l"`,
+	Long:  `Nyx is an application that allows command execution at scale.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -39,7 +36,6 @@ func init() {
 
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.nyx/config)")
 	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
 	viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
 
@@ -54,23 +50,18 @@ func init() {
 }
 
 func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		home, err := homedir.Dir()
-		if err != nil {
-			log.Fatal(err)
-		}
-
-		viper.SetConfigName("config.toml")
-		viper.SetConfigType("toml")
-		viper.AddConfigPath(filepath.Join(home, ".nyx"))
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Fatal(err)
 	}
 
-	viper.AutomaticEnv()
+	configDir := filepath.Join(home, ".nyx")
+	viper.SetConfigName("config.toml")
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(configDir)
 
-	if err := viper.ReadInConfig(); err != nil {
-		log.Fatal(err)
+	if err := viper.ReadInConfig(); err == nil {
+		log.Debug("Using config file ", viper.ConfigFileUsed())
 	}
 	setUpLogs(viper.GetString("verbosity"))
 }
@@ -83,7 +74,7 @@ func setUpLogs(level string) error {
 	log.SetLevel(lvl)
 	// log.SetOutput()
 	formatter := &prefixed.TextFormatter{
-		DisableTimestamp: false,
+		DisableTimestamp: true,
 		FullTimestamp:    true,
 	}
 	// formatter.SetColorScheme(&prefixed.ColorScheme{
