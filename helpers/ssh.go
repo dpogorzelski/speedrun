@@ -14,9 +14,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
-	log "github.com/sirupsen/logrus"
 	"github.com/yahoo/vssh"
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/api/compute/v1"
@@ -108,7 +106,6 @@ func loadKeyPair() (ssh.PublicKey, ssh.Signer, error) {
 		return nil, nil, fmt.Errorf("Couldn't load private key from the expected location. Use --force-new-key to generate a new one: %v", err)
 	}
 
-	log.Debugf("Parsing private key")
 	signer, err := ssh.ParsePrivateKey(file)
 	if err != nil {
 		return nil, nil, err
@@ -124,7 +121,6 @@ func determineKeyFileName() (string, error) {
 	}
 	sum := sha256.Sum256([]byte(user.Username))
 	name := fmt.Sprintf("%x", sum)
-	log.Debugf("Determined private key file name %s", name)
 	return name, nil
 }
 
@@ -138,8 +134,8 @@ func determineKeyFilePath() (string, error) {
 	if err != nil {
 		return "", err
 	}
+
 	path := filepath.Join(home, ".nyx", fileName)
-	log.Debugf("Determined private key file path %s", path)
 	return path, nil
 }
 
@@ -149,7 +145,7 @@ func readKeyFile(path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	log.Debugf("Reading private key from %s", absPath)
+
 	file, err := ioutil.ReadFile(absPath)
 	if err != nil {
 		return nil, err
@@ -235,24 +231,20 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 
 // PrintResult prints the results of the ssh command run
 func (r Run) PrintResult(failures bool) {
-	green := color.New(color.FgGreen).SprintfFunc()
-	yellow := color.New(color.FgYellow).SprintfFunc()
-	red := color.New(color.FgRed).SprintfFunc()
-
 	if failures {
 		for k, v := range r.res.successes {
-			fmt.Printf("%s:\n%s\n", green(k), v)
+			fmt.Printf("%s:\n%s\n", Green(k), v)
 		}
 	}
 
 	for k, v := range r.res.failures {
-		fmt.Printf("%s:\n%s\n", yellow(k), v)
+		fmt.Printf("%s:\n%s\n", Yellow(k), v)
 	}
 
 	for k, v := range r.res.errors {
-		fmt.Printf("%s:\n%s\n\n", red(k), v.Error())
+		fmt.Printf("%s:\n%s\n\n", Red(k), v.Error())
 	}
-	fmt.Printf("%s: %d %s: %d %s: %d\n", green("Success"), len(r.res.successes), yellow("Failure"), len(r.res.failures), red("Error"), len(r.res.errors))
+	fmt.Printf("%s: %d %s: %d %s: %d\n", Green("Success"), len(r.res.successes), Yellow("Failure"), len(r.res.failures), Red("Error"), len(r.res.errors))
 }
 
 // Status function returns true if there are no errors or failures in a run, false otherwise
