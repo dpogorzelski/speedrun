@@ -231,7 +231,7 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 
 // PrintResult prints the results of the ssh command run
 func (r Run) PrintResult(failures bool) {
-	if failures {
+	if !failures {
 		for k, v := range r.res.successes {
 			fmt.Printf("%s:\n%s\n", Green(k), v)
 		}
