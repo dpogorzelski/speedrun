@@ -220,9 +220,9 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 
 		output, _, _ := resp.GetText(vs)
 		if resp.ExitStatus() == 0 {
-			run.res.successes[instanceDict[resp.ID()]] = output
+			run.res.successes[instanceDict[resp.ID()]] = padOutput(output)
 		} else {
-			run.res.failures[instanceDict[resp.ID()]] = output
+			run.res.failures[instanceDict[resp.ID()]] = padOutput(output)
 		}
 
 	}
@@ -233,16 +233,16 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 func (r Run) PrintResult(failures bool) {
 	if !failures {
 		for k, v := range r.res.successes {
-			fmt.Printf("%s:\n%s\n", Green(k), v)
+			fmt.Printf("  %s:\n%s\n", Green(k), v)
 		}
 	}
 
 	for k, v := range r.res.failures {
-		fmt.Printf("%s:\n%s\n", Yellow(k), v)
+		fmt.Printf("  %s:\n%s\n", Yellow(k), v)
 	}
 
 	for k, v := range r.res.errors {
-		fmt.Printf("%s:\n%s\n\n", Red(k), v.Error())
+		fmt.Printf("  %s:\n    %s\n\n", Red(k), v.Error())
 	}
 	fmt.Printf("%s: %d %s: %d %s: %d\n", Green("Success"), len(r.res.successes), Yellow("Failure"), len(r.res.failures), Red("Error"), len(r.res.errors))
 }
@@ -262,7 +262,7 @@ func (r Run) Status() interface{} {
 func padOutput(body string) string {
 	f := []string{}
 	for _, line := range strings.Split(body, "\n") {
-		line = fmt.Sprintf("  %s", line)
+		line = fmt.Sprintf("    %s", line)
 		f = append(f, line)
 	}
 	return strings.Join(f, "\n")
