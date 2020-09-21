@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"log"
+	"nyx/helpers"
 	"os"
 	"path/filepath"
 
@@ -53,7 +53,7 @@ func init() {
 func initConfig() {
 	home, err := homedir.Dir()
 	if err != nil {
-		log.Fatal(err)
+		helpers.Error(err.Error())
 	}
 
 	configDir := filepath.Join(home, ".config", "nyx")
