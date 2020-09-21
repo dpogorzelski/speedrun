@@ -8,30 +8,28 @@ import (
 	"strings"
 	"sync"
 
-	log "github.com/sirupsen/logrus"
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/api/compute/v1"
 )
 
 // UpdateInstanceMetadata adds ssh public key to the intsance metadata
-func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *compute.Instance, pubKey ssh.PublicKey) {
+func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *compute.Instance, pubKey ssh.PublicKey) error {
 	defer wg.Done()
 	authorizedKey, err := formatSSHPubKey(pubKey)
 	if err != nil {
-		log.Warnf("%s failed to update metadata: ", err)
+		return fmt.Errorf("%s failed to update metadata: ", err)
 	}
 
 	entry, err := createMetadataEntry(authorizedKey)
 	if err != nil {
-		log.Warnf("%s failed to update metadata: ", err)
+		return fmt.Errorf("%s failed to update metadata: ", err)
 	}
 
 	has, same, i := hasEntry(instance.Metadata, entry)
 	var items []*compute.MetadataItems
 
 	if has && same {
-		log.Debugf("%s public key already present in instance metadata", instance.Name)
-		return
+		return nil
 	} else if has && !same {
 		items = updateMetadata(instance.Metadata, entry, i)
 	} else if !has {
@@ -49,8 +47,9 @@ func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *comput
 	call := computeService.Instances.Update(project, zone, instance.Name, instance)
 	_, err = call.Do()
 	if err != nil {
-		log.Warnf("%s failed to update metadata: ", err)
+		return fmt.Errorf("%s failed to update metadata: ", err)
 	}
+	return nil
 }
 
 func formatSSHPubKey(pubKey ssh.PublicKey) (string, error) {
@@ -107,8 +106,6 @@ func createMetadataEntry(pubKey string) (string, error) {
 }
 
 func appendToMetadata(md *compute.Metadata, entry string) []*compute.MetadataItems {
-	log.Debug("Appending new public key to metadata")
-
 	var entries []string
 	flatMD := flattenMetadata(md)
 	if flatMD["ssh-keys"] == nil {
@@ -124,8 +121,6 @@ func appendToMetadata(md *compute.Metadata, entry string) []*compute.MetadataIte
 }
 
 func updateMetadata(md *compute.Metadata, entry string, i int) []*compute.MetadataItems {
-	log.Debug("Updating existing metadata entry with new public key")
-
 	var entries []string
 	flatMD := flattenMetadata(md)
 	entries = strings.Split(flatMD["ssh-keys"].(string), "\n")

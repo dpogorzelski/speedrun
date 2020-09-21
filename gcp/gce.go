@@ -1,13 +1,11 @@
 package gcp
 
 import (
-	log "github.com/sirupsen/logrus"
 	"google.golang.org/api/compute/v1"
 )
 
 // GetIPAddresses returns a list of external IP addresses used for the SHH connection
 func GetIPAddresses(instances []*compute.Instance) []string {
-	log.Info("Fetching list of external IP addresses")
 	addresses := []string{}
 	for _, instance := range instances {
 		addresses = append(addresses, instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22")

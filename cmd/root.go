@@ -2,17 +2,18 @@ package cmd
 
 import (
 	"fmt"
-	homedir "github.com/mitchellh/go-homedir"
-	log "github.com/sirupsen/logrus"
-	"github.com/spf13/cobra"
-	"github.com/spf13/viper"
-	prefixed "github.com/x-cray/logrus-prefixed-formatter"
+	"log"
 	"os"
 	"path/filepath"
+
+	homedir "github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var cfgFile string
-var verbosity string
+
+// var verbosity string
 
 var rootCmd = &cobra.Command{
 	Use:   "nyx",
@@ -36,8 +37,8 @@ func init() {
 
 	cobra.OnInitialize(initConfig)
 
-	rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
-	viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
+	// rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
+	// viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
 
 	rootCmd.PersistentFlags().StringVar(&keyPath, "key-path", "", "path to the private SSH key to use")
 	viper.BindPFlag("key-path", rootCmd.PersistentFlags().Lookup("key-path"))
@@ -55,31 +56,29 @@ func initConfig() {
 		log.Fatal(err)
 	}
 
-	configDir := filepath.Join(home, ".nyx")
+	configDir := filepath.Join(home, ".config", "nyx")
 	viper.SetConfigName("config.toml")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(configDir)
 
-	if err := viper.ReadInConfig(); err == nil {
-		log.Debug("Using config file ", viper.ConfigFileUsed())
-	}
-	setUpLogs(viper.GetString("verbosity"))
+	viper.ReadInConfig()
+	// setUpLogs(viper.GetString("verbosity"))
 }
 
-func setUpLogs(level string) error {
-	lvl, err := log.ParseLevel(level)
-	if err != nil {
-		return err
-	}
-	log.SetLevel(lvl)
-	// log.SetOutput()
-	formatter := &prefixed.TextFormatter{
-		DisableTimestamp: true,
-		FullTimestamp:    true,
-	}
-	// formatter.SetColorScheme(&prefixed.ColorScheme{
-	// 	PrefixStyle: "cyan",
-	// })
-	log.SetFormatter(formatter)
-	return nil
-}
+// func setUpLogs(level string) error {
+// 	lvl, err := log.ParseLevel(level)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	log.SetLevel(lvl)
+// 	// log.SetOutput()
+// 	formatter := &prefixed.TextFormatter{
+// 		DisableTimestamp: true,
+// 		FullTimestamp:    true,
+// 	}
+// 	// formatter.SetColorScheme(&prefixed.ColorScheme{
+// 	// 	PrefixStyle: "cyan",
+// 	// })
+// 	log.SetFormatter(formatter)
+// 	return nil
+// }

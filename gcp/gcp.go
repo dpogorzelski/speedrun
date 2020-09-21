@@ -2,8 +2,7 @@ package gcp
 
 import (
 	"context"
-	"fmt"
-	"os"
+	"nyx/helpers"
 
 	"google.golang.org/api/compute/v1"
 )
@@ -16,7 +15,6 @@ func init() {
 	ctx := context.Background()
 	computeService, err = compute.NewService(ctx)
 	if err != nil {
-		fmt.Println(err.Error())
-		os.Exit(1)
+		helpers.Error(err.Error())
 	}
 }

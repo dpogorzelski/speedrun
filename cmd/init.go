@@ -7,9 +7,10 @@ import (
 	"path/filepath"
 	"strings"
 
+	"log"
+
 	"github.com/BurntSushi/toml"
 	homedir "github.com/mitchellh/go-homedir"
-	log "github.com/sirupsen/logrus"
 
 	"nyx/helpers"
 
@@ -31,13 +32,11 @@ func initialize(cmd *cobra.Command, args []string) {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	log.Info("Created configuration file at ~/.nyx/config.toml")
 
 	_, _, err = helpers.GenerateKeyPair()
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	log.Info("Created SSH private key in ~/.nyx")
 }
 
 func createConfig() error {
@@ -54,9 +53,9 @@ func createConfig() error {
 	if err != nil {
 		return err
 	}
-	path := filepath.Join(home, ".nyx", "config.toml")
-	if _, err := os.Stat(filepath.Join(home, ".nyx")); os.IsNotExist(err) {
-		os.Mkdir(filepath.Join(home, ".nyx"), 0700)
+	path := filepath.Join(home, ".config", "nyx", "config.toml")
+	if _, err := os.Stat(filepath.Join(home, ".config", "nyx")); os.IsNotExist(err) {
+		os.Mkdir(filepath.Join(home, ".config", "nyx"), 0700)
 	}
 	f, err := os.Create(path)
 	if err != nil {
