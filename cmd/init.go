@@ -1,14 +1,13 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"log"
 
+	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/toml"
 	homedir "github.com/mitchellh/go-homedir"
 
@@ -40,15 +39,25 @@ func initialize(cmd *cobra.Command, args []string) {
 }
 
 func createConfig() error {
-	reader := bufio.NewReader(os.Stdin)
-	fmt.Print("Google Cloud project id: ")
-	config := make(map[string]string)
+	projectID := ""
+	prompt := &survey.Input{Message: "Google Cloud project ID?"}
 
-	projectID, err := reader.ReadString('\n')
+	// validate := func(val interface{}) error {
+	// 	if str, ok := val.(string); !ok || len(str) > 30 || len(str) > 6 {
+	// 		return errors.New("This response cannot be longer than 10 characters.")
+	// 	}
+	// 	return nil
+	// }
+
+	err := survey.AskOne(prompt, &projectID, survey.WithValidator(survey.Required))
 	if err != nil {
+		fmt.Println(err.Error())
 		return err
 	}
-	config["project"] = strings.TrimSpace(projectID)
+
+	config := make(map[string]string)
+
+	config["project"] = projectID
 	home, err := homedir.Dir()
 	if err != nil {
 		return err
