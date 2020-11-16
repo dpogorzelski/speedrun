@@ -2,7 +2,7 @@ package gcp
 
 import (
 	"context"
-	"nyx/helpers"
+	"speedrun/helpers"
 
 	"google.golang.org/api/compute/v1"
 )

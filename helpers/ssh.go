@@ -48,22 +48,16 @@ func NewRun() *Run {
 }
 
 // GetKeyPair returns a public key, either new or existing depending on the force bool value. The key is formatted for use in authorized_keys files or GCP metadata.
-func GetKeyPair(force bool) (ssh.PublicKey, ssh.Signer, error) {
+func GetKeyPair() (ssh.PublicKey, ssh.Signer, error) {
 	var sshPubKey ssh.PublicKey
 	var signer ssh.Signer
 	var err error
 
-	if force {
-		sshPubKey, signer, err = GenerateKeyPair()
-		if err != nil {
-			return nil, nil, err
-		}
-	} else {
-		sshPubKey, signer, err = loadKeyPair()
-		if err != nil {
-			return nil, nil, err
-		}
+	sshPubKey, signer, err = loadKeyPair()
+	if err != nil {
+		return nil, nil, err
 	}
+
 	return sshPubKey, signer, nil
 }
 
@@ -135,7 +129,7 @@ func determineKeyFilePath() (string, error) {
 		return "", err
 	}
 
-	path := filepath.Join(home, ".nyx", fileName)
+	path := filepath.Join(home, ".config/speedrun", fileName)
 	return path, nil
 }
 

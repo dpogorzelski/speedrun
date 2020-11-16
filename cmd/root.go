@@ -2,9 +2,9 @@ package cmd
 
 import (
 	"fmt"
-	"nyx/helpers"
 	"os"
 	"path/filepath"
+	"speedrun/helpers"
 
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
@@ -16,9 +16,9 @@ var cfgFile string
 // var verbosity string
 
 var rootCmd = &cobra.Command{
-	Use:   "nyx",
+	Use:   "speedrun",
 	Short: "Execute commands at scale",
-	Long:  `Nyx is an application that allows command execution at scale.`,
+	Long:  `Speedrun executes commands at scale`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -31,23 +31,10 @@ func Execute() {
 }
 
 func init() {
-	var project string
-	var keyPath string
-	var forceNewKey bool
-
 	cobra.OnInitialize(initConfig)
 
 	// rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
 	// viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
-
-	rootCmd.PersistentFlags().StringVar(&keyPath, "key-path", "", "path to the private SSH key to use")
-	viper.BindPFlag("key-path", rootCmd.PersistentFlags().Lookup("key-path"))
-
-	rootCmd.PersistentFlags().BoolVar(&forceNewKey, "force-new-key", false, "force creation of a new SSH key pair")
-	viper.BindPFlag("force-new-key", rootCmd.PersistentFlags().Lookup("force-new-key"))
-
-	rootCmd.PersistentFlags().StringVar(&project, "project", "", "google cloud project id")
-	viper.BindPFlag("project", rootCmd.PersistentFlags().Lookup("project"))
 }
 
 func initConfig() {
@@ -56,7 +43,7 @@ func initConfig() {
 		helpers.Error(err.Error())
 	}
 
-	configDir := filepath.Join(home, ".config", "nyx")
+	configDir := filepath.Join(home, ".config", "speedrun")
 	viper.SetConfigName("config.toml")
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(configDir)

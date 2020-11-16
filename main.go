@@ -1,6 +1,6 @@
 package main
 
-import "nyx/cmd"
+import "speedrun/cmd"
 
 func main() {
 	cmd.Execute()

@@ -8,8 +8,8 @@ import (
 
 	"github.com/mitchellh/go-homedir"
 
-	"nyx/gcp"
-	"nyx/helpers"
+	"speedrun/gcp"
+	"speedrun/helpers"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -26,9 +26,9 @@ var runCmd = &cobra.Command{
 			helpers.Error(err.Error())
 		}
 
-		configDir := filepath.Join(home, ".config", "nyx")
+		configDir := filepath.Join(home, ".config", "speedrun")
 		if _, err := os.Stat(configDir); os.IsNotExist(err) {
-			helpers.Error("Try running 'nyx init' first")
+			helpers.Error("Try running 'speedrun init' first")
 		}
 	},
 }
@@ -43,7 +43,7 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) {
-	project := viper.GetString("project")
+	project := viper.GetString("gcp.projectid")
 
 	filter, err := cmd.Flags().GetString("filter")
 	if err != nil {
@@ -55,12 +55,7 @@ func run(cmd *cobra.Command, args []string) {
 		helpers.Error(err.Error())
 	}
 
-	forceNewKey, err := cmd.Flags().GetBool("force-new-key")
-	if err != nil {
-		helpers.Error(err.Error())
-	}
-
-	pubKey, privKey, err := helpers.GetKeyPair(forceNewKey)
+	pubKey, privKey, err := helpers.GetKeyPair()
 	if err != nil {
 		helpers.Error(err.Error())
 	}
