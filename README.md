@@ -1,21 +1,22 @@
-# Nyx
+# Speedrun
 
-Nyx is a small utility to exectue commands remotely at scale
+Speedrun is a small utility to exectue commands remotely at scale
 
 ## Installation
 
 Download the precompiled binary from here
 
 ```bash
-curl https://github.com/dawidpogorzelski/nyx/releases/0.1.0/release
-mv nyx /usr/local/bin
+curl https://github.com/dawidpogorzelski/speedrun/releases/0.1.0/release
+mv speedrun /usr/local/bin
 ```
 
 ## Usage
 
 ```bash
-nyx init
-nyx run "whoami"
+export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
+speedrun init
+speedrun run "whoami"
 ```
 
 ## Contributing

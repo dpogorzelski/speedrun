@@ -10,7 +10,6 @@ func GetIPAddresses(instances []*compute.Instance) []string {
 	for _, instance := range instances {
 		addresses = append(addresses, instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22")
 	}
-
 	return addresses
 }
 

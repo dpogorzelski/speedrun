@@ -2,6 +2,7 @@ package gcp
 
 import (
 	"context"
+	"fmt"
 	"speedrun/helpers"
 
 	"google.golang.org/api/compute/v1"
@@ -15,6 +16,7 @@ func init() {
 	ctx := context.Background()
 	computeService, err = compute.NewService(ctx)
 	if err != nil {
+		err = fmt.Errorf("Couldn't initialize GCP client: %v", err)
 		helpers.Error(err.Error())
 	}
 }
