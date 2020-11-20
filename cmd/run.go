@@ -3,34 +3,21 @@ package cmd
 import (
 	"fmt"
 	"os"
-	"path/filepath"
 	"sync"
 
-	"github.com/mitchellh/go-homedir"
-
 	"speedrun/gcp"
-	"speedrun/helpers"
+	"speedrun/utils"
 
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run commands on GCE instances",
-	Args:  cobra.ExactArgs(1),
-	Run:   run,
-	PreRun: func(cmd *cobra.Command, args []string) {
-		home, err := homedir.Dir()
-		if err != nil {
-			helpers.Error(err.Error())
-		}
-
-		configDir := filepath.Join(home, ".config", "speedrun")
-		if _, err := os.Stat(configDir); os.IsNotExist(err) {
-			helpers.Error("Try running 'speedrun init' first")
-		}
-	},
+	Use:     "run",
+	Short:   "Run commands on GCE instances",
+	Args:    cobra.ExactArgs(1),
+	RunE:    run,
+	PreRunE: utils.Initialized,
 }
 
 func init() {
@@ -42,25 +29,25 @@ func init() {
 	runCmd.PersistentFlags().BoolVar(&onlyFailures, "only-failures", false, "print only failures and errors")
 }
 
-func run(cmd *cobra.Command, args []string) {
+func run(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
 
 	filter, err := cmd.Flags().GetString("filter")
 	if err != nil {
-		helpers.Error(err.Error())
+		return err
 	}
 
 	onlyFailures, err := cmd.Flags().GetBool("only-failures")
 	if err != nil {
-		helpers.Error(err.Error())
+		return err
 	}
 
-	pubKey, privKey, err := helpers.GetKeyPair()
+	pubKey, privKey, err := utils.GetKeyPair()
 	if err != nil {
-		helpers.Error(err.Error())
+		return err
 	}
 
-	p := helpers.NewProgress()
+	p := utils.NewProgress()
 	p.Start("Fetching list of GCE instances")
 	instances, err := gcp.GetInstances(project, filter)
 	if err != nil {
@@ -95,11 +82,12 @@ func run(cmd *cobra.Command, args []string) {
 	p.Stop()
 
 	p.Start(fmt.Sprintf("Running [%s]", args[0]))
-	result, err := helpers.Execute(args[0], instances, privKey)
+	result, err := utils.Execute(args[0], instances, privKey)
 	if err != nil {
 		p.Error(err)
 		os.Exit(1)
 	}
 	p.Stop()
 	result.PrintResult(onlyFailures)
+	return nil
 }

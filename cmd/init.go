@@ -1,17 +1,14 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
-
-	"log"
 
 	"github.com/AlecAivazis/survey/v2"
 	"github.com/BurntSushi/toml"
 	homedir "github.com/mitchellh/go-homedir"
 
-	"speedrun/helpers"
+	"speedrun/utils"
 
 	"github.com/spf13/cobra"
 )
@@ -26,23 +23,24 @@ type config struct {
 var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize speedrun",
-	Run:   initialize,
+	RunE:  initialize,
 }
 
 func init() {
 	rootCmd.AddCommand(initCmd)
 }
 
-func initialize(cmd *cobra.Command, args []string) {
+func initialize(cmd *cobra.Command, args []string) error {
 	err := createConfig()
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
-	_, _, err = helpers.GenerateKeyPair()
+	_, _, err = utils.GenerateKeyPair()
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
+	return nil
 }
 
 func createConfig() error {
@@ -58,7 +56,6 @@ func createConfig() error {
 
 	err := survey.AskOne(prompt, &config.Gcp.ProjectID, survey.WithValidator(survey.Required))
 	if err != nil {
-		fmt.Println(err.Error())
 		return err
 	}
 

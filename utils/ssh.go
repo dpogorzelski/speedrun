@@ -1,4 +1,4 @@
-package helpers
+package utils
 
 import (
 	"context"
@@ -97,7 +97,7 @@ func loadKeyPair() (ssh.PublicKey, ssh.Signer, error) {
 
 	file, err := readKeyFile(privateKeyPath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("Couldn't load private key from the expected location. Use --force-new-key to generate a new one: %v", err)
+		return nil, nil, fmt.Errorf("Couldn't find private key. Use 'speedrun key new' to generate a new one")
 	}
 
 	signer, err := ssh.ParsePrivateKey(file)
