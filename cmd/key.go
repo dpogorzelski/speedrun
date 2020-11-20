@@ -13,10 +13,8 @@ var keyCmd = &cobra.Command{
 	Short: "Manage ssh keys",
 	Args:  cobra.ExactArgs(1),
 	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
-		if err := utils.ConfigInitialized(); err != nil {
-			return err
-		}
-		return nil
+		err := utils.ConfigInitialized()
+		return err
 	},
 }
 

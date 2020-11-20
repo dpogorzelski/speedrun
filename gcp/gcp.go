@@ -11,6 +11,7 @@ import (
 var computeService *compute.Service
 var vpcService *networkmanagement.Service
 
+// ComputeInit will initialize a GCP compute API client
 func ComputeInit() error {
 	var err error
 	ctx := context.Background()
@@ -23,6 +24,7 @@ func ComputeInit() error {
 	return nil
 }
 
+// VpcInit will initialize a GCP networkmanagement API client
 func VpcInit() error {
 	var err error
 	ctx := context.Background()
