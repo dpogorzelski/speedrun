@@ -13,7 +13,7 @@ import (
 )
 
 // UpdateProjectMetadata updates SSH key entires in the project metadata
-func UpdateProjectMetadata(pubKey ssh.PublicKey) error {
+func (c *ComputeClient) UpdateProjectMetadata(pubKey ssh.PublicKey) error {
 	authorizedKey, err := formatPubKey(pubKey)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func UpdateProjectMetadata(pubKey ssh.PublicKey) error {
 		return err
 	}
 
-	getProject := computeService.Projects.Get(computeService.project)
+	getProject := c.Projects.Get(c.Project)
 	projectData, err := getProject.Do()
 	if err != nil {
 		return err
@@ -46,7 +46,7 @@ func UpdateProjectMetadata(pubKey ssh.PublicKey) error {
 		Items:       items,
 	}
 
-	setMetadata := computeService.Projects.SetCommonInstanceMetadata(computeService.project, &metadata)
+	setMetadata := c.Projects.SetCommonInstanceMetadata(c.Project, &metadata)
 	_, err = setMetadata.Do()
 	if err != nil {
 		return err
@@ -56,7 +56,7 @@ func UpdateProjectMetadata(pubKey ssh.PublicKey) error {
 }
 
 // UpdateInstanceMetadata adds ssh public key to the intsance metadata
-func UpdateInstanceMetadata(wg *sync.WaitGroup, instance *compute.Instance, pubKey ssh.PublicKey) error {
+func (c *ComputeClient) UpdateInstanceMetadata(wg *sync.WaitGroup, instance *compute.Instance, pubKey ssh.PublicKey) error {
 	defer wg.Done()
 	authorizedKey, err := formatPubKey(pubKey)
 	if err != nil {
@@ -91,7 +91,7 @@ func UpdateInstanceMetadata(wg *sync.WaitGroup, instance *compute.Instance, pubK
 	instance.Metadata = &metadata
 	s := strings.Split(instance.Zone, "/")
 	zone := s[len(s)-1]
-	call := computeService.Instances.Update(computeService.project, zone, instance.Name, instance)
+	call := c.Instances.Update(c.Project, zone, instance.Name, instance)
 	_, err = call.Do()
 	if err != nil {
 		return fmt.Errorf("%s failed to update metadata: ", err)

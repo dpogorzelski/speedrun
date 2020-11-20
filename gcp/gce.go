@@ -5,7 +5,7 @@ import (
 )
 
 // GetIPAddresses returns a list of external IP addresses used for the SHH connection
-func GetIPAddresses(instances []*compute.Instance) []string {
+func (c *ComputeClient) GetIPAddresses(instances []*compute.Instance) []string {
 	addresses := []string{}
 	for _, instance := range instances {
 		addresses = append(addresses, instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22")
@@ -14,8 +14,8 @@ func GetIPAddresses(instances []*compute.Instance) []string {
 }
 
 // GetInstances returns a list of external IP addresses used for the SHH connection
-func GetInstances(filter string) ([]*compute.Instance, error) {
-	listCall := computeService.Instances.AggregatedList(computeService.project)
+func (c *ComputeClient) GetInstances(filter string) ([]*compute.Instance, error) {
+	listCall := c.Instances.AggregatedList(c.Project)
 	listCall.Filter(filter)
 	list, err := listCall.Do()
 	if err != nil {

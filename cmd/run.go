@@ -9,6 +9,7 @@ import (
 	"speedrun/utils"
 
 	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
 )
 
 var runCmd = &cobra.Command{
@@ -18,10 +19,6 @@ var runCmd = &cobra.Command{
 	RunE:  run,
 	PreRunE: func(cmd *cobra.Command, args []string) error {
 		err := utils.ConfigInitialized()
-		if err != nil {
-			return err
-		}
-		err = gcp.ComputeInit()
 		return err
 	},
 }
@@ -36,6 +33,13 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	project := viper.GetString("gcp.projectid")
+
+	client, err := gcp.NewComputeClient(project)
+	if err != nil {
+		return err
+	}
+
 	filter, err := cmd.Flags().GetString("filter")
 	if err != nil {
 		return err
@@ -53,7 +57,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	p := utils.NewProgress()
 	p.Start("Fetching list of GCE instances")
-	instances, err := gcp.GetInstances(filter)
+	instances, err := client.GetInstances(filter)
 	if err != nil {
 		p.Error(err)
 	}
@@ -63,7 +67,7 @@ func run(cmd *cobra.Command, args []string) error {
 	p.Stop()
 
 	p.Start("Updating project metadata")
-	err = gcp.UpdateProjectMetadata(pubKey)
+	err = client.UpdateProjectMetadata(pubKey)
 	if err != nil {
 		p.Error(err)
 	}
@@ -79,7 +83,7 @@ func run(cmd *cobra.Command, args []string) error {
 		var wg sync.WaitGroup
 		for a := range instances[i:j] {
 			wg.Add(1)
-			go gcp.UpdateInstanceMetadata(&wg, instances[a+i], pubKey)
+			go client.UpdateInstanceMetadata(&wg, instances[a+i], pubKey)
 		}
 		wg.Wait()
 	}

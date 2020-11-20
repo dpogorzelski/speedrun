@@ -19,6 +19,6 @@ func getAddress() string {
 	return string(body)
 }
 
-func GetFWRUles() {
-	computeService.Firewalls.Get(computeService.project, "client")
+func (c *ComputeClient) GetFWRUles() {
+	c.Firewalls.Get(c.Project, "client")
 }

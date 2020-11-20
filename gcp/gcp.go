@@ -4,29 +4,26 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/spf13/viper"
 	"google.golang.org/api/compute/v1"
 )
 
-type computeClient struct {
+// ComputeClient wraps the original *compute.Service
+type ComputeClient struct {
 	*compute.Service
-	project string
+	Project string
 }
 
-var computeService *computeClient
-
-// ComputeInit will initialize a GCP compute API client
-func ComputeInit() error {
-	project := viper.GetString("gcp.projectid")
+// NewComputeClient will initialize a GCP compute API client
+func NewComputeClient(project string) (*ComputeClient, error) {
 	var err error
 	ctx := context.Background()
 
 	s, err := compute.NewService(ctx)
 	if err != nil {
 		err = fmt.Errorf("Couldn't initialize GCP client (Compute): %v", err)
-		return err
+		return nil, err
 	}
-	computeService = &computeClient{s, project}
+	computeService := &ComputeClient{s, project}
 
-	return nil
+	return computeService, nil
 }
