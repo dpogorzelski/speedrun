@@ -14,8 +14,8 @@ func GetIPAddresses(instances []*compute.Instance) []string {
 }
 
 // GetInstances returns a list of external IP addresses used for the SHH connection
-func GetInstances(project string, filter string) ([]*compute.Instance, error) {
-	listCall := computeService.Instances.AggregatedList(project)
+func GetInstances(filter string) ([]*compute.Instance, error) {
+	listCall := computeService.Instances.AggregatedList(computeService.project)
 	listCall.Filter(filter)
 	list, err := listCall.Do()
 	if err != nil {

@@ -4,35 +4,29 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/spf13/viper"
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/networkmanagement/v1"
 )
 
-var computeService *compute.Service
-var vpcService *networkmanagement.Service
+type computeClient struct {
+	*compute.Service
+	project string
+}
+
+var computeService *computeClient
 
 // ComputeInit will initialize a GCP compute API client
 func ComputeInit() error {
+	project := viper.GetString("gcp.projectid")
 	var err error
 	ctx := context.Background()
 
-	computeService, err = compute.NewService(ctx)
+	s, err := compute.NewService(ctx)
 	if err != nil {
 		err = fmt.Errorf("Couldn't initialize GCP client (Compute): %v", err)
 		return err
 	}
-	return nil
-}
+	computeService = &computeClient{s, project}
 
-// VpcInit will initialize a GCP networkmanagement API client
-func VpcInit() error {
-	var err error
-	ctx := context.Background()
-
-	vpcService, err = networkmanagement.NewService(ctx)
-	if err != nil {
-		err = fmt.Errorf("Couldn't initialize GCP client (VPC): %v", err)
-		return err
-	}
 	return nil
 }

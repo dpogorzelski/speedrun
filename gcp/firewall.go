@@ -18,3 +18,7 @@ func getAddress() string {
 	body, err := ioutil.ReadAll(resp.Body)
 	return string(body)
 }
+
+func GetFWRUles() {
+	computeService.Firewalls.Get(computeService.project, "client")
+}
