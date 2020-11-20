@@ -9,10 +9,15 @@ import (
 )
 
 var keyCmd = &cobra.Command{
-	Use:               "key",
-	Short:             "Manage ssh keys",
-	Args:              cobra.ExactArgs(1),
-	PersistentPreRunE: utils.Initialized,
+	Use:   "key",
+	Short: "Manage ssh keys",
+	Args:  cobra.ExactArgs(1),
+	PersistentPreRunE: func(cmd *cobra.Command, args []string) error {
+		if err := utils.ConfigInitialized(); err != nil {
+			return err
+		}
+		return nil
+	},
 }
 
 var newCmd = &cobra.Command{

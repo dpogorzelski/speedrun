@@ -13,11 +13,18 @@ import (
 )
 
 var runCmd = &cobra.Command{
-	Use:     "run",
-	Short:   "Run commands on GCE instances",
-	Args:    cobra.ExactArgs(1),
-	RunE:    run,
-	PreRunE: utils.Initialized,
+	Use:   "run",
+	Short: "Run commands on GCE instances",
+	Args:  cobra.ExactArgs(1),
+	RunE:  run,
+	PreRunE: func(cmd *cobra.Command, args []string) error {
+		err := utils.ConfigInitialized()
+		if err != nil {
+			return err
+		}
+		err = gcp.ComputeInit()
+		return err
+	},
 }
 
 func init() {
