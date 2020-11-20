@@ -67,11 +67,18 @@ func run(cmd *cobra.Command, args []string) {
 		p.Error(err)
 	}
 	if len(instances) == 0 {
-		p.Failure("no instances found, check and/or relax your --filter settings")
+		p.Failure("no instances found")
 	}
 	p.Stop()
 
-	p.Start("Updating GCE metadata")
+	p.Start("Updating project metadata")
+	err = gcp.UpdateProjectMetadata(project, pubKey)
+	if err != nil {
+		p.Error(err)
+	}
+	p.Stop()
+
+	p.Start("Updating instance metadata")
 	batch := 50
 	for i := 0; i < len(instances); i += batch {
 		j := i + batch
@@ -85,7 +92,6 @@ func run(cmd *cobra.Command, args []string) {
 		}
 		wg.Wait()
 	}
-
 	p.Stop()
 
 	p.Start(fmt.Sprintf("Running [%s]", args[0]))

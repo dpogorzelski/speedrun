@@ -12,28 +12,75 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
+// UpdateProjectMetadata updates SSH key entires in the project metadata
+func UpdateProjectMetadata(project string, pubKey ssh.PublicKey) error {
+	authorizedKey, err := formatPubKey(pubKey)
+	if err != nil {
+		return err
+	}
+
+	item, err := createMetadataItem(authorizedKey)
+	if err != nil {
+		return err
+	}
+
+	getProject := computeService.Projects.Get(project)
+	projectData, err := getProject.Do()
+	if err != nil {
+		return err
+	}
+
+	hasKey, same, i := hasItem(projectData.CommonInstanceMetadata, item)
+	var items []*compute.MetadataItems
+
+	if hasKey && same {
+		return nil
+	} else if hasKey && !same {
+		items = updateMetadata(projectData.CommonInstanceMetadata, item, i)
+	} else if !hasKey {
+		items = appendToMetadata(projectData.CommonInstanceMetadata, item)
+	}
+
+	metadata := compute.Metadata{
+		Fingerprint: projectData.CommonInstanceMetadata.Fingerprint,
+		Items:       items,
+	}
+
+	setMetadata := computeService.Projects.SetCommonInstanceMetadata(project, &metadata)
+	_, err = setMetadata.Do()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // UpdateInstanceMetadata adds ssh public key to the intsance metadata
 func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *compute.Instance, pubKey ssh.PublicKey) error {
 	defer wg.Done()
-	authorizedKey, err := formatSSHPubKey(pubKey)
+	authorizedKey, err := formatPubKey(pubKey)
 	if err != nil {
 		return fmt.Errorf("%s failed to update metadata: ", err)
 	}
 
-	entry, err := createMetadataEntry(authorizedKey)
+	item, err := createMetadataItem(authorizedKey)
 	if err != nil {
 		return fmt.Errorf("%s failed to update metadata: ", err)
 	}
 
-	has, same, i := hasEntry(instance.Metadata, entry)
+	hasKey, same, i := hasItem(instance.Metadata, item)
 	var items []*compute.MetadataItems
 
-	if has && same {
+	if !isBlocking(instance) {
 		return nil
-	} else if has && !same {
-		items = updateMetadata(instance.Metadata, entry, i)
-	} else if !has {
-		items = appendToMetadata(instance.Metadata, entry)
+	}
+
+	if hasKey && same {
+		return nil
+	} else if hasKey && !same {
+		items = updateMetadata(instance.Metadata, item, i)
+	} else if !hasKey {
+		items = appendToMetadata(instance.Metadata, item)
 	}
 
 	metadata := compute.Metadata{
@@ -52,14 +99,23 @@ func UpdateInstanceMetadata(wg *sync.WaitGroup, project string, instance *comput
 	return nil
 }
 
-func formatSSHPubKey(pubKey ssh.PublicKey) (string, error) {
+func isBlocking(i *compute.Instance) bool {
+	for _, m := range i.Metadata.Items {
+		if m.Key == "sshKeys" || m.Key == "block-project-ssh-keys" {
+			return true
+		}
+	}
+	return false
+}
+
+func formatPubKey(pubKey ssh.PublicKey) (string, error) {
 	authorizedKey := ssh.MarshalAuthorizedKey(pubKey)
 	tk := strings.TrimSuffix(string(authorizedKey), "\n")
 	return tk, nil
 }
 
-// Extracts username, algorithm and comment from a metadata SSH key entry
-func parseMetadataEntry(key string) (string, string, string) {
+// Extracts username, algorithm and comment from a metadata SSH key item
+func parseMetadataitem(key string) (string, string, string) {
 	t := strings.Split(key, " ")
 	head, comment := t[0], t[len(t)-1]
 	username := strings.Split(head, ":")[0]
@@ -67,18 +123,18 @@ func parseMetadataEntry(key string) (string, string, string) {
 	return username, algo, comment
 }
 
-// Verifies if a metadata entry already exists for a given user/cipher/comment combination.
-// If true it also returns the index number at which the existing entry can be found otherwise index is -1.
-func hasEntry(md *compute.Metadata, x string) (bool, bool, int) {
+// Verifies if a metadata item already exists for a given user/cipher/comment combination.
+// If true it also returns the index number at which the existing item can be found otherwise index is -1.
+func hasItem(md *compute.Metadata, x string) (bool, bool, int) {
 	flatMD := flattenMetadata(md)
 	if flatMD["ssh-keys"] == nil {
 		return false, false, -1
 	}
 
-	entries := strings.Split(flatMD["ssh-keys"].(string), "\n")
-	username, algo, comment := parseMetadataEntry(x)
+	items := strings.Split(flatMD["ssh-keys"].(string), "\n")
+	username, algo, comment := parseMetadataitem(x)
 
-	for i, e := range entries {
+	for i, e := range items {
 		header := fmt.Sprintf("%s:%s", username, algo)
 		if x == e {
 			return true, true, i
@@ -89,8 +145,8 @@ func hasEntry(md *compute.Metadata, x string) (bool, bool, int) {
 	return false, false, -1
 }
 
-// createMetadataEntry formats public key entry according to GCP guidelines
-func createMetadataEntry(pubKey string) (string, error) {
+// createMetadataItem formats public key item according to GCP guidelines
+func createMetadataItem(pubKey string) (string, error) {
 	user, err := user.Current()
 	if err != nil {
 		return "", err
@@ -105,27 +161,27 @@ func createMetadataEntry(pubKey string) (string, error) {
 	return v, nil
 }
 
-func appendToMetadata(md *compute.Metadata, entry string) []*compute.MetadataItems {
-	var entries []string
+func appendToMetadata(md *compute.Metadata, item string) []*compute.MetadataItems {
+	var items []string
 	flatMD := flattenMetadata(md)
 	if flatMD["ssh-keys"] == nil {
-		entries = append(entries, entry)
-		flatMD["ssh-keys"] = strings.Join(entries, "\n")
+		items = append(items, item)
+		flatMD["ssh-keys"] = strings.Join(items, "\n")
 		return expandComputeMetadata(flatMD)
 	}
 
-	entries = strings.Split(flatMD["ssh-keys"].(string), "\n")
-	entries = append(entries, entry)
-	flatMD["ssh-keys"] = strings.Join(entries, "\n")
+	items = strings.Split(flatMD["ssh-keys"].(string), "\n")
+	items = append(items, item)
+	flatMD["ssh-keys"] = strings.Join(items, "\n")
 	return expandComputeMetadata(flatMD)
 }
 
-func updateMetadata(md *compute.Metadata, entry string, i int) []*compute.MetadataItems {
-	var entries []string
+func updateMetadata(md *compute.Metadata, item string, i int) []*compute.MetadataItems {
+	var items []string
 	flatMD := flattenMetadata(md)
-	entries = strings.Split(flatMD["ssh-keys"].(string), "\n")
-	entries[i] = entry
-	flatMD["ssh-keys"] = strings.Join(entries, "\n")
+	items = strings.Split(flatMD["ssh-keys"].(string), "\n")
+	items[i] = item
+	flatMD["ssh-keys"] = strings.Join(items, "\n")
 	return expandComputeMetadata(flatMD)
 }
 
