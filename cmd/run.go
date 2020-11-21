@@ -13,14 +13,11 @@ import (
 )
 
 var runCmd = &cobra.Command{
-	Use:   "run",
-	Short: "Run commands on GCE instances",
-	Args:  cobra.ExactArgs(1),
-	RunE:  run,
-	PreRunE: func(cmd *cobra.Command, args []string) error {
-		err := utils.ConfigInitialized()
-		return err
-	},
+	Use:     "run",
+	Short:   "Run commands on GCE instances",
+	Args:    cobra.ExactArgs(1),
+	RunE:    run,
+	PreRunE: utils.ConfigInitialized,
 }
 
 func init() {
@@ -54,6 +51,8 @@ func run(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+
+	client.GetFirewallRules()
 
 	p := utils.NewProgress()
 	p.Start("Fetching list of GCE instances")

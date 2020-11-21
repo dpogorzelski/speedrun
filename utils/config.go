@@ -6,10 +6,11 @@ import (
 	"path/filepath"
 
 	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/cobra"
 )
 
 // ConfigInitialized checks if config directory was created
-func ConfigInitialized() error {
+func ConfigInitialized(cmd *cobra.Command, args []string) error {
 	home, err := homedir.Dir()
 	if err != nil {
 		return err

@@ -18,7 +18,7 @@ var cfgFile string
 var rootCmd = &cobra.Command{
 	Use:   "speedrun",
 	Short: "Execute commands at scale",
-	Long:  `Speedrun executes commands at scale`,
+	Long:  `Speedrun executes commands at scale.`,
 }
 
 // Execute adds all child commands to the root command and sets flags appropriately.
@@ -32,6 +32,29 @@ func Execute() {
 func init() {
 	cobra.OnInitialize(initConfig)
 
+	tmpl := `Usage:{{if .Runnable}}
+  {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
+  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+
+Aliases:
+  {{.NameAndAliases}}{{end}}{{if .HasExample}}
+
+Examples:
+{{.Example}}{{end}}{{if .HasAvailableSubCommands}}
+
+Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+  {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
+
+Flags:
+{{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
+
+Global Flags:
+{{.InheritedFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasHelpSubCommands}}
+
+Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
+  {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
+{{end}}`
+	rootCmd.SetUsageTemplate(tmpl)
 	// rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
 	// viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
 }
@@ -47,7 +70,10 @@ func initConfig() {
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(configDir)
 
-	viper.ReadInConfig()
+	err = viper.ReadInConfig()
+	if err != nil {
+		utils.Error(err.Error())
+	}
 	// setUpLogs(viper.GetString("verbosity"))
 }
 

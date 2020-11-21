@@ -1,6 +1,7 @@
 package gcp
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -19,6 +20,10 @@ func getAddress() string {
 	return string(body)
 }
 
-func (c *ComputeClient) GetFWRUles() {
-	c.Firewalls.Get(c.Project, "client")
+func (c *ComputeClient) GetFirewallRules() {
+	a, err := c.Firewalls.Get(c.Project, "client").Do()
+	if err != nil {
+		fmt.Print(err)
+	}
+	fmt.Print(a.Allowed)
 }
