@@ -301,6 +301,8 @@ github.com/tmc/grpc-websocket-proxy v0.0.0-20190109142713-0ad062ec5ee5/go.mod h1
 github.com/xiang90/probing v0.0.0-20190116061207-43a291ad63a2/go.mod h1:UETIi67q53MR2AWcXfiuqkDkRtnGDLqkBTpCHuJHxtU=
 github.com/yahoo/vssh v0.0.0-20201020191936-75a3e7fecb33 h1:MJ6cK2gPnQF6V9rrJu/FBGf19YySUgCNZ81cxp5u2do=
 github.com/yahoo/vssh v0.0.0-20201020191936-75a3e7fecb33/go.mod h1:jlMwL65p7h2KWE8YtsG4NtzGkhLO42Q3XK8Act2ccsQ=
+github.com/yahoo/vssh v0.0.0-20201122023451-bfa903e660fc h1:7NDc+3ov+yAA3l6d9I65kUoqP+0372IsLTak5NHIOTE=
+github.com/yahoo/vssh v0.0.0-20201122023451-bfa903e660fc/go.mod h1:jlMwL65p7h2KWE8YtsG4NtzGkhLO42Q3XK8Act2ccsQ=
 github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
