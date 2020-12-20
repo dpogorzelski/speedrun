@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/fatih/color"
 	"github.com/mitchellh/go-homedir"
 	"github.com/yahoo/vssh"
 	"golang.org/x/crypto/ssh"
@@ -32,12 +33,6 @@ type Run struct {
 	res       result
 	instances instanceList
 }
-
-const (
-	GREEN = iota
-	YELLOW
-	RED
-)
 
 func NewRun() *Run {
 	r := Run{}
@@ -207,16 +202,17 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 	respChan := vs.Run(ctx, command, timeout, vssh.SetLimitReaderStdout(4096))
 
 	for resp := range respChan {
+		host := instanceDict[resp.ID()]
 		if err := resp.Err(); err != nil {
-			run.res.errors[instanceDict[resp.ID()]] = err
+			run.res.errors[host] = err
 			continue
 		}
 
 		output, _, _ := resp.GetText(vs)
 		if resp.ExitStatus() == 0 {
-			run.res.successes[instanceDict[resp.ID()]] = padOutput(output)
+			run.res.successes[host] = formatOutput(output)
 		} else {
-			run.res.failures[instanceDict[resp.ID()]] = padOutput(output)
+			run.res.failures[host] = formatOutput(output)
 		}
 
 	}
@@ -225,39 +221,32 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 
 // PrintResult prints the results of the ssh command run
 func (r Run) PrintResult(failures bool) {
+
+	output := color.New(color.FgWhite).SprintFunc()
+
 	if !failures {
-		for k, v := range r.res.successes {
-			fmt.Printf("  %s:\n%s\n", Green(k), v)
+		for host, msg := range r.res.successes {
+			fmt.Printf("  %s:\n%s\n", green(host), output(msg))
 		}
 	}
 
-	for k, v := range r.res.failures {
-		fmt.Printf("  %s:\n%s\n", Yellow(k), v)
+	for host, msg := range r.res.failures {
+		fmt.Printf("  %s:\n%s\n", yellow(host), output(msg))
 	}
 
-	for k, v := range r.res.errors {
-		fmt.Printf("  %s:\n    %s\n\n", Red(k), v.Error())
+	for host, msg := range r.res.errors {
+		fmt.Printf("  %s:\n    %s\n\n", red(host), output(msg.Error()))
 	}
-	fmt.Printf("%s: %d %s: %d %s: %d\n", Green("Success"), len(r.res.successes), Yellow("Failure"), len(r.res.failures), Red("Error"), len(r.res.errors))
+	fmt.Printf("%s: %d %s: %d %s: %d\n", green("Success"), len(r.res.successes), yellow("Failure"), len(r.res.failures), red("Error"), len(r.res.errors))
 }
 
-// Status function returns true if there are no errors or failures in a run, false otherwise
-func (r Run) Status() interface{} {
-	if len(r.res.errors) > 0 {
-		return RED
-	}
-
-	if len(r.res.failures) > 0 {
-		return YELLOW
-	}
-	return GREEN
-}
-
-func padOutput(body string) string {
+func formatOutput(body string) string {
 	f := []string{}
 	for _, line := range strings.Split(body, "\n") {
 		line = fmt.Sprintf("    %s", line)
 		f = append(f, line)
 	}
+
+	f = append(f[:len(f)-1], "")
 	return strings.Join(f, "\n")
 }

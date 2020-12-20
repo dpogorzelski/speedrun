@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -11,7 +12,7 @@ func getAddress() string {
 	var c = &http.Client{
 		Timeout: time.Second * 5,
 	}
-	resp, err := c.Get("https://getaddress.vthor.workers.dev")
+	resp, err := c.Get("https://atto.run/ip")
 	if err != nil {
 		// handle error
 	}
@@ -20,10 +21,16 @@ func getAddress() string {
 	return string(body)
 }
 
-func (c *ComputeClient) GetFirewallRules() {
-	a, err := c.Firewalls.Get(c.Project, "client").Do()
+func (c *ComputeClient) GetFirewallRules() error {
+	a, err := c.Firewalls.Get(c.Project, "morning-mgmt-to-backend").Do()
 	if err != nil {
-		fmt.Print(err)
+		return err
 	}
-	fmt.Print(a.Allowed)
+	b := getAddress()
+	for _, r := range a.SourceRanges {
+		if strings.HasPrefix(r, b) {
+			fmt.Println(r)
+		}
+	}
+	return nil
 }

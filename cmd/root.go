@@ -1,11 +1,13 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 
 	"speedrun/utils"
 
+	"github.com/fatih/color"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -31,10 +33,14 @@ func Execute() {
 
 func init() {
 	cobra.OnInitialize(initConfig)
+	blue := color.New(color.FgBlue)
+	usage := blue.Sprint("Usage:")
+	ac := blue.Sprint("Available Commands:")
+	flags := blue.Sprint("Flags:")
 
-	tmpl := `Usage:{{if .Runnable}}
+	tmpl := fmt.Sprintf(`%s{{if .Runnable}}
   {{.UseLine}}{{end}}{{if .HasAvailableSubCommands}}
-  {{.CommandPath}} [command]{{end}}{{if gt (len .Aliases) 0}}
+  {{.CommandPath}} <command>{{end}}{{if gt (len .Aliases) 0}}
 
 Aliases:
   {{.NameAndAliases}}{{end}}{{if .HasExample}}
@@ -42,10 +48,10 @@ Aliases:
 Examples:
 {{.Example}}{{end}}{{if .HasAvailableSubCommands}}
 
-Available Commands:{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
+%s{{range .Commands}}{{if (or .IsAvailableCommand (eq .Name "help"))}}
   {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableLocalFlags}}
 
-Flags:
+%s
 {{.LocalFlags.FlagUsages | trimTrailingWhitespaces}}{{end}}{{if .HasAvailableInheritedFlags}}
 
 Global Flags:
@@ -53,8 +59,13 @@ Global Flags:
 
 Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
   {{rpad .CommandPath .CommandPathPadding}} {{.Short}}{{end}}{{end}}{{end}}{{if .HasAvailableSubCommands}}
-{{end}}`
+{{end}}`, usage, ac, flags)
+
 	rootCmd.SetUsageTemplate(tmpl)
+	rootCmd.SetHelpCommand(&cobra.Command{
+		Use:    "speedrun",
+		Hidden: true,
+	})
 	// rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
 	// viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
 }

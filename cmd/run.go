@@ -8,16 +8,18 @@ import (
 	"speedrun/gcp"
 	"speedrun/utils"
 
+	"github.com/fatih/color"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
 
 var runCmd = &cobra.Command{
-	Use:     "run",
-	Short:   "Run commands on GCE instances",
-	Args:    cobra.ExactArgs(1),
-	RunE:    run,
-	PreRunE: utils.ConfigInitialized,
+	Use:                   "run",
+	Short:                 "Run commands on GCE instances",
+	Args:                  cobra.ExactArgs(1),
+	RunE:                  run,
+	PreRunE:               utils.ConfigInitialized,
+	DisableFlagsInUseLine: true,
 }
 
 func init() {
@@ -52,7 +54,9 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	client.GetFirewallRules()
+	if err = client.GetFirewallRules(); err != nil {
+		return err
+	}
 
 	p := utils.NewProgress()
 	p.Start("Fetching list of GCE instances")
@@ -88,7 +92,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 	p.Stop()
 
-	p.Start(fmt.Sprintf("Running [%s]", args[0]))
+	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(args[0])))
 	result, err := utils.Execute(args[0], instances, privKey)
 	if err != nil {
 		p.Error(err)
