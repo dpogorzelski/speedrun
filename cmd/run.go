@@ -14,12 +14,11 @@ import (
 )
 
 var runCmd = &cobra.Command{
-	Use:                   "run",
-	Short:                 "Run commands on GCE instances",
-	Args:                  cobra.ExactArgs(1),
-	RunE:                  run,
-	PreRunE:               utils.ConfigInitialized,
-	DisableFlagsInUseLine: true,
+	Use:     "run <command>",
+	Short:   "Run commands on GCE instances",
+	Args:    cobra.ExactArgs(1),
+	RunE:    run,
+	PreRunE: utils.ConfigInitialized,
 }
 
 func init() {

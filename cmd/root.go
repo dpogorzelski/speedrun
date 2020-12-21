@@ -62,10 +62,7 @@ Additional help topics:{{range .Commands}}{{if .IsAdditionalHelpTopicCommand}}
 {{end}}`, usage, ac, flags)
 
 	rootCmd.SetUsageTemplate(tmpl)
-	rootCmd.SetHelpCommand(&cobra.Command{
-		Use:    "speedrun",
-		Hidden: true,
-	})
+
 	// rootCmd.PersistentFlags().StringVarP(&verbosity, "verbosity", "v", log.InfoLevel.String(), "Log level (debug, info, warn, error, fatal, panic)")
 	// viper.BindPFlag("verbosity", rootCmd.PersistentFlags().Lookup("verbosity"))
 }
