@@ -1,4 +1,4 @@
-package cmd
+package main
 
 import (
 	"fmt"
@@ -6,31 +6,24 @@ import (
 	"sync"
 
 	"speedrun/gcp"
-	"speedrun/utils"
 
 	"github.com/fatih/color"
-	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
+	"github.com/urfave/cli/v2"
 )
 
-var runCmd = &cobra.Command{
-	Use:     "run <command>",
-	Short:   "Run commands on GCE instances",
-	Args:    cobra.ExactArgs(1),
-	RunE:    run,
-	PreRunE: utils.ConfigInitialized,
-}
+// var runCmd = &cobra.Command{
+// 	Use:     "run <command>",
+// 	Short:   "Run commands on GCE instances",
+// 	Args:    cobra.ExactArgs(1),
+// 	RunE:    run,
+// 	PreRunE: utils.ConfigInitialized,
+// }
 
-func init() {
-	var filter string
-	var onlyFailures bool
-
-	rootCmd.AddCommand(runCmd)
-	runCmd.PersistentFlags().StringVar(&filter, "filter", "", "gcloud resource filter")
-	runCmd.PersistentFlags().BoolVar(&onlyFailures, "only-failures", false, "print only failures and errors")
-}
-
-func run(cmd *cobra.Command, args []string) error {
+func run(c *cli.Context) error {
+	if c.Args().Len() < 1 {
+		return cli.Exit("missing command", 1)
+	}
 	project := viper.GetString("gcp.projectid")
 
 	client, err := gcp.NewComputeClient(project)
@@ -38,17 +31,10 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	filter, err := cmd.Flags().GetString("filter")
-	if err != nil {
-		return err
-	}
+	filter := c.String("filter")
+	onlyFailures := c.Bool("only-failures")
 
-	onlyFailures, err := cmd.Flags().GetBool("only-failures")
-	if err != nil {
-		return err
-	}
-
-	pubKey, privKey, err := utils.GetKeyPair()
+	pubKey, privKey, err := GetKeyPair()
 	if err != nil {
 		return err
 	}
@@ -57,7 +43,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	p := utils.NewProgress()
+	p := NewProgress()
 	p.Start("Fetching list of GCE instances")
 	instances, err := client.GetInstances(filter)
 	if err != nil {
@@ -91,8 +77,8 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 	p.Stop()
 
-	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(args[0])))
-	result, err := utils.Execute(args[0], instances, privKey)
+	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(c.Args().First())))
+	result, err := Execute(c.Args().First(), instances, privKey)
 	if err != nil {
 		p.Error(err)
 		os.Exit(1)
