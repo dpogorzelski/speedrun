@@ -12,23 +12,15 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// var runCmd = &cobra.Command{
-// 	Use:     "run <command>",
-// 	Short:   "Run commands on GCE instances",
-// 	Args:    cobra.ExactArgs(1),
-// 	RunE:    run,
-// 	PreRunE: utils.ConfigInitialized,
-// }
-
 func run(c *cli.Context) error {
 	if c.Args().Len() < 1 {
-		return cli.Exit("missing command", 1)
+		return cli.Exit("missing required command arguments", 1)
 	}
 	project := viper.GetString("gcp.projectid")
 
 	client, err := gcp.NewComputeClient(project)
 	if err != nil {
-		return err
+		return cli.Exit(err, 1)
 	}
 
 	filter := c.String("filter")
@@ -36,11 +28,11 @@ func run(c *cli.Context) error {
 
 	pubKey, privKey, err := GetKeyPair()
 	if err != nil {
-		return err
+		return cli.Exit(err, 1)
 	}
 
 	if err = client.GetFirewallRules(); err != nil {
-		return err
+		return cli.Exit(err, 1)
 	}
 
 	p := NewProgress()

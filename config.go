@@ -13,7 +13,7 @@ import (
 )
 
 type config struct {
-	gcp gcpConfig `toml:"gcp"`
+	Gcp gcpConfig `toml:"gcp"`
 }
 
 type gcpConfig struct {
@@ -33,7 +33,7 @@ func initialize(ctx *cli.Context) error {
 	return nil
 }
 
-func loadConfig() {
+func loadConfig(ctx *cli.Context) error {
 	home, err := homedir.Dir()
 	if err != nil {
 		cli.Exit(err, 1)
@@ -48,15 +48,17 @@ func loadConfig() {
 	if err != nil {
 		cli.Exit(err, 1)
 	}
+
+	return nil
 	// setUpLogs(viper.GetString("verbosity"))
 }
 
 func createConfig() error {
 	var err error
 	ui := &input.UI{}
-	config := config{gcp: gcpConfig{}}
+	config := &config{Gcp: gcpConfig{}}
 
-	config.gcp.ProjectID, err = ui.Ask("Google Cloud project ID?", &input.Options{
+	config.Gcp.ProjectID, err = ui.Ask("Google Cloud project ID?", &input.Options{
 		Required: true,
 		Loop:     true,
 	})
