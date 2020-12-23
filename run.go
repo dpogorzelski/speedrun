@@ -5,8 +5,6 @@ import (
 	"os"
 	"sync"
 
-	"speedrun/gcp"
-
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
@@ -18,7 +16,7 @@ func run(c *cli.Context) error {
 	}
 	project := viper.GetString("gcp.projectid")
 
-	client, err := gcp.NewComputeClient(project)
+	client, err := NewComputeClient(project)
 	if err != nil {
 		return cli.Exit(err, 1)
 	}
@@ -26,7 +24,7 @@ func run(c *cli.Context) error {
 	filter := c.String("filter")
 	onlyFailures := c.Bool("only-failures")
 
-	pubKey, privKey, err := GetKeyPair()
+	pubKey, privKey, err := loadKeyPair()
 	if err != nil {
 		return cli.Exit(err, 1)
 	}

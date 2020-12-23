@@ -43,7 +43,7 @@ func main() {
 						Name:   "new",
 						Usage:  "create a new ssh key",
 						Before: configInitialized,
-						Action: newKey,
+						Action: createKey,
 					},
 					{
 						Name:   "show",

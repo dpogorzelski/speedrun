@@ -2,20 +2,12 @@ package main
 
 import (
 	"context"
-	"crypto/ed25519"
-	"crypto/rand"
-	"crypto/sha256"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
-	"io/ioutil"
 	"os/user"
-	"path/filepath"
 	"strings"
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/mitchellh/go-homedir"
 	"github.com/yahoo/vssh"
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/api/compute/v1"
@@ -40,119 +32,6 @@ func NewRun() *Run {
 	r.res.failures = make(map[string]string)
 	r.res.successes = make(map[string]string)
 	return &r
-}
-
-// GetKeyPair returns a public key, either new or existing depending on the force bool value. The key is formatted for use in authorized_keys files or GCP metadata.
-func GetKeyPair() (ssh.PublicKey, ssh.Signer, error) {
-	var sshPubKey ssh.PublicKey
-	var signer ssh.Signer
-	var err error
-
-	sshPubKey, signer, err = loadKeyPair()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	return sshPubKey, signer, nil
-}
-
-func GenerateKeyPair() (ssh.PublicKey, ssh.Signer, error) {
-	_, privKey, err := ed25519.GenerateKey(rand.Reader)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	pemBlock := &pem.Block{}
-	pemBlock.Type = "PRIVATE KEY"
-	pemBlock.Bytes, err = x509.MarshalPKCS8PrivateKey(privKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	privateKey := pem.EncodeToMemory(pemBlock)
-
-	err = writeKeyFile(privateKey)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	signer, err := ssh.ParsePrivateKey(privateKey)
-	if err != nil {
-		return nil, nil, err
-	}
-	pubKey := signer.PublicKey()
-	return pubKey, signer, nil
-}
-
-func loadKeyPair() (ssh.PublicKey, ssh.Signer, error) {
-	privateKeyPath, err := determineKeyFilePath()
-	if err != nil {
-		return nil, nil, err
-	}
-
-	file, err := readKeyFile(privateKeyPath)
-	if err != nil {
-		return nil, nil, fmt.Errorf("Couldn't find private key. Use 'speedrun key new' to generate a new one")
-	}
-
-	signer, err := ssh.ParsePrivateKey(file)
-	if err != nil {
-		return nil, nil, err
-	}
-	pubKey := signer.PublicKey()
-	return pubKey, signer, nil
-}
-
-func determineKeyFileName() (string, error) {
-	user, err := user.Current()
-	if err != nil {
-		return "", err
-	}
-	sum := sha256.Sum256([]byte(user.Username))
-	name := fmt.Sprintf("%x", sum)
-	return name, nil
-}
-
-func determineKeyFilePath() (string, error) {
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-
-	fileName, err := determineKeyFileName()
-	if err != nil {
-		return "", err
-	}
-
-	path := filepath.Join(home, ".config/speedrun", fileName)
-	return path, nil
-}
-
-func readKeyFile(path string) ([]byte, error) {
-	cleanPath := filepath.Clean(path)
-	absPath, err := filepath.Abs(cleanPath)
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := ioutil.ReadFile(absPath)
-	if err != nil {
-		return nil, err
-	}
-	return file, nil
-}
-
-func writeKeyFile(key []byte) error {
-	privateKeyPath, err := determineKeyFilePath()
-	if err != nil {
-		return err
-	}
-
-	err = ioutil.WriteFile(privateKeyPath, key, 0600)
-	if err != nil {
-		return err
-	}
-	return nil
 }
 
 func getSSHConfig(user string, key ssh.Signer) (*ssh.ClientConfig, error) {

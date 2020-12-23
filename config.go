@@ -26,7 +26,7 @@ func initialize(ctx *cli.Context) error {
 		return cli.Exit(err, 1)
 	}
 
-	_, _, err = GenerateKeyPair()
+	err = createKey(ctx)
 	if err != nil {
 		return cli.Exit(err, 1)
 	}
@@ -100,7 +100,7 @@ func configInitialized(ctx *cli.Context) error {
 
 	configDir := filepath.Join(home, ".config", "speedrun")
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
-		return fmt.Errorf("Try running 'speedrun init' first")
+		return cli.Exit(fmt.Errorf("Try running 'speedrun init' first"), 1)
 	}
 	return nil
 }
