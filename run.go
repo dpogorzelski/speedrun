@@ -29,7 +29,7 @@ func run(c *cli.Context) error {
 		return cli.Exit(err, 1)
 	}
 
-	if err = client.GetFirewallRules(); err != nil {
+	if err = client.getFirewallRules(); err != nil {
 		return cli.Exit(err, 1)
 	}
 
@@ -68,12 +68,13 @@ func run(c *cli.Context) error {
 	p.Stop()
 
 	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(c.Args().First())))
-	result, err := Execute(c.Args().First(), instances, privKey)
+	roll := newRoll(c.Args().First())
+	err = roll.execute(instances, privKey)
 	if err != nil {
 		p.Error(err)
 		os.Exit(1)
 	}
 	p.Stop()
-	result.PrintResult(onlyFailures)
+	roll.printResult(onlyFailures)
 	return nil
 }

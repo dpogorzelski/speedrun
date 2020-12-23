@@ -13,24 +13,21 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-type result struct {
+type roll struct {
 	errors    map[string]error
 	failures  map[string]string
 	successes map[string]string
+	command   string
 }
 
-type instanceList map[string]string
+func newRoll(command string) *roll {
+	r := roll{
+		errors:    make(map[string]error),
+		failures:  make(map[string]string),
+		successes: make(map[string]string),
+		command:   command,
+	}
 
-type Run struct {
-	res       result
-	instances instanceList
-}
-
-func NewRun() *Run {
-	r := Run{}
-	r.res.errors = make(map[string]error)
-	r.res.failures = make(map[string]string)
-	r.res.successes = make(map[string]string)
 	return &r
 }
 
@@ -45,17 +42,16 @@ func getSSHConfig(user string, key ssh.Signer) (*ssh.ClientConfig, error) {
 }
 
 // Execute runs agiven command on servers in the addresses list
-func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Run, error) {
+func (r *roll) execute(instances []*compute.Instance, key ssh.Signer) error {
 	vs := vssh.New().Start()
 	user, err := user.Current()
-	run := NewRun()
 	if err != nil {
-		return run, err
+		return err
 	}
 
 	config, err := getSSHConfig(user.Username, key)
 	if err != nil {
-		return run, err
+		return err
 	}
 
 	instanceDict := map[string]string{}
@@ -66,7 +62,7 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 	for addr := range instanceDict {
 		err := vs.AddClient(addr, config, vssh.SetMaxSessions(10))
 		if err != nil {
-			return run, err
+			return err
 		}
 	}
 	vs.Wait()
@@ -75,48 +71,48 @@ func Execute(command string, instances []*compute.Instance, key ssh.Signer) (*Ru
 	defer cancel()
 	timeout, err := time.ParseDuration("20s")
 	if err != nil {
-		return run, err
+		return err
 	}
 
-	respChan := vs.Run(ctx, command, timeout, vssh.SetLimitReaderStdout(4096))
+	respChan := vs.Run(ctx, r.command, timeout, vssh.SetLimitReaderStdout(4096))
 
 	for resp := range respChan {
 		host := instanceDict[resp.ID()]
 		if err := resp.Err(); err != nil {
-			run.res.errors[host] = err
+			r.errors[host] = err
 			continue
 		}
 
 		output, _, _ := resp.GetText(vs)
 		if resp.ExitStatus() == 0 {
-			run.res.successes[host] = formatOutput(output)
+			r.successes[host] = formatOutput(output)
 		} else {
-			run.res.failures[host] = formatOutput(output)
+			r.failures[host] = formatOutput(output)
 		}
 
 	}
-	return run, nil
+	return nil
 }
 
 // PrintResult prints the results of the ssh command run
-func (r Run) PrintResult(failures bool) {
+func (r *roll) printResult(failures bool) {
 
 	output := color.New(color.FgWhite).SprintFunc()
 
 	if !failures {
-		for host, msg := range r.res.successes {
+		for host, msg := range r.successes {
 			fmt.Printf("  %s:\n%s\n", green(host), output(msg))
 		}
 	}
 
-	for host, msg := range r.res.failures {
+	for host, msg := range r.failures {
 		fmt.Printf("  %s:\n%s\n", yellow(host), output(msg))
 	}
 
-	for host, msg := range r.res.errors {
+	for host, msg := range r.errors {
 		fmt.Printf("  %s:\n    %s\n\n", red(host), output(msg.Error()))
 	}
-	fmt.Printf("%s: %d %s: %d %s: %d\n", green("Success"), len(r.res.successes), yellow("Failure"), len(r.res.failures), red("Error"), len(r.res.errors))
+	fmt.Printf("%s: %d %s: %d %s: %d\n", green("Success"), len(r.successes), yellow("Failure"), len(r.failures), red("Error"), len(r.errors))
 }
 
 func formatOutput(body string) string {
