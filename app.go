@@ -27,6 +27,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "filter", Usage: "gcloud resource filter"},
 					&cli.BoolFlag{Name: "only-failures", Usage: "print only failures and errors"},
+					&cli.BoolFlag{Name: "private-ip", Usage: "connect to private IPs instead of public ones"},
 				},
 				Before: configInitialized,
 				Action: run,
@@ -41,15 +42,24 @@ func main() {
 				Subcommands: []*cli.Command{
 					{
 						Name:   "new",
-						Usage:  "create a new ssh key",
+						Usage:  "Create a new ssh key",
 						Before: configInitialized,
 						Action: createKey,
 					},
 					{
 						Name:   "show",
-						Usage:  "show current ssh key",
+						Usage:  "Show current ssh key",
 						Before: configInitialized,
 						Action: showKey,
+					},
+					{
+						Name:  "set",
+						Usage: "Set key in the project's metadata",
+						Flags: []cli.Flag{
+							&cli.StringFlag{Name: "filter", Usage: "gcloud resource filter"},
+						},
+						Before: configInitialized,
+						Action: setKey,
 					},
 				},
 			},

@@ -1,96 +1,85 @@
 package main
 
 import (
-	"context"
 	"fmt"
 	"os/user"
 	"strings"
+	"sync"
 	"time"
 
+	"github.com/alitto/pond"
 	"github.com/fatih/color"
-	"github.com/yahoo/vssh"
-	"golang.org/x/crypto/ssh"
+	"github.com/melbahja/goph"
 	"google.golang.org/api/compute/v1"
 )
 
 type roll struct {
+	sync.Mutex
 	errors    map[string]error
 	failures  map[string]string
 	successes map[string]string
 	command   string
+	timeout   time.Duration
 }
 
-func newRoll(command string) *roll {
+func newRoll(command string, timeout time.Duration) *roll {
 	r := roll{
 		errors:    make(map[string]error),
 		failures:  make(map[string]string),
 		successes: make(map[string]string),
 		command:   command,
+		timeout:   timeout,
 	}
 
 	return &r
 }
 
-func getSSHConfig(user string, key ssh.Signer) (*ssh.ClientConfig, error) {
-	var auths []ssh.AuthMethod
-	auths = append(auths, ssh.PublicKeys(key))
-	return &ssh.ClientConfig{
-		User:            user,
-		Auth:            auths,
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-	}, nil
-}
-
 // Execute runs agiven command on servers in the addresses list
-func (r *roll) execute(instances []*compute.Instance, key ssh.Signer) error {
-	vs := vssh.New().Start()
+func (r *roll) execute(instances []*compute.Instance, key string) error {
 	user, err := user.Current()
-	if err != nil {
-		return err
-	}
-
-	config, err := getSSHConfig(user.Username, key)
 	if err != nil {
 		return err
 	}
 
 	instanceDict := map[string]string{}
 	for _, instance := range instances {
-		instanceDict[instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22"] = instance.Name
+		instanceDict[instance.NetworkInterfaces[0].AccessConfigs[0].NatIP] = instance.Name
 	}
 
-	for addr := range instanceDict {
-		err := vs.AddClient(addr, config, vssh.SetMaxSessions(10))
-		if err != nil {
-			return err
-		}
-	}
-	vs.Wait()
-
-	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel()
-	timeout, err := time.ParseDuration("20s")
+	auth, err := goph.Key(key, "")
 	if err != nil {
 		return err
 	}
 
-	respChan := vs.Run(ctx, r.command, timeout, vssh.SetLimitReaderStdout(4096))
+	pool := pond.New(100, 0)
 
-	for resp := range respChan {
-		host := instanceDict[resp.ID()]
-		if err := resp.Err(); err != nil {
-			r.errors[host] = err
-			continue
-		}
-
-		output, _, _ := resp.GetText(vs)
-		if resp.ExitStatus() == 0 {
-			r.successes[host] = formatOutput(output)
-		} else {
-			r.failures[host] = formatOutput(output)
-		}
-
+	for k, v := range instanceDict {
+		addr := k
+		host := v
+		pool.Submit(func() {
+			client, err := goph.NewUnknown(user.Username, addr, auth)
+			client.Config.Timeout = r.timeout
+			if err != nil {
+				r.Lock()
+				r.errors[host] = err
+				r.Unlock()
+				return
+			}
+			defer client.Close()
+			out, err := client.Run(r.command)
+			if err != nil {
+				r.Lock()
+				r.failures[host] = formatOutput(string(out))
+				r.Unlock()
+				return
+			}
+			r.Lock()
+			r.successes[host] = formatOutput(string(out))
+			r.Unlock()
+		})
 	}
+	pool.StopAndWait()
+
 	return nil
 }
 

@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
-	"sync"
+	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/viper"
@@ -24,9 +24,9 @@ func run(c *cli.Context) error {
 	filter := c.String("filter")
 	onlyFailures := c.Bool("only-failures")
 
-	pubKey, privKey, err := loadKeyPair()
+	privateKeyPath, err := determineKeyFilePath()
 	if err != nil {
-		return cli.Exit(err, 1)
+		return err
 	}
 
 	if err = client.getFirewallRules(); err != nil {
@@ -44,37 +44,20 @@ func run(c *cli.Context) error {
 	}
 	p.Stop()
 
-	p.Start("Updating project metadata")
-	err = client.UpdateProjectMetadata(pubKey)
-	if err != nil {
-		p.Error(err)
-	}
-	p.Stop()
-
-	p.Start("Updating instance metadata")
-	batch := 50
-	for i := 0; i < len(instances); i += batch {
-		j := i + batch
-		if j > len(instances) {
-			j = len(instances)
-		}
-		var wg sync.WaitGroup
-		for a := range instances[i:j] {
-			wg.Add(1)
-			go client.UpdateInstanceMetadata(&wg, instances[a+i], pubKey)
-		}
-		wg.Wait()
-	}
-	p.Stop()
-
 	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(c.Args().First())))
-	roll := newRoll(c.Args().First())
-	err = roll.execute(instances, privKey)
+	timeout, err := time.ParseDuration("10s")
+	if err != nil {
+		return err
+	}
+
+	batch := newRoll(c.Args().First(), timeout)
+	err = batch.execute(instances, privateKeyPath)
 	if err != nil {
 		p.Error(err)
 		os.Exit(1)
 	}
 	p.Stop()
-	roll.printResult(onlyFailures)
+
+	batch.printResult(onlyFailures)
 	return nil
 }

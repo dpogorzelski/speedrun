@@ -9,7 +9,9 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
+	"github.com/alitto/pond"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh"
 )
@@ -71,7 +73,7 @@ func determineKeyFilePath() (string, error) {
 	return path, nil
 }
 
-func createKey(ctx *cli.Context) error {
+func createKey(c *cli.Context) error {
 	_, privKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return cli.Exit(err, 1)
@@ -141,7 +143,52 @@ func readKeyFile(path string) ([]byte, error) {
 	return file, nil
 }
 
-func showKey(ctx *cli.Context) error {
+func showKey(c *cli.Context) error {
 	fmt.Println("showing private key")
+	return nil
+}
+
+func setKey(c *cli.Context) error {
+	project := viper.GetString("gcp.projectid")
+
+	client, err := NewComputeClient(project)
+	if err != nil {
+		return cli.Exit(err, 1)
+	}
+
+	pubKey, _, err := loadKeyPair()
+	if err != nil {
+		return cli.Exit(err, 1)
+	}
+
+	p := NewProgress()
+	p.Start("Setting public key in the project metadata")
+	err = client.UpdateProjectMetadata(pubKey)
+	if err != nil {
+		p.Error(err)
+	}
+	p.Stop()
+
+	filter := c.String("filter")
+	p.Start("Setting public key in the instance metadata")
+	instances, err := client.GetInstances(filter)
+	if err != nil {
+		p.Error(err)
+	}
+
+	if len(instances) == 0 {
+		p.Failure("no instances found")
+	}
+
+	pool := pond.New(10, 0, pond.MinWorkers(10))
+	for i := 0; i < len(instances); i++ {
+		n := i
+		pool.Submit(func() {
+			client.UpdateInstanceMetadata(instances[n], pubKey)
+		})
+	}
+
+	pool.StopAndWait()
+	p.Stop()
 	return nil
 }
