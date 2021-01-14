@@ -60,13 +60,22 @@ func main() {
 		},
 	}
 
+	appFlags := []cli.Flag{
+		&cli.StringFlag{
+			Name:  "config",
+			Usage: "The location of the speedrun config file",
+			Value: configPath(),
+		},
+	}
+
 	app := &cli.App{
 		Name: "speedrun",
 		Authors: []*cli.Author{{
 			Name:  "Dawid Pogorzelski",
 			Email: "dawid@pogorzelski.dev",
 		}},
-		Before: loadConfig,
+		Before: altsrc.InitInputSourceWithContext(appFlags, altsrc.NewTomlSourceFromFlagFunc("config")),
+		Flags:  appFlags,
 		Commands: []*cli.Command{
 			init,
 			run,

@@ -50,6 +50,15 @@ func loadConfig(ctx *cli.Context) error {
 	// setUpLogs(viper.GetString("verbosity"))
 }
 
+func configPath() string {
+	home, err := homedir.Dir()
+	if err != nil {
+		cli.Exit(err, 1)
+	}
+
+	return filepath.Join(home, ".config", "speedrun", "config.toml")
+}
+
 func createConfig() error {
 	var err error
 	ui := &input.UI{}
@@ -106,6 +115,5 @@ func configInitialized(c *cli.Context) error {
 		return err
 	}
 
-	fmt.Print(inputSource)
 	return altsrc.ApplyInputSourceValues(c, inputSource, c.Command.Flags)
 }

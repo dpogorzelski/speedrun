@@ -6,7 +6,6 @@ import (
 	"time"
 
 	"github.com/fatih/color"
-	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 )
 
@@ -14,7 +13,7 @@ func run(c *cli.Context) error {
 	if c.Args().Len() < 1 {
 		return cli.Exit("missing required command arguments", 1)
 	}
-	project := viper.GetString("gcp.projectid")
+	project := c.String("[gcp]projectid")
 
 	client, err := NewComputeClient(project)
 	if err != nil {
