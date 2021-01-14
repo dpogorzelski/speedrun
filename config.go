@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/viper"
 	"github.com/tcnksm/go-input"
 	"github.com/urfave/cli/v2"
+	"github.com/urfave/cli/v2/altsrc"
 )
 
 type config struct {
@@ -26,10 +27,6 @@ func initialize(ctx *cli.Context) error {
 		return cli.Exit(err, 1)
 	}
 
-	err = createKey(ctx)
-	if err != nil {
-		return cli.Exit(err, 1)
-	}
 	return nil
 }
 
@@ -92,7 +89,7 @@ func createConfig() error {
 	return nil
 }
 
-func configInitialized(ctx *cli.Context) error {
+func configInitialized(c *cli.Context) error {
 	home, err := homedir.Dir()
 	if err != nil {
 		return err
@@ -102,5 +99,13 @@ func configInitialized(ctx *cli.Context) error {
 	if _, err := os.Stat(configDir); os.IsNotExist(err) {
 		return cli.Exit(fmt.Errorf("Try running 'speedrun init' first"), 1)
 	}
-	return nil
+
+	configFile := filepath.Join(configDir, "config.toml")
+	inputSource, err := altsrc.NewTomlSourceFromFile(configFile)
+	if err != nil {
+		return err
+	}
+
+	fmt.Print(inputSource)
+	return altsrc.ApplyInputSourceValues(c, inputSource, c.Command.Flags)
 }

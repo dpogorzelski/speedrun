@@ -23,14 +23,11 @@ func run(c *cli.Context) error {
 
 	filter := c.String("filter")
 	onlyFailures := c.Bool("only-failures")
+	ignoreFingerprint := c.Bool("ignore-fingerprint")
 
 	privateKeyPath, err := determineKeyFilePath()
 	if err != nil {
 		return err
-	}
-
-	if err = client.getFirewallRules(); err != nil {
-		return cli.Exit(err, 1)
 	}
 
 	p := NewProgress()
@@ -51,7 +48,7 @@ func run(c *cli.Context) error {
 	}
 
 	batch := newRoll(c.Args().First(), timeout)
-	err = batch.execute(instances, privateKeyPath)
+	err = batch.execute(instances, privateKeyPath, ignoreFingerprint)
 	if err != nil {
 		p.Error(err)
 		os.Exit(1)

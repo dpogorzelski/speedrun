@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"net"
 	"os/user"
 	"strings"
 	"sync"
@@ -10,9 +11,14 @@ import (
 	"github.com/alitto/pond"
 	"github.com/fatih/color"
 	"github.com/melbahja/goph"
+	"golang.org/x/crypto/ssh"
 	"google.golang.org/api/compute/v1"
 )
 
+// type run struct {
+// 	targets map[string]string
+// 	command string
+// }
 type roll struct {
 	sync.Mutex
 	errors    map[string]error
@@ -35,7 +41,7 @@ func newRoll(command string, timeout time.Duration) *roll {
 }
 
 // Execute runs agiven command on servers in the addresses list
-func (r *roll) execute(instances []*compute.Instance, key string) error {
+func (r *roll) execute(instances []*compute.Instance, key string, ignoreFingerprint bool) error {
 	user, err := user.Current()
 	if err != nil {
 		return err
@@ -51,14 +57,25 @@ func (r *roll) execute(instances []*compute.Instance, key string) error {
 		return err
 	}
 
+	cb := VerifyHost
+	if ignoreFingerprint {
+		cb = ssh.InsecureIgnoreHostKey()
+	}
+
 	pool := pond.New(100, 0)
 
 	for k, v := range instanceDict {
 		addr := k
 		host := v
 		pool.Submit(func() {
-			client, err := goph.NewUnknown(user.Username, addr, auth)
-			client.Config.Timeout = r.timeout
+			client, err := goph.NewConn(&goph.Config{
+				User:     user.Username,
+				Addr:     addr,
+				Port:     22,
+				Auth:     auth,
+				Callback: cb,
+				Timeout:  r.timeout,
+			})
 			if err != nil {
 				r.Lock()
 				r.errors[host] = err
@@ -66,6 +83,7 @@ func (r *roll) execute(instances []*compute.Instance, key string) error {
 				return
 			}
 			defer client.Close()
+
 			out, err := client.Run(r.command)
 			if err != nil {
 				r.Lock()
@@ -81,6 +99,21 @@ func (r *roll) execute(instances []*compute.Instance, key string) error {
 	pool.StopAndWait()
 
 	return nil
+}
+
+// VerifyHost chekcks that the remote host's fingerprint matches the know one to avoid MITM.
+// If the host is new the fingerprint is added to known hostss file
+func VerifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
+	hostFound, err := goph.CheckKnownHost(host, remote, key, "")
+	if hostFound && err != nil {
+		return err
+	}
+
+	if hostFound && err == nil {
+		return nil
+	}
+
+	return goph.AddKnownHost(host, remote, key, "")
 }
 
 // PrintResult prints the results of the ssh command run

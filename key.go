@@ -16,53 +16,6 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
-// type key struct {
-// 	privatekey []byte
-// }
-
-// func newkey() (key, error) {
-// 	key := new(key)
-
-// 	return key, nil
-// }
-
-// func (k *key) create(ctx *cli.Context) error {
-// 	_, privKey, err := ed25519.GenerateKey(rand.Reader)
-// 	if err != nil {
-// 		return cli.Exit(err, 1)
-// 	}
-
-// 	pemBlock := &pem.Block{}
-// 	pemBlock.Type = "PRIVATE KEY"
-// 	pemBlock.Bytes, err = x509.MarshalPKCS8PrivateKey(privKey)
-// 	if err != nil {
-// 		return cli.Exit(err, 1)
-// 	}
-
-// 	privateKey := pem.EncodeToMemory(pemBlock)
-
-// 	err = writeKeyFile(privateKey)
-// 	if err != nil {
-// 		return cli.Exit(err, 1)
-// 	}
-
-// 	fmt.Println("generated new ssh key")
-// 	return nil
-// }
-
-// func (k *key) writeToFile() error {
-// 	privateKeyPath, err := determineKeyFilePath()
-// 	if err != nil {
-// 		return err
-// 	}
-
-// 	err = ioutil.WriteFile(privateKeyPath, k.privatekey, 0600)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func determineKeyFilePath() (string, error) {
 	home, err := homedir.Dir()
 	if err != nil {
