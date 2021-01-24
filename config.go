@@ -23,7 +23,7 @@ type gcpConfig struct {
 func initialize(ctx *cli.Context) error {
 	err := createConfig()
 	if err != nil {
-		return cli.Exit(err, 1)
+		return err
 	}
 
 	return nil
@@ -42,13 +42,13 @@ func loadConfig(configDir string) error {
 	return nil
 }
 
-func configPath() string {
+func configDir() (string, error) {
 	home, err := homedir.Dir()
 	if err != nil {
-		cli.Exit(err, 1)
+		return "", err
 	}
 
-	return filepath.Join(home, ".config", "speedrun", "config.toml")
+	return filepath.Join(home, ".config", "speedrun"), nil
 }
 
 func createConfig() error {
@@ -64,17 +64,17 @@ func createConfig() error {
 		return err
 	}
 
-	home, err := homedir.Dir()
+	dir, err := configDir()
 	if err != nil {
 		return err
 	}
 
-	path := filepath.Join(home, ".config", "speedrun", "config.toml")
-	if _, err := os.Stat(filepath.Join(home, ".config", "speedrun")); os.IsNotExist(err) {
-		os.Mkdir(filepath.Join(home, ".config", "speedrun"), 0700)
+	file := filepath.Join(dir, "config.toml")
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.Mkdir(dir, 0700)
 	}
 
-	f, err := os.Create(path)
+	f, err := os.Create(file)
 	if err != nil {
 		return err
 	}
@@ -91,13 +91,8 @@ func createConfig() error {
 }
 
 func configInitialized(c *cli.Context) error {
-	home, err := homedir.Dir()
+	configDir, err := configDir()
 	if err != nil {
-		return err
-	}
-
-	configDir := filepath.Join(home, ".config", "speedrun")
-	if _, err := os.Stat(configDir); os.IsNotExist(err) {
 		return cli.Exit(fmt.Errorf("Try running 'speedrun init' first"), 1)
 	}
 
