@@ -70,7 +70,7 @@ func (c *Config) Create(ctx *cli.Context) error {
 
 	dir := filepath.Join(home, ".speedrun")
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0755)
+		os.Mkdir(dir, os.ModeDir)
 	}
 
 	err = viper.WriteConfig()
