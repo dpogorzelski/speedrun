@@ -21,7 +21,7 @@ func determineKeyFilePath() (string, error) {
 		return "", err
 	}
 
-	path := filepath.Join(home, ".config/speedrun/privatekey")
+	path := filepath.Join(home, ".speedrun/privatekey")
 	return path, nil
 }
 
