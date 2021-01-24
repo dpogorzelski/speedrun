@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"os"
+	"path/filepath"
 
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pelletier/go-toml"
 	"github.com/spf13/viper"
 	"github.com/tcnksm/go-input"
@@ -61,11 +63,17 @@ func (c *Config) Create(ctx *cli.Context) error {
 	b, err := toml.Marshal(c)
 	viper.ReadConfig(bytes.NewBuffer(b))
 
-	if _, err := os.Stat(path); os.IsNotExist(err) {
-		os.Mkdir(path, mode)
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
 	}
 
-	err = viper.WriteConfigAs("/Users/dpogorzelski/.speedrun/config.toml")
+	dir := filepath.Join(home, ".speedrun")
+	if _, err := os.Stat(dir); os.IsNotExist(err) {
+		os.Mkdir(dir, 0755)
+	}
+
+	err = viper.WriteConfig()
 	if err != nil {
 		return err
 	}
