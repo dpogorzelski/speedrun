@@ -7,9 +7,9 @@ import (
 
 	"github.com/BurntSushi/toml"
 	homedir "github.com/mitchellh/go-homedir"
+	"github.com/spf13/viper"
 	"github.com/tcnksm/go-input"
 	"github.com/urfave/cli/v2"
-	"github.com/urfave/cli/v2/altsrc"
 )
 
 type config struct {
@@ -29,25 +29,18 @@ func initialize(ctx *cli.Context) error {
 	return nil
 }
 
-// func loadConfig(ctx *cli.Context) error {
-// 	home, err := homedir.Dir()
-// 	if err != nil {
-// 		cli.Exit(err, 1)
-// 	}
+func loadConfig(configDir string) error {
+	viper.SetConfigName("config.toml")
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(configDir)
 
-// 	configDir := filepath.Join(home, ".config", "speedrun")
-// 	viper.SetConfigName("config.toml")
-// 	viper.SetConfigType("toml")
-// 	viper.AddConfigPath(configDir)
+	err := viper.ReadInConfig()
+	if err != nil {
+		return err
+	}
 
-// 	err = viper.ReadInConfig()
-// 	if err != nil {
-// 		cli.Exit(err, 1)
-// 	}
-
-// 	return nil
-// 	// setUpLogs(viper.GetString("verbosity"))
-// }
+	return nil
+}
 
 func configPath() string {
 	home, err := homedir.Dir()
@@ -108,11 +101,5 @@ func configInitialized(c *cli.Context) error {
 		return cli.Exit(fmt.Errorf("Try running 'speedrun init' first"), 1)
 	}
 
-	configFile := filepath.Join(configDir, "config.toml")
-	inputSource, err := altsrc.NewTomlSourceFromFile(configFile)
-	if err != nil {
-		return err
-	}
-
-	return altsrc.ApplyInputSourceValues(c, inputSource, c.Command.Flags)
+	return loadConfig(configDir)
 }

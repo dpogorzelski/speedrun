@@ -5,7 +5,6 @@ import (
 	"os"
 
 	"github.com/urfave/cli/v2"
-	"github.com/urfave/cli/v2/altsrc"
 )
 
 func main() {
@@ -20,9 +19,9 @@ func main() {
 		Usage: "Runs a command on remote servers",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "filter", Usage: "gcloud resource filter"},
-			altsrc.NewBoolFlag(&cli.BoolFlag{Name: "only-failures", Usage: "print only failures and errors"}),
+			&cli.BoolFlag{Name: "only-failures", Usage: "print only failures and errors"},
 			&cli.BoolFlag{Name: "private-ip", Usage: "connect to private IPs instead of public ones"},
-			altsrc.NewBoolFlag(&cli.BoolFlag{Name: "ignore-fingerprint", Usage: "ignore host's fingerprint mismatch"}),
+			&cli.BoolFlag{Name: "ignore-fingerprint", Usage: "ignore host's fingerprint mismatch"},
 		},
 		Before: configInitialized,
 		Action: run,
@@ -60,18 +59,10 @@ func main() {
 		},
 	}
 
-	appFlags := []cli.Flag{
-		&cli.StringFlag{
-			Name:  "config",
-			Usage: "The location of the speedrun config file",
-			Value: configPath(),
-		},
-	}
-
 	app := &cli.App{
-		Name:   "speedrun",
-		Before: altsrc.InitInputSourceWithContext(appFlags, altsrc.NewTomlSourceFromFlagFunc("config")),
-		Flags:  appFlags,
+		Name:      "speedrun",
+		Usage:     "Cloud first command execution",
+		UsageText: "speedrun command [subcommand]",
 		Commands: []*cli.Command{
 			init,
 			run,
