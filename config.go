@@ -1,62 +1,56 @@
 package main
 
 import (
-	"fmt"
+	"bytes"
 	"os"
-	"path/filepath"
 
-	"github.com/BurntSushi/toml"
-	homedir "github.com/mitchellh/go-homedir"
+	"github.com/pelletier/go-toml"
 	"github.com/spf13/viper"
 	"github.com/tcnksm/go-input"
 	"github.com/urfave/cli/v2"
 )
 
-type config struct {
-	Gcp gcpConfig `toml:"gcp"`
+// Config type holds the configuration struct
+type Config struct {
+	Gcp gcpConfig
 }
 
 type gcpConfig struct {
-	ProjectID string `toml:"projectid"`
+	ProjectID string
 }
 
-func initialize(ctx *cli.Context) error {
-	err := createConfig()
-	if err != nil {
-		return err
-	}
+// NewConfig initializes viper
+func NewConfig() (*Config, error) {
+	c := &Config{}
 
-	return nil
-}
-
-func loadConfig(configDir string) error {
-	viper.SetConfigName("config.toml")
+	viper.SetConfigName("config")
 	viper.SetConfigType("toml")
-	viper.AddConfigPath(configDir)
+	viper.AddConfigPath("$HOME/.speedrun")
 
+	return c, nil
+}
+
+// Read will read the config file if exists and unmarshal it to the Config type
+func (c *Config) Read(ctx *cli.Context) error {
 	err := viper.ReadInConfig()
 	if err != nil {
 		return err
 	}
 
+	err = viper.Unmarshal(&c)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
-func configDir() (string, error) {
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-
-	return filepath.Join(home, ".config", "speedrun"), nil
-}
-
-func createConfig() error {
+// Create will create a new config file if it doesn't exist
+func (c *Config) Create(ctx *cli.Context) error {
 	var err error
 	ui := &input.UI{}
-	config := &config{Gcp: gcpConfig{}}
 
-	config.Gcp.ProjectID, err = ui.Ask("Google Cloud project ID?", &input.Options{
+	c.Gcp.ProjectID, err = ui.Ask("Google Cloud project ID?", &input.Options{
 		Required: true,
 		Loop:     true,
 	})
@@ -64,37 +58,16 @@ func createConfig() error {
 		return err
 	}
 
-	dir, err := configDir()
+	b, err := toml.Marshal(c)
+	viper.ReadConfig(bytes.NewBuffer(b))
+
+	if _, err := os.Stat(path); os.IsNotExist(err) {
+		os.Mkdir(path, mode)
+	}
+
+	err = viper.WriteConfigAs("/Users/dpogorzelski/.speedrun/config.toml")
 	if err != nil {
 		return err
 	}
-
-	file := filepath.Join(dir, "config.toml")
-	if _, err := os.Stat(dir); os.IsNotExist(err) {
-		os.Mkdir(dir, 0700)
-	}
-
-	f, err := os.Create(file)
-	if err != nil {
-		return err
-	}
-
-	if err := toml.NewEncoder(f).Encode(config); err != nil {
-		return err
-	}
-
-	if err := f.Close(); err != nil {
-		return err
-	}
-
 	return nil
-}
-
-func configInitialized(c *cli.Context) error {
-	configDir, err := configDir()
-	if err != nil {
-		return cli.Exit(fmt.Errorf("Try running 'speedrun init' first"), 1)
-	}
-
-	return loadConfig(configDir)
 }

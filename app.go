@@ -7,11 +7,19 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+var config *Config
+
 func main() {
+	var err error
+	config, err = NewConfig()
+	if err != nil {
+		cli.Exit(err, 1)
+	}
+
 	init := &cli.Command{
 		Name:   "init",
 		Usage:  "Initialize speedrun",
-		Action: initialize,
+		Action: config.Create,
 	}
 
 	run := &cli.Command{
@@ -23,7 +31,7 @@ func main() {
 			&cli.BoolFlag{Name: "private-ip", Usage: "connect to private IPs instead of public ones"},
 			&cli.BoolFlag{Name: "ignore-fingerprint", Usage: "ignore host's fingerprint mismatch"},
 		},
-		Before: configInitialized,
+		Before: config.Read,
 		Action: run,
 		UsageText: "speedrun run [command options] <command to send>\n\n" +
 			"EXAMPLES:\n" +
@@ -38,13 +46,13 @@ func main() {
 			{
 				Name:   "new",
 				Usage:  "Create a new ssh key",
-				Before: configInitialized,
+				Before: config.Read,
 				Action: createKey,
 			},
 			{
 				Name:   "show",
 				Usage:  "Show current ssh key",
-				Before: configInitialized,
+				Before: config.Read,
 				Action: showKey,
 			},
 			{
@@ -53,7 +61,7 @@ func main() {
 				Flags: []cli.Flag{
 					&cli.StringFlag{Name: "filter", Usage: "gcloud resource filter"},
 				},
-				Before: configInitialized,
+				Before: config.Read,
 				Action: setKey,
 			},
 		},
@@ -70,7 +78,7 @@ func main() {
 		},
 	}
 
-	err := app.Run(os.Args)
+	err = app.Run(os.Args)
 	if err != nil {
 		log.Fatal(err)
 	}

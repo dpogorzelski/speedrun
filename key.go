@@ -11,7 +11,6 @@ import (
 
 	"github.com/alitto/pond"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh"
 )
@@ -102,9 +101,7 @@ func showKey(c *cli.Context) error {
 }
 
 func setKey(c *cli.Context) error {
-	project := viper.GetString("gcp.projectid")
-
-	client, err := NewComputeClient(project)
+	client, err := NewComputeClient(config.Gcp.ProjectID)
 	if err != nil {
 		return cli.Exit(err, 1)
 	}
