@@ -27,11 +27,12 @@ require (
 	github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8
 	github.com/urfave/cli/v2 v2.3.0
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
+	golang.org/x/net v0.0.0-20210119194325-5f4716e94777 // indirect
 	golang.org/x/oauth2 v0.0.0-20210113205817-d3ed898aa8a3 // indirect
-	golang.org/x/sys v0.0.0-20210113181707-4bcb84eeeb78 // indirect
+	golang.org/x/sys v0.0.0-20210123111255-9b0068b26619 // indirect
 	golang.org/x/text v0.3.5 // indirect
 	google.golang.org/api v0.36.0
-	google.golang.org/genproto v0.0.0-20210113195801-ae06605f4595 // indirect
+	google.golang.org/genproto v0.0.0-20210122163508-8081c04a3579 // indirect
 	google.golang.org/grpc v1.35.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect

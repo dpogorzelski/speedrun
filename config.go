@@ -7,7 +7,6 @@ import (
 
 	"github.com/BurntSushi/toml"
 	homedir "github.com/mitchellh/go-homedir"
-	"github.com/spf13/viper"
 	"github.com/tcnksm/go-input"
 	"github.com/urfave/cli/v2"
 	"github.com/urfave/cli/v2/altsrc"
@@ -30,25 +29,25 @@ func initialize(ctx *cli.Context) error {
 	return nil
 }
 
-func loadConfig(ctx *cli.Context) error {
-	home, err := homedir.Dir()
-	if err != nil {
-		cli.Exit(err, 1)
-	}
+// func loadConfig(ctx *cli.Context) error {
+// 	home, err := homedir.Dir()
+// 	if err != nil {
+// 		cli.Exit(err, 1)
+// 	}
 
-	configDir := filepath.Join(home, ".config", "speedrun")
-	viper.SetConfigName("config.toml")
-	viper.SetConfigType("toml")
-	viper.AddConfigPath(configDir)
+// 	configDir := filepath.Join(home, ".config", "speedrun")
+// 	viper.SetConfigName("config.toml")
+// 	viper.SetConfigType("toml")
+// 	viper.AddConfigPath(configDir)
 
-	err = viper.ReadInConfig()
-	if err != nil {
-		cli.Exit(err, 1)
-	}
+// 	err = viper.ReadInConfig()
+// 	if err != nil {
+// 		cli.Exit(err, 1)
+// 	}
 
-	return nil
-	// setUpLogs(viper.GetString("verbosity"))
-}
+// 	return nil
+// 	// setUpLogs(viper.GetString("verbosity"))
+// }
 
 func configPath() string {
 	home, err := homedir.Dir()

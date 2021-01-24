@@ -10,10 +10,10 @@ import (
 )
 
 func run(c *cli.Context) error {
-	if c.Args().Len() < 1 {
+	if !c.Args().Present() {
 		return cli.Exit("missing required command arguments", 1)
 	}
-	project := c.String("[gcp]projectid")
+	project := c.String("gcp.projectid")
 
 	client, err := NewComputeClient(project)
 	if err != nil {

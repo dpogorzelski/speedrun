@@ -69,11 +69,7 @@ func main() {
 	}
 
 	app := &cli.App{
-		Name: "speedrun",
-		Authors: []*cli.Author{{
-			Name:  "Dawid Pogorzelski",
-			Email: "dawid@pogorzelski.dev",
-		}},
+		Name:   "speedrun",
 		Before: altsrc.InitInputSourceWithContext(appFlags, altsrc.NewTomlSourceFromFlagFunc("config")),
 		Flags:  appFlags,
 		Commands: []*cli.Command{
