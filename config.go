@@ -69,11 +69,13 @@ func (c *Config) Create(ctx *cli.Context) error {
 	}
 
 	dir := filepath.Join(home, ".speedrun")
+	path := filepath.Join(dir, "config.toml")
+
 	if _, err := os.Stat(dir); os.IsNotExist(err) {
 		os.Mkdir(dir, os.ModeDir)
 	}
 
-	err = viper.WriteConfig()
+	err = viper.WriteConfigAs(path)
 	if err != nil {
 		return err
 	}
