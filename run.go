@@ -14,7 +14,7 @@ func run(c *cli.Context) error {
 		return cli.Exit("missing required command arguments", 1)
 	}
 
-	client, err := NewComputeClient(config.Gcp.ProjectID)
+	client, err := NewComputeClient(config.Gcp.Projectid)
 	if err != nil {
 		return cli.Exit(err, 1)
 	}

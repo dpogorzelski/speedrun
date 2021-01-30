@@ -14,11 +14,9 @@ import (
 
 // Config type holds the configuration struct
 type Config struct {
-	Gcp gcpConfig
-}
-
-type gcpConfig struct {
-	ProjectID string
+	Gcp struct {
+		Projectid string
+	}
 }
 
 // NewConfig initializes viper
@@ -52,7 +50,7 @@ func (c *Config) Create(ctx *cli.Context) error {
 	var err error
 	ui := &input.UI{}
 
-	c.Gcp.ProjectID, err = ui.Ask("Google Cloud project ID?", &input.Options{
+	c.Gcp.Projectid, err = ui.Ask("Google Cloud project ID?", &input.Options{
 		Required: true,
 		Loop:     true,
 	})

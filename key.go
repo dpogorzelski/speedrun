@@ -101,7 +101,7 @@ func showKey(c *cli.Context) error {
 }
 
 func setKey(c *cli.Context) error {
-	client, err := NewComputeClient(config.Gcp.ProjectID)
+	client, err := NewComputeClient(config.Gcp.Projectid)
 	if err != nil {
 		return cli.Exit(err, 1)
 	}
