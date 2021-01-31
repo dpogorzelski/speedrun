@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/fatih/color"
@@ -14,6 +15,7 @@ func run(c *cli.Context) error {
 		// cli.ShowCommandHelpAndExit(c, "run", 1)
 		return cli.Exit("you need to provide a command to run", 1)
 	}
+	cmd := strings.Join(c.Args().Slice(), " ")
 
 	client, err := NewComputeClient(config.Gcp.Projectid)
 	if err != nil {
@@ -40,13 +42,13 @@ func run(c *cli.Context) error {
 	}
 	p.Stop()
 
-	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(c.Args().First())))
+	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(cmd)))
 	timeout, err := time.ParseDuration("10s")
 	if err != nil {
 		return err
 	}
 
-	batch := newRoll(c.Args().First(), timeout)
+	batch := newRoll(cmd, timeout)
 	err = batch.execute(instances, privateKeyPath, ignoreFingerprint)
 	if err != nil {
 		p.Error(err)

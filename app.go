@@ -33,10 +33,10 @@ func main() {
 		},
 		Before: config.Read,
 		Action: run,
-		UsageText: "speedrun run [command options] <command to send>\n\n" +
+		UsageText: "speedrun run [command options] -- <command to run>\n\n" +
 			"EXAMPLES:\n" +
-			"   speedrun run \"uname -r\"\n" +
-			"   speedrun run --only-failures --filter \"labels.foo = bar AND labels.environment = staging\" \"uname -r\"",
+			"   speedrun run -- uname -r\n" +
+			"   speedrun run --only-failures --filter \"labels.foo = bar AND labels.environment = staging\" -- uname -r",
 	}
 
 	key := &cli.Command{
