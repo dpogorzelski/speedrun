@@ -1,6 +1,6 @@
 # Speedrun
 
-Speedrun is a small utility to exectue commands remotely at scale
+Speedrun is a cloud first command execution utility
 
 ## Installation
 
@@ -18,7 +18,7 @@ export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
 speedrun init
 speedrun key new
 speedrun key set
-speedrun run "whoami"
+speedrun run whoami
 ```
 
 ## Contributing
