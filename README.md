@@ -16,6 +16,8 @@ mv speedrun /usr/local/bin
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
 speedrun init
+speedrun key new
+speedrun key set
 speedrun run "whoami"
 ```
 
