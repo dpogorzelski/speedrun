@@ -50,7 +50,7 @@ func (c *Config) Create(ctx *cli.Context) error {
 	var err error
 	ui := &input.UI{}
 
-	c.Gcp.Projectid, err = ui.Ask("Google Cloud project ID?", &input.Options{
+	c.Gcp.Projectid, err = ui.Ask("Google Cloud project id?", &input.Options{
 		Required: true,
 		Loop:     true,
 	})
