@@ -11,7 +11,8 @@ import (
 
 func run(c *cli.Context) error {
 	if !c.Args().Present() {
-		return cli.Exit("missing required command arguments", 1)
+		// cli.ShowCommandHelpAndExit(c, "run", 1)
+		return cli.Exit("you need to provide a command to run", 1)
 	}
 
 	client, err := NewComputeClient(config.Gcp.Projectid)
