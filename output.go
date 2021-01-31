@@ -1,9 +1,6 @@
-package utils
+package main
 
 import (
-	"fmt"
-	"os"
-
 	"github.com/fatih/color"
 )
 
@@ -17,10 +14,4 @@ func yellow(s string) string {
 
 func red(s string) string {
 	return color.RedString(s)
-}
-
-// Error is a shortcut function that prints the error message and exits
-func Error(msg string) {
-	fmt.Println(msg)
-	os.Exit(1)
 }

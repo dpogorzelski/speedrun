@@ -1,4 +1,4 @@
-package gcp
+package main
 
 import (
 	"fmt"
@@ -6,7 +6,6 @@ import (
 	"os/user"
 	"sort"
 	"strings"
-	"sync"
 
 	"golang.org/x/crypto/ssh"
 	"google.golang.org/api/compute/v1"
@@ -56,8 +55,7 @@ func (c *ComputeClient) UpdateProjectMetadata(pubKey ssh.PublicKey) error {
 }
 
 // UpdateInstanceMetadata adds ssh public key to the intsance metadata
-func (c *ComputeClient) UpdateInstanceMetadata(wg *sync.WaitGroup, instance *compute.Instance, pubKey ssh.PublicKey) error {
-	defer wg.Done()
+func (c *ComputeClient) UpdateInstanceMetadata(instance *compute.Instance, pubKey ssh.PublicKey) error {
 	authorizedKey, err := formatPubKey(pubKey)
 	if err != nil {
 		return fmt.Errorf("%s failed to update metadata: ", err)

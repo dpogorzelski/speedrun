@@ -1,4 +1,4 @@
-package gcp
+package main
 
 import (
 	"fmt"
@@ -21,7 +21,7 @@ func getAddress() string {
 	return string(body)
 }
 
-func (c *ComputeClient) GetFirewallRules() error {
+func (c *ComputeClient) getFirewallRules() error {
 	a, err := c.Firewalls.Get(c.Project, "morning-mgmt-to-backend").Do()
 	if err != nil {
 		return err

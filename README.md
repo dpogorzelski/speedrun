@@ -1,6 +1,6 @@
 # Speedrun
 
-Speedrun is a small utility to exectue commands remotely at scale
+Speedrun is a cloud first command execution utility
 
 ## Installation
 
@@ -16,7 +16,9 @@ mv speedrun /usr/local/bin
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
 speedrun init
-speedrun run "whoami"
+speedrun key new
+speedrun key set
+speedrun run whoami
 ```
 
 ## Contributing

@@ -1,4 +1,4 @@
-package gcp
+package main
 
 import (
 	"google.golang.org/api/compute/v1"
