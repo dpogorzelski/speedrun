@@ -29,7 +29,8 @@ require (
 	go.opencensus.io v0.22.6 // indirect
 	golang.org/x/crypto v0.0.0-20201221181555-eec23a3978ad
 	golang.org/x/oauth2 v0.0.0-20210201163806-010130855d6c // indirect
-	google.golang.org/api v0.38.0
+	google.golang.org/api v0.39.0
+	google.golang.org/genproto v0.0.0-20210204154452-deb828366460 // indirect
 	gopkg.in/check.v1 v1.0.0-20201130134442-10cb98267c6c // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
