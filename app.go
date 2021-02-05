@@ -50,12 +50,6 @@ func main() {
 				Action: createKey,
 			},
 			{
-				Name:   "show",
-				Usage:  "Show current ssh key",
-				Before: config.Read,
-				Action: showKey,
-			},
-			{
 				Name:  "set",
 				Usage: "Set key in the project's metadata",
 				Flags: []cli.Flag{

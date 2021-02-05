@@ -95,11 +95,6 @@ func readKeyFile(path string) ([]byte, error) {
 	return file, nil
 }
 
-func showKey(c *cli.Context) error {
-	fmt.Println("showing private key")
-	return nil
-}
-
 func setKey(c *cli.Context) error {
 	client, err := NewComputeClient(config.Gcp.Projectid)
 	if err != nil {
