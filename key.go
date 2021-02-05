@@ -26,26 +26,28 @@ func determineKeyFilePath() (string, error) {
 }
 
 func createKey(c *cli.Context) error {
+	p := NewProgress()
+	p.Start("Generating new private key")
 	_, privKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
-		return cli.Exit(err, 1)
+		p.Error(err)
 	}
 
 	pemBlock := &pem.Block{}
 	pemBlock.Type = "PRIVATE KEY"
 	pemBlock.Bytes, err = x509.MarshalPKCS8PrivateKey(privKey)
 	if err != nil {
-		return cli.Exit(err, 1)
+		p.Error(err)
 	}
 
 	privateKey := pem.EncodeToMemory(pemBlock)
 
 	err = writeKeyFile(privateKey)
 	if err != nil {
-		return cli.Exit(err, 1)
+		p.Error(err)
 	}
 
-	fmt.Println("generated new ssh key")
+	p.Stop()
 	return nil
 }
 
