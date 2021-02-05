@@ -25,7 +25,7 @@ func NewProgress() *Progress {
 
 // Start sets the default "success" condition tag that will be displayed when the spinner is stopped
 func (o *Progress) Start(msg string) {
-	tag := green("")
+	tag := green("✓")
 	o.spinner.Suffix = " " + msg
 	o.spinner.FinalMSG = fmt.Sprintf("%s %s\n", tag, msg)
 	o.spinner.Start()
@@ -38,14 +38,14 @@ func (o *Progress) Stop() {
 
 // Failure changes the spinner tag to the one associated with "failure" conditions and exits
 func (o *Progress) Failure(msg string) {
-	tag := yellow("")
+	tag := yellow("-")
 	o.spinner.FinalMSG = fmt.Sprintf("%s%s: %s\n", tag, o.spinner.Suffix, msg)
 	o.spinner.Stop()
 	os.Exit(0)
 }
 
 func (o *Progress) Error(err error) {
-	tag := red("")
+	tag := red("X")
 	o.spinner.FinalMSG = fmt.Sprintf("%s%s: %s\n", tag, o.spinner.Suffix, err)
 	o.spinner.Stop()
 }
