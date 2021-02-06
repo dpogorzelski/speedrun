@@ -111,23 +111,21 @@ func setKey(c *cli.Context) error {
 		return cli.Exit(err, 1)
 	}
 
-	p := NewProgress()
-	p.Start("Setting public key in the project metadata")
+	log.Info("Setting public key in the project metadata")
 	err = client.UpdateProjectMetadata(pubKey)
 	if err != nil {
-		p.Error(err)
+		return err
 	}
-	p.Stop()
 
 	filter := c.String("filter")
-	p.Start("Setting public key in the instance metadata")
+	log.Info("Setting public key in the instance metadata")
 	instances, err := client.GetInstances(filter)
 	if err != nil {
-		p.Error(err)
+		return err
 	}
 
 	if len(instances) == 0 {
-		p.Failure("no instances found")
+		log.Warn("no instances found")
 	}
 
 	pool := pond.New(10, 0, pond.MinWorkers(10))
@@ -139,6 +137,5 @@ func setKey(c *cli.Context) error {
 	}
 
 	pool.StopAndWait()
-	p.Stop()
 	return nil
 }

@@ -2,10 +2,10 @@ package main
 
 import (
 	"fmt"
-	"os"
 	"strings"
 	"time"
 
+	"github.com/apex/log"
 	"github.com/fatih/color"
 	"github.com/urfave/cli/v2"
 )
@@ -31,18 +31,17 @@ func run(c *cli.Context) error {
 		return err
 	}
 
-	p := NewProgress()
-	p.Start("Fetching list of GCE instances")
+	log.Info("Fetching list of GCE instances")
 	instances, err := client.GetInstances(filter)
 	if err != nil {
-		p.Error(err)
+		return err
 	}
 	if len(instances) == 0 {
-		p.Failure("no instances found")
+		log.Warn("No instances found")
+		return nil
 	}
-	p.Stop()
 
-	p.Start(fmt.Sprintf("Running [%s]", color.BlueString(cmd)))
+	log.Info(fmt.Sprintf("Running [%s]", color.BlueString(cmd)))
 	timeout, err := time.ParseDuration("10s")
 	if err != nil {
 		return err
@@ -51,10 +50,8 @@ func run(c *cli.Context) error {
 	batch := newRoll(cmd, timeout)
 	err = batch.execute(instances, privateKeyPath, ignoreFingerprint)
 	if err != nil {
-		p.Error(err)
-		os.Exit(1)
+		return err
 	}
-	p.Stop()
 
 	batch.printResult(onlyFailures)
 	return nil
