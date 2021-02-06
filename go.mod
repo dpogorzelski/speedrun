@@ -6,7 +6,6 @@ require (
 	cloud.google.com/go v0.76.0 // indirect
 	github.com/alitto/pond v1.5.0
 	github.com/apex/log v1.9.0
-	github.com/briandowns/spinner v1.12.0
 	github.com/cpuguy83/go-md2man/v2 v2.0.0 // indirect
 	github.com/fatih/color v1.10.0
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
