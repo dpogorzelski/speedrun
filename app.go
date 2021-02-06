@@ -1,19 +1,22 @@
 package main
 
 import (
-	"log"
 	"os"
 
+	"github.com/apex/log"
+	clilog "github.com/apex/log/handlers/cli"
 	"github.com/urfave/cli/v2"
 )
 
 var config *Config
 
 func main() {
+	log.SetHandler(clilog.New(os.Stdout))
+
 	var err error
 	config, err = NewConfig()
 	if err != nil {
-		cli.Exit(err, 1)
+		log.Fatal(err.Error())
 	}
 
 	init := &cli.Command{
@@ -65,6 +68,9 @@ func main() {
 		Name:      "speedrun",
 		Usage:     "Cloud first command execution",
 		UsageText: "speedrun command [subcommand]",
+		Flags: []cli.Flag{
+			&cli.StringFlag{Name: "verbosity", Aliases: []string{"v"}, Destination: &config.LogLevel, Usage: "output verbosity level"},
+		},
 		Commands: []*cli.Command{
 			init,
 			run,
@@ -74,6 +80,6 @@ func main() {
 
 	err = app.Run(os.Args)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err.Error())
 	}
 }

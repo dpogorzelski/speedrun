@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/apex/log"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/pelletier/go-toml"
 	"github.com/spf13/viper"
@@ -14,7 +15,8 @@ import (
 
 // Config type holds the configuration struct
 type Config struct {
-	Gcp struct {
+	LogLevel string
+	Gcp      struct {
 		Projectid string
 	}
 }
@@ -32,6 +34,7 @@ func NewConfig() (*Config, error) {
 
 // Read will read the config file if exists and unmarshal it to the Config type
 func (c *Config) Read(ctx *cli.Context) error {
+	v := ctx.String("verbosity")
 	err := viper.ReadInConfig()
 	if err != nil {
 		return err
@@ -40,6 +43,14 @@ func (c *Config) Read(ctx *cli.Context) error {
 	err = viper.Unmarshal(&c)
 	if err != nil {
 		return err
+	}
+
+	if c.LogLevel != "" {
+		log.SetLevelFromString(c.LogLevel)
+	}
+
+	if v != "" {
+		log.SetLevelFromString(v)
 	}
 
 	return nil

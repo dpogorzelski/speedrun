@@ -10,12 +10,14 @@ import (
 	"path/filepath"
 
 	"github.com/alitto/pond"
+	"github.com/apex/log"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/urfave/cli/v2"
 	"golang.org/x/crypto/ssh"
 )
 
 func determineKeyFilePath() (string, error) {
+	log.Debug("Determining private key path")
 	home, err := homedir.Dir()
 	if err != nil {
 		return "", err
@@ -26,28 +28,28 @@ func determineKeyFilePath() (string, error) {
 }
 
 func createKey(c *cli.Context) error {
-	p := NewProgress()
-	p.Start("Generating new private key")
+	log.Debug("Generating new private key")
 	_, privKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
-		p.Error(err)
+		return err
 	}
 
+	log.Debug("Converting private key to PKCS8 format")
 	pemBlock := &pem.Block{}
 	pemBlock.Type = "PRIVATE KEY"
 	pemBlock.Bytes, err = x509.MarshalPKCS8PrivateKey(privKey)
 	if err != nil {
-		p.Error(err)
+		return err
 	}
 
+	log.Debug("Encoding the key to PEM format")
 	privateKey := pem.EncodeToMemory(pemBlock)
 
 	err = writeKeyFile(privateKey)
 	if err != nil {
-		p.Error(err)
+		return err
 	}
 
-	p.Stop()
 	return nil
 }
 
@@ -57,6 +59,7 @@ func writeKeyFile(key []byte) error {
 		return err
 	}
 
+	log.Debugf("Writing priviate key to %s", privateKeyPath)
 	err = ioutil.WriteFile(privateKeyPath, key, 0600)
 	if err != nil {
 		return err

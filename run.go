@@ -13,7 +13,7 @@ import (
 func run(c *cli.Context) error {
 	if !c.Args().Present() {
 		// cli.ShowCommandHelpAndExit(c, "run", 1)
-		return cli.Exit("you need to provide a command to run", 1)
+		return fmt.Errorf("you need to provide a command to run")
 	}
 	cmd := strings.Join(c.Args().Slice(), " ")
 
