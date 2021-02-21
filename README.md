@@ -1,10 +1,12 @@
 # Speedrun
 
-Speedrun is a cloud first command execution utility
+Speedrun is a cloud first command execution utility. It's goal is to provide a simple way to perform command execution on remote servers with almost no setup. 
+
+Speedrun is agentless and leverages native 
 
 ## Installation
 
-Download the precompiled binary from here
+Download the precompiled binary from here:
 
 ```bash
 curl https://github.com/dawidpogorzelski/speedrun/releases/0.1.0/release
