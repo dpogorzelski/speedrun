@@ -8,7 +8,7 @@ Speedrun is a cloud first command execution utility. It's goal is to provide a s
 Download the precompiled binary from here:
 
 ```bash
-curl https://github.com/dawidpogorzelski/speedrun/releases/tag/0.1.0
+curl https://github.com/dpogorzelski/speedrun/releases/tag/0.1.0
 mv speedrun /usr/local/bin
 ```
 
