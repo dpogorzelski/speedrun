@@ -1,6 +1,15 @@
+![logo](docs/logo2.png)
+
 # Speedrun
 
-Speedrun is a cloud first command execution utility. It's goal is to provide a simple way to perform command execution on remote servers with almost no setup.
+Speedrun is a command execution utility. It's goal is to provide a simple way to perform command execution on a large amount of servers.
+
+Features:
+
+* native cloud integration (currently Google Cloud only, AWS and Azure coming up)
+* incredibly fast
+* stateless and agentless
+* no configuration required
 
 
 ## Installation
