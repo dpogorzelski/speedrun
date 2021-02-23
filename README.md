@@ -6,10 +6,10 @@ Speedrun is a command execution utility. It's goal is to provide a simple way to
 
 Features:
 
-* native cloud integration (currently Google Cloud only, AWS and Azure coming up)
+* native cloud integration (currently Google Cloud only, AWS and Azure coming up!)
 * incredibly fast
 * stateless and agentless
-* no configuration required
+* no complex configuration required
 
 
 ## Installation
@@ -30,6 +30,44 @@ speedrun key new
 speedrun key set
 speedrun run whoami
 ```
+
+## Examples
+
+Use 1000 concurrent SSH workers
+
+```bash
+speedrun run "uname -r" --concurrency 1000
+```
+
+Stop Nginx on VMs matching the filter
+
+```bash
+speedrun run sudo systemctl stop nginx --filter "labels.env=staging AND labels.app=foobar"
+```
+
+Ignore SSH fingerprint mismatch and connect via private IP addresses
+
+```bash
+speedrun run "ls -la" --filter "labels.env != prod" --ignore-fingerprint --concurrency 1000 -l debug --use-private-ip
+```
+
+Use a different config file
+
+```bash
+speedrun run -c /path/to/config.toml
+```
+
+Set public key on specific instances instead of project metadata (useful if instances are blocking project wide keys):
+
+```bash
+speedrun key set --filter "labels.env = dev"
+```
+
+
+
+## Configuration
+
+Using certain flags repeteadly can be annoying, it's possible to persist their behavior via config file. Default config is located at `~/.speedrun/config.toml` and can be re-initialized to it's default form via `speedrun init`.
 
 ## Contributing
 
