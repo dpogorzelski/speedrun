@@ -1,6 +1,9 @@
 <p align="center">
-  ![logo](docs/logo2.png)
+  <a rel="nofollow">
+    <img src="/docs/logo.png?raw=true" width="200" style="max-width:100%;">
+  </a>
 </p>
+
 # Speedrun
 
 Speedrun is a command execution utility. It's goal is to provide a simple way to perform command execution on a large amount of servers.
