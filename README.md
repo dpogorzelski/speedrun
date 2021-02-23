@@ -48,13 +48,13 @@ speedrun run sudo systemctl stop nginx --filter "labels.env=staging AND labels.a
 Ignore SSH fingerprint mismatch and connect via private IP addresses
 
 ```bash
-speedrun run "ls -la" --filter "labels.env != prod" --ignore-fingerprint --concurrency 1000 -l debug --use-private-ip
+speedrun run "ls -la" --filter "labels.env != prod" --ignore-fingerprint --concurrency 1000 --use-private-ip
 ```
 
 Use a different config file
 
 ```bash
-speedrun run -c /path/to/config.toml
+speedrun run whoami -c /path/to/config.toml
 ```
 
 Set public key on specific instances instead of project metadata (useful if instances are blocking project wide keys):
@@ -67,7 +67,7 @@ speedrun key set --filter "labels.env = dev"
 
 ## Configuration
 
-Using certain flags repeteadly can be annoying, it's possible to persist their behavior via config file. Default config is located at `~/.speedrun/config.toml` and can be re-initialized to it's default form via `speedrun init`.
+Using certain flags repeteadly can be annoying, it's possible to persist their behavior via config file. Default config file is located at `~/.speedrun/config.toml` and can be re-initialized to it's default form via `speedrun init`.
 
 ## Contributing
 

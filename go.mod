@@ -3,7 +3,7 @@ module speedrun
 go 1.16
 
 require (
-	cloud.google.com/go v0.77.0 // indirect
+	cloud.google.com/go v0.78.0 // indirect
 	github.com/alitto/pond v1.5.0
 	github.com/apex/log v1.9.0
 	github.com/fatih/color v1.10.0
@@ -21,11 +21,11 @@ require (
 	github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8
 	go.opencensus.io v0.22.6 // indirect
 	golang.org/x/crypto v0.0.0-20210220033148-5ea612d1eb83
-	golang.org/x/net v0.0.0-20210220033124-5f55cee0dc0d // indirect
+	golang.org/x/net v0.0.0-20210222171744-9060382bd457 // indirect
 	golang.org/x/oauth2 v0.0.0-20210220000619-9bb904979d93 // indirect
-	golang.org/x/sys v0.0.0-20210220050731-9a76102bfb43 // indirect
+	golang.org/x/sys v0.0.0-20210223095934-7937bea0104d // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	google.golang.org/api v0.40.0
-	google.golang.org/genproto v0.0.0-20210219173056-d891e3cb3b5b // indirect
+	google.golang.org/genproto v0.0.0-20210223151946-22b48be4551b // indirect
 	gopkg.in/ini.v1 v1.62.0 // indirect
 )

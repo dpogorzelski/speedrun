@@ -18,21 +18,23 @@ import (
 // Marathon represents the instance of the execution of a command against a number of target servers
 type Marathon struct {
 	sync.Mutex
-	errors    map[string]error
-	failures  map[string]string
-	successes map[string]string
-	Command   string
-	Timeout   time.Duration
+	errors      map[string]error
+	failures    map[string]string
+	successes   map[string]string
+	Command     string
+	Timeout     time.Duration
+	Concurrency int
 }
 
 // New creates a new instance of the Marathon type
-func New(command string, timeout time.Duration) *Marathon {
+func New(command string, timeout time.Duration, concurrency int) *Marathon {
 	r := Marathon{
-		errors:    make(map[string]error),
-		failures:  make(map[string]string),
-		successes: make(map[string]string),
-		Command:   command,
-		Timeout:   timeout,
+		errors:      make(map[string]error),
+		failures:    make(map[string]string),
+		successes:   make(map[string]string),
+		Command:     command,
+		Timeout:     timeout,
+		Concurrency: concurrency,
 	}
 
 	return &r
@@ -55,7 +57,7 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 		cb = ssh.InsecureIgnoreHostKey()
 	}
 
-	pool := pond.New(100, 0)
+	pool := pond.New(m.Concurrency, 10000)
 
 	for k, v := range instances {
 		addr := k
@@ -129,5 +131,5 @@ func (m *Marathon) PrintResult(failures bool) {
 	for host, msg := range m.errors {
 		fmt.Printf("  %s:\n    %s\n\n", colors.Red(host), output(msg.Error()))
 	}
-	fmt.Printf("%s: %d %s: %d %s: %d\n", colors.Green("Success"), len(m.successes), colors.Yellow("Failure"), len(m.failures), colors.Red("Error"), len(m.errors))
+	fmt.Printf("%s: %d\n%s: %d\n%s:   %d\n", colors.Green("Success"), len(m.successes), colors.Yellow("Failure"), len(m.failures), colors.Red("Error"), len(m.errors))
 }

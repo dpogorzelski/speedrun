@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"os"
+	"path"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -14,31 +14,29 @@ var cfgFile string
 func Execute() {
 	// cobra.OnInitialize(initConfig)
 	var rootCmd = &cobra.Command{
-		Use:   "speedrun",
-		Short: "Cloud first command execution",
+		Use:     "speedrun",
+		Short:   "Cloud first command execution",
+		Version: "0.1.0",
 	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(keyCmd)
 	rootCmd.AddCommand(runCmd)
 
-	rootCmd.PersistentFlags().StringVar(&cfgFile, "config", "", "config file (default is $HOME/.speedrun/config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "$HOME/.speedrun/config.toml", "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
 	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
 
 	if err := rootCmd.Execute(); err != nil {
-		os.Exit(1)
+		log.Fatal(err.Error())
 	}
 }
 
 func initConfig() {
-	if cfgFile != "" {
-		viper.SetConfigFile(cfgFile)
-	} else {
-		viper.SetConfigName("config")
-		viper.SetConfigType("toml")
-		viper.AddConfigPath("$HOME/.speedrun")
-	}
+	dir, file := path.Split(cfgFile)
+	viper.SetConfigName(file)
+	viper.SetConfigType("toml")
+	viper.AddConfigPath(dir)
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
