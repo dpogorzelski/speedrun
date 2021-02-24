@@ -117,7 +117,7 @@ golang.org/x/crypto/ssh/agent
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
 golang.org/x/crypto/ssh/knownhosts
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20210222171744-9060382bd457
+# golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
@@ -135,7 +135,7 @@ golang.org/x/oauth2/google/internal/externalaccount
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sys v0.0.0-20210223095934-7937bea0104d
+# golang.org/x/sys v0.0.0-20210223212115-eede4237b368
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
