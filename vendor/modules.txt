@@ -85,7 +85,7 @@ github.com/subosito/gotenv
 # github.com/tcnksm/go-input v0.0.0-20180404061846-548a7d7a8ee8
 ## explicit
 github.com/tcnksm/go-input
-# go.opencensus.io v0.22.6
+# go.opencensus.io v0.23.0
 ## explicit
 go.opencensus.io
 go.opencensus.io/internal
@@ -117,7 +117,7 @@ golang.org/x/crypto/ssh/agent
 golang.org/x/crypto/ssh/internal/bcrypt_pbkdf
 golang.org/x/crypto/ssh/knownhosts
 golang.org/x/crypto/ssh/terminal
-# golang.org/x/net v0.0.0-20210224082022-3d97a244fca7
+# golang.org/x/net v0.0.0-20210226172049-e18ecbb05110
 ## explicit
 golang.org/x/net/context
 golang.org/x/net/context/ctxhttp
@@ -135,7 +135,7 @@ golang.org/x/oauth2/google/internal/externalaccount
 golang.org/x/oauth2/internal
 golang.org/x/oauth2/jws
 golang.org/x/oauth2/jwt
-# golang.org/x/sys v0.0.0-20210223212115-eede4237b368
+# golang.org/x/sys v0.0.0-20210228012217-479acdf4ea46
 ## explicit
 golang.org/x/sys/cpu
 golang.org/x/sys/internal/unsafeheader
@@ -176,10 +176,11 @@ google.golang.org/appengine/internal/modules
 google.golang.org/appengine/internal/remote_api
 google.golang.org/appengine/internal/urlfetch
 google.golang.org/appengine/urlfetch
-# google.golang.org/genproto v0.0.0-20210223151946-22b48be4551b
+# google.golang.org/genproto v0.0.0-20210226172003-ab064af71705
 ## explicit
 google.golang.org/genproto/googleapis/rpc/status
-# google.golang.org/grpc v1.35.0
+# google.golang.org/grpc v1.36.0
+## explicit
 google.golang.org/grpc
 google.golang.org/grpc/attributes
 google.golang.org/grpc/backoff
