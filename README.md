@@ -8,6 +8,7 @@
 # Speedrun
 [![license](https://img.shields.io/badge/license-MPL2-blue.svg)](https://github.com/dpogorzelski/speedrun/blob/master/LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dpogorzelski/speedrun)](https://goreportcard.com/report/github.com/dpogorzelski/speedrun)
+<img src="https://github.com/dpogorzelski/speedrun/workflows/Go/badge.svg?branch=master" alt="Go tests status" /></a>
 
 Speedrun executes commands, at scale.
 
