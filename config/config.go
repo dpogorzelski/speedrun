@@ -72,5 +72,6 @@ func Create() error {
 	if err != nil {
 		return err
 	}
+	log.Infof("Your config was saved at: %s", path)
 	return nil
 }
