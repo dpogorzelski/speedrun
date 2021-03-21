@@ -6,6 +6,8 @@
 
 
 # Speedrun
+[![license](https://img.shields.io/badge/license-MPL2-blue.svg)](https://github.com/dpogorzelski/speedrun/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/dpogorzelski/speedrun)](https://goreportcard.com/report/github.com/dpogorzelski/speedrun)
 
 Speedrun executes commands, at scale.
 
@@ -18,11 +20,7 @@ Features:
 
 ## Installation
 
-Download the precompiled binary from here:
-
-```bash
-curl https://github.com/dpogorzelski/speedrun/releases/tag/0.1.0
-```
+Download the precompiled binary from here: [Releases](https://github.com/dpogorzelski/speedrun/releases)
 
 ## Usage
 
