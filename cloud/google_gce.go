@@ -1,6 +1,8 @@
 package gcp
 
 import (
+	"context"
+
 	"google.golang.org/api/compute/v1"
 )
 
@@ -16,17 +18,18 @@ func (c *ComputeClient) GetIPAddresses(instances []*compute.Instance) []string {
 // GetInstances returns a list of external IP addresses used for the SHH connection
 func (c *ComputeClient) GetInstances(filter string) ([]*compute.Instance, error) {
 	listCall := c.Instances.AggregatedList(c.Project)
-	listCall.Filter(filter)
-	list, err := listCall.Do()
+	var ctx context.Context
+	instances := []*compute.Instance{}
+
+	listCall.Filter(filter).Pages(ctx, func(list *compute.InstanceAggregatedList) error {
+		for _, item := range list.Items {
+			instances = append(instances, item.Instances...)
+		}
+		return nil
+	})
+	_, err := listCall.Do()
 	if err != nil {
 		return nil, err
-	}
-
-	instances := []*compute.Instance{}
-	for _, item := range list.Items {
-		for _, instance := range item.Instances {
-			instances = append(instances, instance)
-		}
 	}
 
 	return instances, nil
