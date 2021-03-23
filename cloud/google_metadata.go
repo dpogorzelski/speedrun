@@ -7,19 +7,13 @@ import (
 	"sort"
 	"strings"
 
-	"golang.org/x/crypto/ssh"
 	"google.golang.org/api/compute/v1"
 )
 
 // AddKeyToMetadataP updates SSH key entires in the project metadata
-func (c *ComputeClient) AddKeyToMetadataP(pubKey ssh.PublicKey) error {
+func (c *ComputeClient) AddKeyToMetadataP(authorizedKey []byte) error {
 	getProject := c.Projects.Get(c.Project)
 	projectData, err := getProject.Do()
-	if err != nil {
-		return err
-	}
-
-	authorizedKey, err := formatPubKey(pubKey)
 	if err != nil {
 		return err
 	}
@@ -55,12 +49,7 @@ func (c *ComputeClient) AddKeyToMetadataP(pubKey ssh.PublicKey) error {
 }
 
 // AddKeyToMetadata adds ssh public key to the intsance metadata
-func (c *ComputeClient) AddKeyToMetadata(instance *compute.Instance, pubKey ssh.PublicKey) error {
-	authorizedKey, err := formatPubKey(pubKey)
-	if err != nil {
-		return err
-	}
-
+func (c *ComputeClient) AddKeyToMetadata(instance *compute.Instance, authorizedKey []byte) error {
 	item, err := createMetadataItem(authorizedKey)
 	if err != nil {
 		return err
@@ -94,14 +83,9 @@ func (c *ComputeClient) AddKeyToMetadata(instance *compute.Instance, pubKey ssh.
 }
 
 // RemoveKeyFromMetadataP removes user's ssh public key from the project metadata
-func (c *ComputeClient) RemoveKeyFromMetadataP(pubKey ssh.PublicKey) error {
+func (c *ComputeClient) RemoveKeyFromMetadataP(authorizedKey []byte) error {
 	getProject := c.Projects.Get(c.Project)
 	projectData, err := getProject.Do()
-	if err != nil {
-		return err
-	}
-
-	authorizedKey, err := formatPubKey(pubKey)
 	if err != nil {
 		return err
 	}
@@ -135,12 +119,7 @@ func (c *ComputeClient) RemoveKeyFromMetadataP(pubKey ssh.PublicKey) error {
 }
 
 // RemoveKeyFromMetadata removes user's ssh public key from the intsance metadata
-func (c *ComputeClient) RemoveKeyFromMetadata(instance *compute.Instance, pubKey ssh.PublicKey) error {
-	authorizedKey, err := formatPubKey(pubKey)
-	if err != nil {
-		return err
-	}
-
+func (c *ComputeClient) RemoveKeyFromMetadata(instance *compute.Instance, authorizedKey []byte) error {
 	item, err := createMetadataItem(authorizedKey)
 	if err != nil {
 		return err
@@ -180,12 +159,6 @@ func isBlocking(i *compute.Instance) bool {
 	return false
 }
 
-func formatPubKey(pubKey ssh.PublicKey) (string, error) {
-	authorizedKey := ssh.MarshalAuthorizedKey(pubKey)
-	tk := strings.TrimSuffix(string(authorizedKey), "\n")
-	return tk, nil
-}
-
 // Extracts username, algorithm and comment from a metadata SSH key item
 func parseMetadataitem(key string) (string, string, string) {
 	t := strings.Split(key, " ")
@@ -218,7 +191,7 @@ func hasItem(md *compute.Metadata, x string) (bool, bool, int) {
 }
 
 // createMetadataItem formats public key item according to GCP guidelines
-func createMetadataItem(pubKey string) (string, error) {
+func createMetadataItem(authorizedKey []byte) (string, error) {
 	user, err := user.Current()
 	if err != nil {
 		return "", err
@@ -229,7 +202,9 @@ func createMetadataItem(pubKey string) (string, error) {
 		return "", err
 	}
 
-	v := fmt.Sprintf("%s:%s %s", user.Username, pubKey, hostname)
+	trimmedKey := strings.TrimSuffix(string(authorizedKey), "\n")
+
+	v := fmt.Sprintf("%s:%s %s", user.Username, trimmedKey, hostname)
 	return v, nil
 }
 

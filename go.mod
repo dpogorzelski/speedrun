@@ -12,6 +12,7 @@ require (
 	github.com/magiconair/properties v1.8.4 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/melbahja/goph v1.2.1
+	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/mitchellh/mapstructure v1.4.1 // indirect
 	github.com/pelletier/go-toml v1.8.1 // indirect

@@ -3,7 +3,6 @@ package cmd
 import (
 	"crypto/ed25519"
 	"crypto/rand"
-	"crypto/x509"
 	"encoding/pem"
 	"fmt"
 	"io/ioutil"
@@ -13,6 +12,7 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
+	"github.com/mikesmitty/edkey"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -80,16 +80,11 @@ func newKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	log.Debug("Converting private key to PKCS8 format")
-	pemBlock := &pem.Block{}
-	pemBlock.Type = "PRIVATE KEY"
-	pemBlock.Bytes, err = x509.MarshalPKCS8PrivateKey(privKey)
-	if err != nil {
-		return err
+	pemKey := &pem.Block{
+		Type:  "OPENSSH PRIVATE KEY",
+		Bytes: edkey.MarshalED25519PrivateKey(privKey),
 	}
-
-	log.Debug("Encoding the key to PEM format")
-	privateKey := pem.EncodeToMemory(pemBlock)
+	privateKey := pem.EncodeToMemory(pemKey)
 
 	err = writeKeyFile(privateKey)
 	if err != nil {
@@ -113,23 +108,24 @@ func writeKeyFile(key []byte) error {
 	return nil
 }
 
-func loadKeyPair() (ssh.PublicKey, ssh.Signer, error) {
+func loadPubKey() ([]byte, error) {
 	privateKeyPath, err := determineKeyFilePath()
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 
 	file, err := readKeyFile(privateKeyPath)
 	if err != nil {
-		return nil, nil, fmt.Errorf("couldn't find private key. Use 'speedrun key new' to generate a new one")
+		return nil, fmt.Errorf("couldn't find private key. Use 'speedrun key new' to generate a new one")
 	}
 
-	signer, err := ssh.ParsePrivateKey(file)
+	privKey, err := ssh.ParsePrivateKey(file)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
-	pubKey := signer.PublicKey()
-	return pubKey, signer, nil
+
+	authorizedKey := ssh.MarshalAuthorizedKey(privKey.PublicKey())
+	return authorizedKey, nil
 }
 
 func readKeyFile(path string) ([]byte, error) {
@@ -152,7 +148,7 @@ func setKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pubKey, _, err := loadKeyPair()
+	pubKey, err := loadPubKey()
 	if err != nil {
 		return err
 	}
@@ -199,7 +195,7 @@ func removeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pubKey, _, err := loadKeyPair()
+	pubKey, err := loadPubKey()
 	if err != nil {
 		return err
 	}
