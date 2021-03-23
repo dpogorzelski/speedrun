@@ -12,6 +12,7 @@
 
 Speedrun is a command execution framework that works at scale.
 The point of Speedrun is so that you can run any command across any number of servers, projects and cloud vendors with ease and fast (currently GCP only but AWS and Azure will be supported as well), example:
+
 `speedrun run systemctl stop nginx` to stop nginx across 3k machines.
 
 No hassels with setting up and maintaining a server with agents as speedrun has none. No runtime to install/maintain as it's a single self-contained binary. Speedrun leverages SSH as transport with tight cloud vendor integration to take the burden of mundane things like key generation and propagation/revocation away from the user.
