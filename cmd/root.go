@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"path"
+	"path/filepath"
 
 	"github.com/apex/log"
+	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -23,7 +24,14 @@ func Execute() {
 	rootCmd.AddCommand(keyCmd)
 	rootCmd.AddCommand(runCmd)
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "$HOME/.speedrun/config.toml", "config file")
+	home, err := homedir.Dir()
+	if err != nil {
+		log.Fatal(err.Error())
+	}
+	dir := filepath.Join(home, ".speedrun")
+	path := filepath.Join(dir, "config.toml")
+
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", path, "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
 	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
 
@@ -33,7 +41,7 @@ func Execute() {
 }
 
 func initConfig() {
-	dir, file := path.Split(cfgFile)
+	dir, file := filepath.Split(cfgFile)
 	viper.SetConfigName(file)
 	viper.SetConfigType("toml")
 	viper.AddConfigPath(dir)
