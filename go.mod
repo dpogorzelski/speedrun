@@ -5,6 +5,8 @@ go 1.16
 require (
 	github.com/alitto/pond v1.5.0
 	github.com/apex/log v1.9.0
+	github.com/cheggaaa/pb/v3 v3.0.7
+	github.com/fatih/color v1.9.0 // indirect
 	github.com/fsnotify/fsnotify v1.4.9 // indirect
 	github.com/golang/protobuf v1.5.1 // indirect
 	github.com/jwalton/gchalk v1.0.3

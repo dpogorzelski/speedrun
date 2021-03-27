@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	gcp "speedrun/cloud"
-	"speedrun/colors"
 	"speedrun/marathon"
 	"strings"
 	"time"
@@ -74,7 +72,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	log.Info(fmt.Sprintf("Running [%s]", colors.Blue(command)))
+	// log.Info(fmt.Sprintf("Running [%s]", colors.Blue(command)))
 	m := marathon.New(command, timeout, concurrency)
 	instanceDict := map[string]string{}
 	for _, instance := range instances {
@@ -84,6 +82,7 @@ func run(cmd *cobra.Command, args []string) error {
 			instanceDict[instance.NetworkInterfaces[0].AccessConfigs[0].NatIP] = instance.Name
 		}
 	}
+
 	err = m.Run(instanceDict, privateKeyPath, ignoreFingerprint)
 	if err != nil {
 		log.Fatal(err.Error())

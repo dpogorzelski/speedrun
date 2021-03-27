@@ -10,6 +10,7 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
+	"github.com/cheggaaa/pb/v3"
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
 )
@@ -57,7 +58,26 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 	}
 
 	pool := pond.New(m.Concurrency, 10000)
+	// bar := pb.New(len(instances))
+	tmpl := `{{ red "With funcs:" }} {{ bar . "<" "-" (cycle . "↖" "↗" "↘" "↙" ) "." ">"}} {{speed . | rndcolor }} {{percent .}} {{string . "my_green_string" | green}} {{string . "my_blue_string" | blue}}`
+	// start bar based on our template
+	bar := pb.ProgressBarTemplate(tmpl).Start(len(instances))
+	bar.SetMaxWidth(80)
+	// bar.SetTemplateString("dssf")
+	bar.Start()
 
+	// cfg := yacspin.Config{
+	// 	Frequency:       100 * time.Millisecond,
+	// 	CharSet:         yacspin.CharSets[11],
+	// 	Prefix:          colors.Blue("• "),
+	// 	Suffix:          fmt.Sprintf(" Running [%s]", colors.Blue(m.Command)),
+	// 	SuffixAutoColon: true,
+	// }
+	// spinner, err := yacspin.New(cfg)
+	// if err != nil {
+	// 	log.Fatal(err.Error())
+	// }
+	// spinner.Start()
 	for k, v := range instances {
 		addr := k
 		host := v
@@ -86,6 +106,8 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 			if err != nil {
 				log.WithField("host", host).Debugf("Error encountered while trying to connect: %s", err)
 				m.Lock()
+				bar.Increment()
+				// spinner.Message(host)
 				m.errors[host] = err
 				m.Unlock()
 				return
@@ -95,16 +117,22 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 			out, err := client.Run(m.Command)
 			if err != nil {
 				m.Lock()
+				bar.Increment()
+				// spinner.Message(host)
 				m.failures[host] = formatOutput(string(out))
 				m.Unlock()
 				return
 			}
 			m.Lock()
+			bar.Increment()
+			// spinner.Message(host)
 			m.successes[host] = formatOutput(string(out))
 			m.Unlock()
 		})
 	}
 	pool.StopAndWait()
+	// spinner.Stop()
+	bar.Finish()
 
 	return nil
 }
