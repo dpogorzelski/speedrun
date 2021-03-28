@@ -58,9 +58,11 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 	}
 
 	pool := pond.New(m.Concurrency, 10000)
-	tmpl := fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command))
-	bar := pb.ProgressBarTemplate(tmpl).Start(len(instances))
+
+	bar := pb.New(len(instances))
 	bar.SetMaxWidth(1)
+	bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
+	bar.Start()
 
 	for k, v := range instances {
 		addr := k
