@@ -72,7 +72,6 @@ func run(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	// log.Info(fmt.Sprintf("Running [%s]", colors.Blue(command)))
 	m := marathon.New(command, timeout, concurrency)
 	instanceDict := map[string]string{}
 	for _, instance := range instances {
