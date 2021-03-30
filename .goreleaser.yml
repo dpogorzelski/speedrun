@@ -1,16 +1,13 @@
-# This is an example .goreleaser.yml file with some sane defaults.
-# Make sure to check the documentation at http://goreleaser.com
 before:
   hooks:
-    # You may remove this if you don't use go modules.
     - go mod tidy
 builds:
-  - env:
-      - CGO_ENABLED=0
-    goos:
+  - goos:
       - linux
       - windows
       - darwin
+    ldflags:
+      - -s -w -X speedrun/cmd.version={{.Version}} -X speedrun/cmd.commit={{.ShortCommit}} -X speedrun/cmd.date={{.Date}}
 archives:
   - replacements:
       darwin: darwin
@@ -28,5 +25,5 @@ changelog:
     exclude:
       - "^docs:"
       - "^test:"
-      - "^README"
-      - "^.goreleaser"
+      - "^README.md"
+      - "^.goreleaser.yaml"
