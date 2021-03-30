@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"path/filepath"
 
 	"github.com/apex/log"
@@ -10,6 +11,9 @@ import (
 )
 
 var cfgFile string
+var version string
+var commit string
+var date string
 
 //Execute runs the root command
 func Execute() {
@@ -17,7 +21,7 @@ func Execute() {
 	var rootCmd = &cobra.Command{
 		Use:     "speedrun",
 		Short:   "Cloud first command execution",
-		Version: "0.1.0",
+		Version: fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
 	}
 
 	rootCmd.AddCommand(initCmd)
