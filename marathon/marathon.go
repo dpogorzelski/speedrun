@@ -10,6 +10,7 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
+	"github.com/cheggaaa/pb/v3"
 	"github.com/melbahja/goph"
 	"golang.org/x/crypto/ssh"
 )
@@ -58,6 +59,11 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 
 	pool := pond.New(m.Concurrency, 10000)
 
+	bar := pb.New(len(instances))
+	bar.SetMaxWidth(1)
+	bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
+	bar.Start()
+
 	for k, v := range instances {
 		addr := k
 		host := v
@@ -86,6 +92,7 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 			if err != nil {
 				log.WithField("host", host).Debugf("Error encountered while trying to connect: %s", err)
 				m.Lock()
+				bar.Increment()
 				m.errors[host] = err
 				m.Unlock()
 				return
@@ -95,16 +102,19 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 			out, err := client.Run(m.Command)
 			if err != nil {
 				m.Lock()
+				bar.Increment()
 				m.failures[host] = formatOutput(string(out))
 				m.Unlock()
 				return
 			}
 			m.Lock()
+			bar.Increment()
 			m.successes[host] = formatOutput(string(out))
 			m.Unlock()
 		})
 	}
 	pool.StopAndWait()
+	bar.Finish()
 
 	return nil
 }
