@@ -19,9 +19,11 @@ var date string
 func Execute() {
 	// cobra.OnInitialize(initConfig)
 	var rootCmd = &cobra.Command{
-		Use:     "speedrun",
-		Short:   "Cloud first command execution",
-		Version: fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
+		Use:           "speedrun",
+		Short:         "Cloud first command execution",
+		Version:       fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
+		SilenceUsage:  true,
+		SilenceErrors: true,
 	}
 
 	rootCmd.AddCommand(initCmd)
