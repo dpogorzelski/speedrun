@@ -130,7 +130,6 @@ func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
 
 	if !hostFound && err != nil {
 		if err.Error() == "knownhosts: key is unknown" {
-			log.Warnf("Adding host %s to ~/.ssh/known_hosts", host)
 			return goph.AddKnownHost(host, remote, key, "")
 		}
 		return err
