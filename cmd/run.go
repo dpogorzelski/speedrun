@@ -2,7 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	gcp "speedrun/cloud"
+	"speedrun/cloud"
 	"speedrun/colors"
 	"speedrun/marathon"
 	"strings"
@@ -54,7 +54,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	client, err := gcp.NewComputeClient(projectid)
+	client, err := cloud.NewClient(cloud.SetProject(projectid))
 	if err != nil {
 		log.Fatal(err.Error())
 	}
@@ -76,15 +76,8 @@ func run(cmd *cobra.Command, args []string) error {
 
 	log.Info(fmt.Sprintf("Running [%s]", colors.Blue(command)))
 	m := marathon.New(command, timeout, concurrency)
-	instanceDict := map[string]string{}
-	for _, instance := range instances {
-		if usePrivateIP {
-			instanceDict[instance.NetworkInterfaces[0].NetworkIP] = instance.Name
-		} else {
-			instanceDict[instance.NetworkInterfaces[0].AccessConfigs[0].NatIP] = instance.Name
-		}
-	}
-	err = m.Run(instanceDict, privateKeyPath, ignoreFingerprint)
+
+	err = m.Run(instances, privateKeyPath, ignoreFingerprint, usePrivateIP)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

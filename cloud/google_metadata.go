@@ -1,18 +1,55 @@
-package gcp
+package cloud
 
 import (
+	"crypto/sha256"
 	"fmt"
 	"os"
 	"os/user"
 	"sort"
 	"strings"
 
+	"github.com/apex/log"
 	"google.golang.org/api/compute/v1"
+	"google.golang.org/api/oslogin/v1"
 )
 
+func (c *gcpClient) addUserKey(authorizedKey []byte) error {
+	parent := fmt.Sprintf("users/%s", c.client_email)
+
+	key := strings.TrimSuffix(string(authorizedKey), "\n")
+	sshPublicKey := &oslogin.SshPublicKey{
+		Key: string(key),
+	}
+
+	_, err := c.oslogin.Users.ImportSshPublicKey(parent, sshPublicKey).Do()
+	return err
+}
+
+func (c *gcpClient) removeUserKey(authorizedKey []byte) error {
+	key := strings.TrimSuffix(string(authorizedKey), "\n")
+	name := fmt.Sprintf("users/%s/sshPublicKeys/%x", c.client_email, sha256.Sum256([]byte(key)))
+
+	_, err := c.oslogin.Users.SshPublicKeys.Delete(name).Do()
+	return err
+}
+
+func (c *gcpClient) listUserKeys() error {
+	parent := fmt.Sprintf("users/%s", c.client_email)
+
+	profile, err := c.oslogin.Users.GetLoginProfile(parent).Do()
+	if err != nil {
+		return err
+	}
+
+	for _, k := range profile.SshPublicKeys {
+		log.Info(k.Key)
+	}
+	return nil
+}
+
 // AddKeyToMetadataP updates SSH key entires in the project metadata
-func (c *ComputeClient) AddKeyToMetadataP(authorizedKey []byte) error {
-	getProject := c.Projects.Get(c.Project)
+func (c *gcpClient) addKeyToMetadata(authorizedKey []byte) error {
+	getProject := c.gce.Projects.Get(c.Project)
 	projectData, err := getProject.Do()
 	if err != nil {
 		return err
@@ -39,7 +76,7 @@ func (c *ComputeClient) AddKeyToMetadataP(authorizedKey []byte) error {
 		Items:       items,
 	}
 
-	setMetadata := c.Projects.SetCommonInstanceMetadata(c.Project, &metadata)
+	setMetadata := c.gce.Projects.SetCommonInstanceMetadata(c.Project, &metadata)
 	_, err = setMetadata.Do()
 	if err != nil {
 		return err
@@ -48,43 +85,9 @@ func (c *ComputeClient) AddKeyToMetadataP(authorizedKey []byte) error {
 	return nil
 }
 
-// AddKeyToMetadata adds ssh public key to the intsance metadata
-func (c *ComputeClient) AddKeyToMetadata(instance *compute.Instance, authorizedKey []byte) error {
-	item, err := createMetadataItem(authorizedKey)
-	if err != nil {
-		return err
-	}
-
-	hasKey, same, i := hasItem(instance.Metadata, item)
-	var items []*compute.MetadataItems
-
-	if hasKey && same {
-		return nil
-	} else if hasKey && !same {
-		items = updateMetadata(instance.Metadata, item, i)
-	} else if !hasKey {
-		items = appendToMetadata(instance.Metadata, item)
-	}
-
-	metadata := compute.Metadata{
-		Fingerprint: instance.Metadata.Fingerprint,
-		Items:       items,
-	}
-
-	instance.Metadata = &metadata
-	s := strings.Split(instance.Zone, "/")
-	zone := s[len(s)-1]
-	call := c.Instances.Update(c.Project, zone, instance.Name, instance)
-	_, err = call.Do()
-	if err != nil {
-		return fmt.Errorf("%s failed to update metadata: ", err)
-	}
-	return nil
-}
-
-// RemoveKeyFromMetadataP removes user's ssh public key from the project metadata
-func (c *ComputeClient) RemoveKeyFromMetadataP(authorizedKey []byte) error {
-	getProject := c.Projects.Get(c.Project)
+// removeKeyFromMetadata removes user's ssh public key from the project metadata
+func (c *gcpClient) removeKeyFromMetadata(authorizedKey []byte) error {
+	getProject := c.gce.Projects.Get(c.Project)
 	projectData, err := getProject.Do()
 	if err != nil {
 		return err
@@ -109,54 +112,13 @@ func (c *ComputeClient) RemoveKeyFromMetadataP(authorizedKey []byte) error {
 		Items:       items,
 	}
 
-	setMetadata := c.Projects.SetCommonInstanceMetadata(c.Project, &metadata)
+	setMetadata := c.gce.Projects.SetCommonInstanceMetadata(c.Project, &metadata)
 	_, err = setMetadata.Do()
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-// RemoveKeyFromMetadata removes user's ssh public key from the intsance metadata
-func (c *ComputeClient) RemoveKeyFromMetadata(instance *compute.Instance, authorizedKey []byte) error {
-	item, err := createMetadataItem(authorizedKey)
-	if err != nil {
-		return err
-	}
-
-	hasKey, same, i := hasItem(instance.Metadata, item)
-	var items []*compute.MetadataItems
-
-	if hasKey && same {
-		removeFromMetadata(instance.Metadata, item, i)
-	} else {
-		return nil
-	}
-
-	metadata := compute.Metadata{
-		Fingerprint: instance.Metadata.Fingerprint,
-		Items:       items,
-	}
-
-	instance.Metadata = &metadata
-	s := strings.Split(instance.Zone, "/")
-	zone := s[len(s)-1]
-	call := c.Instances.Update(c.Project, zone, instance.Name, instance)
-	_, err = call.Do()
-	if err != nil {
-		return fmt.Errorf("%s failed to update metadata: ", err)
-	}
-	return nil
-}
-
-func isBlocking(i *compute.Instance) bool {
-	for _, m := range i.Metadata.Items {
-		if m.Key == "sshKeys" || m.Key == "block-project-ssh-keys" {
-			return true
-		}
-	}
-	return false
 }
 
 // Extracts username, algorithm and comment from a metadata SSH key item

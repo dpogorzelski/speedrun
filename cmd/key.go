@@ -8,9 +8,8 @@ import (
 	"io/ioutil"
 	"path/filepath"
 
-	gcp "speedrun/cloud"
+	"speedrun/cloud"
 
-	"github.com/alitto/pond"
 	"github.com/apex/log"
 	"github.com/mikesmitty/edkey"
 	homedir "github.com/mitchellh/go-homedir"
@@ -34,32 +33,41 @@ var newKeyCmd = &cobra.Command{
 	RunE: newKey,
 }
 
-var setKeyCmd = &cobra.Command{
-	Use:     "set",
-	Short:   "Set key in the project or instance metadata",
-	Example: "  speedrun key set \n  speedrun key set --filter \"labels.foo = bar AND labels.environment = staging\"",
+var authorizeKeyCmd = &cobra.Command{
+	Use:     "authorize",
+	Short:   "Authorize key for ssh access",
+	Example: "  speedrun key authorize",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
 	},
-	RunE: setKey,
+	RunE: authorizeKey,
 }
 
-var removeKeyCmd = &cobra.Command{
-	Use:     "remove",
-	Short:   "Remove key from the project metadata or instance metadata",
-	Example: "  speedrun key remove \n  speedrun key remove --filter \"labels.foo = bar AND labels.environment = staging\"",
+var revokeKeyCmd = &cobra.Command{
+	Use:     "revoke",
+	Short:   "Revoke ssh key",
+	Example: "  speedrun key revoke",
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
 	},
-	RunE: removeKey,
+	RunE: revokeKey,
+}
+
+var listKeyCmd = &cobra.Command{
+	Use:     "list",
+	Short:   "List user keys",
+	Example: "  speedrun key list",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		initConfig()
+	},
+	RunE: listKey,
 }
 
 func init() {
-	setKeyCmd.Flags().String("filter", "", "Set the key only on matching instances")
-	removeKeyCmd.Flags().String("filter", "", "Set the key only on matching instances")
 	keyCmd.AddCommand(newKeyCmd)
-	keyCmd.AddCommand(setKeyCmd)
-	keyCmd.AddCommand(removeKeyCmd)
+	keyCmd.AddCommand(authorizeKeyCmd)
+	keyCmd.AddCommand(revokeKeyCmd)
+	keyCmd.AddCommand(listKeyCmd)
 }
 
 func determineKeyFilePath() (string, error) {
@@ -142,8 +150,9 @@ func readKeyFile(path string) ([]byte, error) {
 	return file, nil
 }
 
-func setKey(cmd *cobra.Command, args []string) error {
-	client, err := gcp.NewComputeClient(viper.GetString("gcp.projectid"))
+func authorizeKey(cmd *cobra.Command, args []string) error {
+	project := viper.GetString("gcp.projectid")
+	client, err := cloud.NewClient(cloud.SetProject(project))
 	if err != nil {
 		return err
 	}
@@ -153,44 +162,19 @@ func setKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	filter, err := cmd.Flags().GetString("filter")
+	log.Infof("Auhtorizing public key: %s", pubKey)
+
+	client.AuthorizeKey(pubKey)
 	if err != nil {
 		return err
-	}
-
-	if filter != "" {
-		log.Info("Setting public key in the instance metadata")
-		instances, err := client.GetInstances(filter)
-		if err != nil {
-			return err
-		}
-
-		if len(instances) == 0 {
-			log.Warn("no instances found")
-		}
-
-		pool := pond.New(10, 0, pond.MinWorkers(10))
-		for i := 0; i < len(instances); i++ {
-			n := i
-			pool.Submit(func() {
-				client.AddKeyToMetadata(instances[n], pubKey)
-			})
-		}
-
-		pool.StopAndWait()
-	} else {
-		log.Info("Setting public key in the project metadata")
-		err = client.AddKeyToMetadataP(pubKey)
-		if err != nil {
-			return err
-		}
 	}
 
 	return nil
 }
 
-func removeKey(cmd *cobra.Command, args []string) error {
-	client, err := gcp.NewComputeClient(viper.GetString("gcp.projectid"))
+func revokeKey(cmd *cobra.Command, args []string) error {
+	project := viper.GetString("gcp.projectid")
+	client, err := cloud.NewClient(cloud.SetProject(project))
 	if err != nil {
 		return err
 	}
@@ -200,37 +184,25 @@ func removeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	filter, err := cmd.Flags().GetString("filter")
+	log.Info("Revoking public key")
+	err = client.RevokeKey(pubKey)
 	if err != nil {
 		return err
 	}
 
-	if filter != "" {
-		log.Info("Removing public from the instance metadata")
-		instances, err := client.GetInstances(filter)
-		if err != nil {
-			return err
-		}
+	return nil
+}
 
-		if len(instances) == 0 {
-			log.Warn("no instances found")
-		}
+func listKey(cmd *cobra.Command, args []string) error {
+	project := viper.GetString("gcp.projectid")
+	client, err := cloud.NewClient(cloud.SetProject(project))
+	if err != nil {
+		return err
+	}
 
-		pool := pond.New(10, 0, pond.MinWorkers(10))
-		for i := 0; i < len(instances); i++ {
-			n := i
-			pool.Submit(func() {
-				client.RemoveKeyFromMetadata(instances[n], pubKey)
-			})
-		}
-
-		pool.StopAndWait()
-	} else {
-		log.Info("Removing public key from the project metadata")
-		err = client.RemoveKeyFromMetadataP(pubKey)
-		if err != nil {
-			return err
-		}
+	err = client.ListKeys()
+	if err != nil {
+		return err
 	}
 
 	return nil

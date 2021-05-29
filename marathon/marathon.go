@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net"
 	"os/user"
+	"speedrun/cloud"
 	"speedrun/colors"
 	"sync"
 	"time"
@@ -40,7 +41,7 @@ func New(command string, timeout time.Duration, concurrency int) *Marathon {
 }
 
 // Run runs a given command on servers in the addresses list
-func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprint bool) error {
+func (m *Marathon) Run(instances []cloud.Instance, key string, ignoreFingerprint, usePrivateIP bool) error {
 	user, err := user.Current()
 	if err != nil {
 		return err
@@ -58,16 +59,18 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 
 	pool := pond.New(m.Concurrency, 10000)
 
-	for k, v := range instances {
-		addr := k
-		host := v
-		log.Debugf("Adding %s(%s) to the queue", v, k)
+	for _, instance := range instances {
+		addr := instance.PublicAddress
+		if usePrivateIP {
+			addr = instance.PrivateAddress
+		}
+		log.Debugf("Adding %s(%s) to the queue", instance.Name, addr)
 		pool.Submit(func() {
 			var client *goph.Client
 			var err error
 
 			for i := 0; i < 60; i++ {
-				log.WithField("host", host).Debug("Checking if they public key has propagated yet")
+				log.WithField("host", instance.Name).Debug("Checking if they public key has propagated yet")
 				client, err = goph.NewConn(&goph.Config{
 					User:     user.Username,
 					Addr:     addr,
@@ -84,9 +87,9 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 			}
 
 			if err != nil {
-				log.WithField("host", host).Debugf("Error encountered while trying to connect: %s", err)
+				log.WithField("host", instance.Name).Debugf("Error encountered while trying to connect: %s", err)
 				m.Lock()
-				m.errors[host] = err
+				m.errors[instance.Name] = err
 				m.Unlock()
 				return
 			}
@@ -95,12 +98,12 @@ func (m *Marathon) Run(instances map[string]string, key string, ignoreFingerprin
 			out, err := client.Run(m.Command)
 			if err != nil {
 				m.Lock()
-				m.failures[host] = formatOutput(string(out))
+				m.failures[instance.Name] = formatOutput(string(out))
 				m.Unlock()
 				return
 			}
 			m.Lock()
-			m.successes[host] = formatOutput(string(out))
+			m.successes[instance.Name] = formatOutput(string(out))
 			m.Unlock()
 		})
 	}
