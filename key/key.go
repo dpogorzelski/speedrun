@@ -12,6 +12,7 @@ import (
 	"strings"
 
 	"github.com/apex/log"
+	"github.com/melbahja/goph"
 	"github.com/mikesmitty/edkey"
 	"golang.org/x/crypto/ssh"
 )
@@ -97,4 +98,15 @@ func (k *Key) MarshalAuthorizedKey() (string, error) {
 	authorizedKey := ssh.MarshalAuthorizedKey(privKey.PublicKey())
 	trimmedKey := strings.TrimSuffix(string(authorizedKey), "\n")
 	return trimmedKey, nil
+}
+
+func (k *Key) GetAuth() (goph.Auth, error) {
+	privKey, err := ssh.ParsePrivateKey(k.Key)
+	if err != nil {
+		return nil, err
+	}
+
+	return goph.Auth{
+		ssh.PublicKeys(privKey),
+	}, nil
 }

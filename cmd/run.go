@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"speedrun/cloud"
 	"speedrun/colors"
+	"speedrun/key"
 	"speedrun/marathon"
 	"strings"
 	"time"
@@ -59,9 +60,14 @@ func run(cmd *cobra.Command, args []string) error {
 		log.Fatal(err.Error())
 	}
 
-	privateKeyPath, err := determineKeyFilePath()
+	path, err := determineKeyFilePath()
 	if err != nil {
 		log.Fatal(err.Error())
+	}
+
+	k, err := key.Read(path)
+	if err != nil {
+		return err
 	}
 
 	log.Info("Fetching list of GCE instances")
@@ -77,7 +83,7 @@ func run(cmd *cobra.Command, args []string) error {
 	log.Info(fmt.Sprintf("Running [%s]", colors.Blue(command)))
 	m := marathon.New(command, timeout, concurrency)
 
-	err = m.Run(instances, privateKeyPath, ignoreFingerprint, usePrivateIP)
+	err = m.Run(instances, k, ignoreFingerprint, usePrivateIP)
 	if err != nil {
 		log.Fatal(err.Error())
 	}

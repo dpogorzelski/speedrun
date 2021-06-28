@@ -6,6 +6,7 @@ import (
 	"os/user"
 	"speedrun/cloud"
 	"speedrun/colors"
+	"speedrun/key"
 	"sync"
 	"time"
 
@@ -41,13 +42,13 @@ func New(command string, timeout time.Duration, concurrency int) *Marathon {
 }
 
 // Run runs a given command on servers in the addresses list
-func (m *Marathon) Run(instances []cloud.Instance, key string, ignoreFingerprint, usePrivateIP bool) error {
+func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerprint, usePrivateIP bool) error {
 	user, err := user.Current()
 	if err != nil {
 		return err
 	}
 
-	auth, err := goph.Key(key, "")
+	auth, err := key.GetAuth()
 	if err != nil {
 		return err
 	}
