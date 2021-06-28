@@ -1,21 +1,15 @@
 package cmd
 
 import (
-	"crypto/ed25519"
-	"crypto/rand"
-	"encoding/pem"
-	"fmt"
-	"io/ioutil"
 	"path/filepath"
 
 	"speedrun/cloud"
+	"speedrun/key"
 
 	"github.com/apex/log"
-	"github.com/mikesmitty/edkey"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"golang.org/x/crypto/ssh"
 )
 
 var keyCmd = &cobra.Command{
@@ -82,72 +76,22 @@ func determineKeyFilePath() (string, error) {
 }
 
 func newKey(cmd *cobra.Command, args []string) error {
-	log.Debug("Generating new private key")
-	_, privKey, err := ed25519.GenerateKey(rand.Reader)
+	k, err := key.New()
 	if err != nil {
 		return err
 	}
 
-	pemKey := &pem.Block{
-		Type:  "OPENSSH PRIVATE KEY",
-		Bytes: edkey.MarshalED25519PrivateKey(privKey),
+	path, err := determineKeyFilePath()
+	if err != nil {
+		return err
 	}
-	privateKey := pem.EncodeToMemory(pemKey)
 
-	err = writeKeyFile(privateKey)
+	err = k.Write(path)
 	if err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func writeKeyFile(key []byte) error {
-	privateKeyPath, err := determineKeyFilePath()
-	if err != nil {
-		return err
-	}
-
-	log.Debugf("Writing priviate key to %s", privateKeyPath)
-	err = ioutil.WriteFile(privateKeyPath, key, 0600)
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func loadPubKey() ([]byte, error) {
-	privateKeyPath, err := determineKeyFilePath()
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := readKeyFile(privateKeyPath)
-	if err != nil {
-		return nil, fmt.Errorf("couldn't find private key. Use 'speedrun key new' to generate a new one")
-	}
-
-	privKey, err := ssh.ParsePrivateKey(file)
-	if err != nil {
-		return nil, err
-	}
-
-	authorizedKey := ssh.MarshalAuthorizedKey(privKey.PublicKey())
-	return authorizedKey, nil
-}
-
-func readKeyFile(path string) ([]byte, error) {
-	cleanPath := filepath.Clean(path)
-	absPath, err := filepath.Abs(cleanPath)
-	if err != nil {
-		return nil, err
-	}
-
-	file, err := ioutil.ReadFile(absPath)
-	if err != nil {
-		return nil, err
-	}
-	return file, nil
 }
 
 func authorizeKey(cmd *cobra.Command, args []string) error {
@@ -157,14 +101,18 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pubKey, err := loadPubKey()
+	path, err := determineKeyFilePath()
 	if err != nil {
 		return err
 	}
 
-	log.Infof("Auhtorizing public key: %s", pubKey)
+	k, err := key.Read(path)
+	if err != nil {
+		return err
+	}
 
-	client.AuthorizeKey(pubKey)
+	log.Infof("Authorizing public key")
+	client.AuthorizeKey(k)
 	if err != nil {
 		return err
 	}
@@ -179,13 +127,18 @@ func revokeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	pubKey, err := loadPubKey()
+	path, err := determineKeyFilePath()
+	if err != nil {
+		return err
+	}
+
+	k, err := key.Read(path)
 	if err != nil {
 		return err
 	}
 
 	log.Info("Revoking public key")
-	err = client.RevokeKey(pubKey)
+	err = client.RevokeKey(k)
 	if err != nil {
 		return err
 	}

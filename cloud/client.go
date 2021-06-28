@@ -1,5 +1,7 @@
 package cloud
 
+import "speedrun/key"
+
 type Client struct {
 	gcp *gcpClient
 }
@@ -41,23 +43,23 @@ func (c *Client) GetInstances(filter string) ([]Instance, error) {
 	return instances, err
 }
 
-func (c *Client) AuthorizeKey(authorizedKey []byte) error {
-	err := c.gcp.addKeyToMetadata(authorizedKey)
+func (c *Client) AuthorizeKey(key *key.Key) error {
+	err := c.gcp.addKeyToMetadata(key)
 	if err != nil {
 		return err
 	}
 
-	err = c.gcp.addUserKey(authorizedKey)
+	err = c.gcp.addUserKey(key)
 	return err
 }
 
-func (c *Client) RevokeKey(authorizedKey []byte) error {
-	err := c.gcp.removeUserKey(authorizedKey)
+func (c *Client) RevokeKey(key *key.Key) error {
+	err := c.gcp.removeUserKey(key)
 	if err != nil {
 		return err
 	}
 
-	err = c.gcp.removeKeyFromMetadata(authorizedKey)
+	err = c.gcp.removeKeyFromMetadata(key)
 	if err != nil {
 		return err
 	}
@@ -70,14 +72,16 @@ func (c *Client) ListKeys() error {
 	if err != nil {
 		return err
 	}
+
+	err = c.gcp.listMetadataKeys()
 	return err
 }
 
-// func (c *Client) AuthorizeKeyInstance(authorizedKey []byte, instancePool *InstancePool) error {
+// func (c *Client) AuthorizeKeyInstance(key *key.Key, instancePool *InstancePool) error {
 // 	pool := pond.New(10, 0, pond.MinWorkers(10))
 // 	for _, instance := range instancePool.instances {
 // 		pool.Submit(func() {
-// 			instance.Authorize(authorizedKey)
+// 			instance.Authorize(key)
 // 		})
 // 	}
 // 	pool.StopAndWait()

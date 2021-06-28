@@ -3,9 +3,8 @@ package cloud
 import (
 	"crypto/sha256"
 	"fmt"
-	"os"
-	"os/user"
 	"sort"
+	"speedrun/key"
 	"strings"
 
 	"github.com/apex/log"
@@ -13,23 +12,30 @@ import (
 	"google.golang.org/api/oslogin/v1"
 )
 
-func (c *gcpClient) addUserKey(authorizedKey []byte) error {
+func (c *gcpClient) addUserKey(key *key.Key) error {
 	parent := fmt.Sprintf("users/%s", c.client_email)
 
-	key := strings.TrimSuffix(string(authorizedKey), "\n")
-	sshPublicKey := &oslogin.SshPublicKey{
-		Key: string(key),
+	authorizedKey, err := key.MarshalAuthorizedKey()
+	if err != nil {
+		return err
 	}
 
-	_, err := c.oslogin.Users.ImportSshPublicKey(parent, sshPublicKey).Do()
+	sshPublicKey := &oslogin.SshPublicKey{
+		Key: string(authorizedKey),
+	}
+
+	_, err = c.oslogin.Users.ImportSshPublicKey(parent, sshPublicKey).Do()
 	return err
 }
 
-func (c *gcpClient) removeUserKey(authorizedKey []byte) error {
-	key := strings.TrimSuffix(string(authorizedKey), "\n")
-	name := fmt.Sprintf("users/%s/sshPublicKeys/%x", c.client_email, sha256.Sum256([]byte(key)))
+func (c *gcpClient) removeUserKey(key *key.Key) error {
+	authorizedKey, err := key.MarshalAuthorizedKey()
+	if err != nil {
+		return err
+	}
 
-	_, err := c.oslogin.Users.SshPublicKeys.Delete(name).Do()
+	name := fmt.Sprintf("users/%s/sshPublicKeys/%x", c.client_email, sha256.Sum256([]byte(authorizedKey)))
+	_, err = c.oslogin.Users.SshPublicKeys.Delete(name).Do()
 	return err
 }
 
@@ -43,19 +49,19 @@ func (c *gcpClient) listUserKeys() error {
 
 	for _, k := range profile.SshPublicKeys {
 		log.Info(k.Key)
+		log.Info(k.Name)
 	}
 	return nil
 }
 
-// AddKeyToMetadataP updates SSH key entires in the project metadata
-func (c *gcpClient) addKeyToMetadata(authorizedKey []byte) error {
-	getProject := c.gce.Projects.Get(c.Project)
-	projectData, err := getProject.Do()
+// addKeyToMetadataP updates SSH key entires in the project metadata
+func (c *gcpClient) addKeyToMetadata(key *key.Key) error {
+	projectData, err := c.gce.Projects.Get(c.Project).Do()
 	if err != nil {
 		return err
 	}
 
-	item, err := createMetadataItem(authorizedKey)
+	item, err := createMetadataItem(key)
 	if err != nil {
 		return err
 	}
@@ -85,15 +91,36 @@ func (c *gcpClient) addKeyToMetadata(authorizedKey []byte) error {
 	return nil
 }
 
-// removeKeyFromMetadata removes user's ssh public key from the project metadata
-func (c *gcpClient) removeKeyFromMetadata(authorizedKey []byte) error {
-	getProject := c.gce.Projects.Get(c.Project)
-	projectData, err := getProject.Do()
+func (c *gcpClient) listMetadataKeys() error {
+	projectData, err := c.gce.Projects.Get(c.Project).Do()
 	if err != nil {
 		return err
 	}
 
-	item, err := createMetadataItem(authorizedKey)
+	flatMD := flattenMetadata(projectData.CommonInstanceMetadata)
+	if flatMD["ssh-keys"] == nil {
+		return nil
+	}
+
+	items := strings.Split(flatMD["ssh-keys"].(string), "\n")
+
+	for _, item := range items {
+		if strings.HasPrefix(item, c.client_email) {
+			log.Info(item)
+		}
+	}
+
+	return nil
+}
+
+// removeKeyFromMetadata removes user's ssh public key from the project metadata
+func (c *gcpClient) removeKeyFromMetadata(key *key.Key) error {
+	projectData, err := c.gce.Projects.Get(c.Project).Do()
+	if err != nil {
+		return err
+	}
+
+	item, err := createMetadataItem(key)
 	if err != nil {
 		return err
 	}
@@ -153,20 +180,13 @@ func hasItem(md *compute.Metadata, x string) (bool, bool, int) {
 }
 
 // createMetadataItem formats public key item according to GCP guidelines
-func createMetadataItem(authorizedKey []byte) (string, error) {
-	user, err := user.Current()
+func createMetadataItem(key *key.Key) (string, error) {
+	authorizedKey, err := key.MarshalAuthorizedKey()
 	if err != nil {
 		return "", err
 	}
 
-	hostname, err := os.Hostname()
-	if err != nil {
-		return "", err
-	}
-
-	trimmedKey := strings.TrimSuffix(string(authorizedKey), "\n")
-
-	v := fmt.Sprintf("%s:%s %s", user.Username, trimmedKey, hostname)
+	v := fmt.Sprintf("%s:%s %s", key.User, authorizedKey, key.Comment)
 	return v, nil
 }
 
