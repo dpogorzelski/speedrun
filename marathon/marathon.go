@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"net"
 	"os"
-	"os/user"
 	"path/filepath"
 	"speedrun/cloud"
 	"speedrun/colors"
@@ -46,11 +45,6 @@ func New(command string, timeout time.Duration, concurrency int) *Marathon {
 
 // Run runs a given command on servers in the addresses list
 func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerprint, usePrivateIP bool) error {
-	user, err := user.Current()
-	if err != nil {
-		return err
-	}
-
 	auth, err := key.GetAuth()
 	if err != nil {
 		return err
@@ -80,7 +74,7 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 			var err error
 
 			client, err = goph.NewConn(&goph.Config{
-				User:     user.Username,
+				User:     key.User,
 				Addr:     addr,
 				Port:     22,
 				Auth:     auth,
