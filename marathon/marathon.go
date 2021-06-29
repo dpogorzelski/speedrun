@@ -3,7 +3,9 @@ package marathon
 import (
 	"fmt"
 	"net"
+	"os"
 	"os/user"
+	"path/filepath"
 	"speedrun/cloud"
 	"speedrun/colors"
 	"speedrun/key"
@@ -13,6 +15,7 @@ import (
 	"github.com/alitto/pond"
 	"github.com/apex/log"
 	"github.com/melbahja/goph"
+	"github.com/mitchellh/go-homedir"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -53,6 +56,11 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 		return err
 	}
 
+	err = checkHostsFile()
+	if err != nil {
+		return err
+	}
+
 	cb := verifyHost
 	if ignoreFingerprint {
 		cb = ssh.InsecureIgnoreHostKey()
@@ -60,32 +68,25 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 
 	pool := pond.New(m.Concurrency, 10000)
 
-	for _, instance := range instances {
+	for _, i := range instances {
+		instance := i
 		addr := instance.PublicAddress
 		if usePrivateIP {
 			addr = instance.PrivateAddress
 		}
-		log.Debugf("Adding %s(%s) to the queue", instance.Name, addr)
+		log.Debugf("Adding %s (%s) to the queue", instance.Name, addr)
 		pool.Submit(func() {
 			var client *goph.Client
 			var err error
 
-			for i := 0; i < 60; i++ {
-				log.WithField("host", instance.Name).Debug("Checking if they public key has propagated yet")
-				client, err = goph.NewConn(&goph.Config{
-					User:     user.Username,
-					Addr:     addr,
-					Port:     22,
-					Auth:     auth,
-					Callback: cb,
-					Timeout:  m.Timeout,
-				})
-				if err != nil && err.Error() == "ssh: handshake failed: ssh: unable to authenticate, attempted methods [none publickey], no supported methods remain" {
-					time.Sleep(time.Second)
-				} else {
-					break
-				}
-			}
+			client, err = goph.NewConn(&goph.Config{
+				User:     user.Username,
+				Addr:     addr,
+				Port:     22,
+				Auth:     auth,
+				Callback: cb,
+				Timeout:  m.Timeout,
+			})
 
 			if err != nil {
 				log.WithField("host", instance.Name).Debugf("Error encountered while trying to connect: %s", err)
@@ -116,7 +117,14 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 // VerifyHost chekcks that the remote host's fingerprint matches the know one to avoid MITM.
 // If the host is new the fingerprint is added to known hostss file
 func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
-	hostFound, err := goph.CheckKnownHost(host, remote, key, "")
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+
+	knownhosts := filepath.Join(home, ".speedrun", "known_hosts")
+
+	hostFound, err := goph.CheckKnownHost(host, remote, key, knownhosts)
 	if hostFound && err != nil {
 		log.Debugf("Host fingerprint known")
 		return err
@@ -124,8 +132,8 @@ func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
 
 	if !hostFound && err != nil {
 		if err.Error() == "knownhosts: key is unknown" {
-			log.Warnf("Adding host %s to ~/.ssh/known_hosts", host)
-			return goph.AddKnownHost(host, remote, key, "")
+			log.Warnf("Adding host %s to ~/.speedrun/known_hosts", host)
+			return goph.AddKnownHost(host, remote, key, knownhosts)
 		}
 		return err
 	}
@@ -135,6 +143,23 @@ func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
 		return nil
 	}
 
+	return nil
+}
+
+func checkHostsFile() error {
+	home, err := homedir.Dir()
+	if err != nil {
+		return err
+	}
+
+	knownhosts := filepath.Join(home, ".speedrun", "known_hosts")
+
+	if _, err := os.Stat(knownhosts); os.IsNotExist(err) {
+		_, err = os.Create(knownhosts)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }
 

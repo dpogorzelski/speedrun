@@ -61,7 +61,7 @@ func (c *gcpClient) addKeyToMetadata(key *key.Key) error {
 		return err
 	}
 
-	item, err := createMetadataItem(key)
+	item, err := formatSSHKey(key)
 	if err != nil {
 		return err
 	}
@@ -120,7 +120,7 @@ func (c *gcpClient) removeKeyFromMetadata(key *key.Key) error {
 		return err
 	}
 
-	item, err := createMetadataItem(key)
+	item, err := formatSSHKey(key)
 	if err != nil {
 		return err
 	}
@@ -179,8 +179,8 @@ func hasItem(md *compute.Metadata, x string) (bool, bool, int) {
 	return false, false, -1
 }
 
-// createMetadataItem formats public key item according to GCP guidelines
-func createMetadataItem(key *key.Key) (string, error) {
+// formatSSHKey formats public key item according to GCP guidelines
+func formatSSHKey(key *key.Key) (string, error) {
 	authorizedKey, err := key.MarshalAuthorizedKey()
 	if err != nil {
 		return "", err
