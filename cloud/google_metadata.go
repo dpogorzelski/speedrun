@@ -1,42 +1,13 @@
 package cloud
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"sort"
 	"speedrun/key"
 	"strings"
 
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/oslogin/v1"
 )
-
-func (c *gcpClient) addUserKey(key *key.Key) error {
-	parent := fmt.Sprintf("users/%s", c.client_email)
-
-	authorizedKey, err := key.MarshalAuthorizedKey()
-	if err != nil {
-		return err
-	}
-
-	sshPublicKey := &oslogin.SshPublicKey{
-		Key: string(authorizedKey),
-	}
-
-	_, err = c.oslogin.Users.ImportSshPublicKey(parent, sshPublicKey).Do()
-	return err
-}
-
-func (c *gcpClient) removeUserKey(key *key.Key) error {
-	authorizedKey, err := key.MarshalAuthorizedKey()
-	if err != nil {
-		return err
-	}
-
-	name := fmt.Sprintf("users/%s/sshPublicKeys/%x", c.client_email, sha256.Sum256([]byte(authorizedKey)))
-	_, err = c.oslogin.Users.SshPublicKeys.Delete(name).Do()
-	return err
-}
 
 // addKeyToMetadataP updates SSH key entires in the project metadata
 func (c *gcpClient) addKeyToMetadata(key *key.Key) error {
