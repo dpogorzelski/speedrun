@@ -8,7 +8,7 @@ import (
 	"google.golang.org/api/oslogin/v1"
 )
 
-func (c *gcpClient) addUserKey(key *key.Key) error {
+func (c *GCPClient) AddUserKey(key *key.Key) error {
 	parent := fmt.Sprintf("users/%s", c.client_email)
 
 	authorizedKey, err := key.MarshalAuthorizedKey()
@@ -24,7 +24,7 @@ func (c *gcpClient) addUserKey(key *key.Key) error {
 	return err
 }
 
-func (c *gcpClient) removeUserKey(key *key.Key) error {
+func (c *GCPClient) RemoveUserKey(key *key.Key) error {
 	authorizedKey, err := key.MarshalAuthorizedKey()
 	if err != nil {
 		return err

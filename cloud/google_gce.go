@@ -7,14 +7,21 @@ import (
 )
 
 // GetInstances returns a list of external IP addresses used for the SHH connection
-func (c *gcpClient) GetInstances(filter string) ([]*compute.Instance, error) {
+func (c *GCPClient) GetInstances(filter string) ([]Instance, error) {
+	instances := []Instance{}
 	listCall := c.gce.Instances.AggregatedList(c.Project).Fields("nextPageToken", "items(Name,NetworkInterfaces)")
 	var ctx context.Context
-	instances := []*compute.Instance{}
 
 	listCall.Filter(filter).Pages(ctx, func(list *compute.InstanceAggregatedList) error {
 		for _, item := range list.Items {
-			instances = append(instances, item.Instances...)
+			for _, instance := range item.Instances {
+				i := &Instance{
+					PrivateAddress: instance.NetworkInterfaces[0].NetworkIP,
+					PublicAddress:  instance.NetworkInterfaces[0].AccessConfigs[0].NatIP,
+					Name:           instance.Name,
+				}
+				instances = append(instances, *i)
+			}
 		}
 		return nil
 	})

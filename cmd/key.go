@@ -51,6 +51,8 @@ func init() {
 	keyCmd.AddCommand(newKeyCmd)
 	keyCmd.AddCommand(authorizeKeyCmd)
 	keyCmd.AddCommand(revokeKeyCmd)
+	authorizeKeyCmd.Flags().Bool("use-oslogin", false, "Authorize the key via OS Login rather than metadata")
+	viper.BindPFlag("gcp.use-oslogin", authorizeKeyCmd.Flags().Lookup("use-oslogin"))
 }
 
 func determineKeyFilePath() (string, error) {
@@ -85,7 +87,9 @@ func newKey(cmd *cobra.Command, args []string) error {
 
 func authorizeKey(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
-	client, err := cloud.NewClient(cloud.SetProject(project))
+	useOSlogin := viper.GetBool("gcp.use-oslogin")
+
+	gcpClient, err := cloud.NewGCPClient(project)
 	if err != nil {
 		return err
 	}
@@ -101,9 +105,16 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Infof("Authorizing public key")
-	client.AuthorizeKey(k)
-	if err != nil {
-		return err
+	if useOSlogin {
+		gcpClient.AddUserKey(k)
+		if err != nil {
+			return err
+		}
+	} else {
+		gcpClient.AddKeyToMetadata(k)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
@@ -111,7 +122,7 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 
 func revokeKey(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
-	client, err := cloud.NewClient(cloud.SetProject(project))
+	gcpClient, err := cloud.NewGCPClient(project)
 	if err != nil {
 		return err
 	}
@@ -127,7 +138,12 @@ func revokeKey(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Info("Revoking public key")
-	err = client.RevokeKey(k)
+	err = gcpClient.RemoveKeyFromMetadata(k)
+	if err != nil {
+		return err
+	}
+
+	err = gcpClient.RemoveUserKey(k)
 	if err != nil {
 		return err
 	}

@@ -10,7 +10,7 @@ import (
 )
 
 // addKeyToMetadataP updates SSH key entires in the project metadata
-func (c *gcpClient) addKeyToMetadata(key *key.Key) error {
+func (c *GCPClient) AddKeyToMetadata(key *key.Key) error {
 	projectData, err := c.gce.Projects.Get(c.Project).Do()
 	if err != nil {
 		return err
@@ -47,7 +47,7 @@ func (c *gcpClient) addKeyToMetadata(key *key.Key) error {
 }
 
 // removeKeyFromMetadata removes user's ssh public key from the project metadata
-func (c *gcpClient) removeKeyFromMetadata(key *key.Key) error {
+func (c *GCPClient) RemoveKeyFromMetadata(key *key.Key) error {
 	projectData, err := c.gce.Projects.Get(c.Project).Do()
 	if err != nil {
 		return err

@@ -44,7 +44,7 @@ func init() {
 
 func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
-	projectid := viper.GetString("gcp.projectid")
+	project := viper.GetString("gcp.projectid")
 	timeout := viper.GetDuration("ssh.timeout")
 	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
 	onlyFailures := viper.GetBool("ssh.only-failures")
@@ -55,14 +55,14 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	client, err := cloud.NewClient(cloud.SetProject(projectid))
+	gcpClient, err := cloud.NewGCPClient(project)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	path, err := determineKeyFilePath()
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	k, err := key.Read(path)
@@ -71,7 +71,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Info("Fetching list of GCE instances")
-	instances, err := client.GetInstances(filter)
+	instances, err := gcpClient.GetInstances(filter)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
