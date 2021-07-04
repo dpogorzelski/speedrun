@@ -104,17 +104,19 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	log.Infof("Authorizing public key")
+	log.Info("Authorizing public key")
 	if useOSlogin {
 		gcpClient.AddUserKey(k)
 		if err != nil {
 			return err
 		}
+		log.Debugf("Authorized key via OS Login in the %s project", gcpClient.Project)
 	} else {
 		gcpClient.AddKeyToMetadata(k)
 		if err != nil {
 			return err
 		}
+		log.Debugf("Authorized key via metadata in the %s project", gcpClient.Project)
 	}
 
 	return nil

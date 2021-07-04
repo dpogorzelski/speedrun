@@ -27,7 +27,7 @@ type Key struct {
 
 func New() (*Key, error) {
 	key := &Key{}
-	log.Debug("Generating new private key")
+	log.Info("Generating new private key")
 	_, rawKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
