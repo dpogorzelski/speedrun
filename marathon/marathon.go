@@ -13,6 +13,7 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
+	"github.com/cheggaaa/pb/v3"
 	"github.com/melbahja/goph"
 	"github.com/mitchellh/go-homedir"
 	"golang.org/x/crypto/ssh"
@@ -44,7 +45,7 @@ func New(command string, timeout time.Duration, concurrency int) *Marathon {
 }
 
 // Run runs a given command on servers in the addresses list
-func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerprint, usePrivateIP bool) error {
+func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerprint bool) error {
 	auth, err := key.GetAuth()
 	if err != nil {
 		return err
@@ -62,20 +63,21 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 
 	pool := pond.New(m.Concurrency, 10000)
 
+	bar := pb.New(len(instances))
+	bar.SetMaxWidth(1)
+	bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
+	bar.Start()
+
 	for _, i := range instances {
 		instance := i
-		addr := instance.PublicAddress
-		if usePrivateIP {
-			addr = instance.PrivateAddress
-		}
-		log.Debugf("Adding %s (%s) to the queue", instance.Name, addr)
+		log.Debugf("Adding %s to the queue", instance.Name)
 		pool.Submit(func() {
 			var client *goph.Client
 			var err error
 
 			client, err = goph.NewConn(&goph.Config{
 				User:     key.User,
-				Addr:     addr,
+				Addr:     instance.Address,
 				Port:     22,
 				Auth:     auth,
 				Callback: cb,
@@ -85,6 +87,7 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 			if err != nil {
 				log.WithField("host", instance.Name).Debugf("Error encountered while trying to connect: %s", err)
 				m.Lock()
+				bar.Increment()
 				m.errors[instance.Name] = err
 				m.Unlock()
 				return
@@ -94,16 +97,19 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 			out, err := client.Run(m.Command)
 			if err != nil {
 				m.Lock()
+				bar.Increment()
 				m.failures[instance.Name] = formatOutput(string(out))
 				m.Unlock()
 				return
 			}
 			m.Lock()
+			bar.Increment()
 			m.successes[instance.Name] = formatOutput(string(out))
 			m.Unlock()
 		})
 	}
 	pool.StopAndWait()
+	bar.Finish()
 
 	return nil
 }

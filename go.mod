@@ -4,14 +4,17 @@ go 1.16
 
 require (
 	cloud.google.com/go v0.86.0 // indirect
+	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/alitto/pond v1.5.0
 	github.com/apex/log v1.9.0
+	github.com/cheggaaa/pb/v3 v3.0.8
 	github.com/fatih/color v1.12.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/jwalton/gchalk v1.0.3
 	github.com/lunixbochs/vtclean v1.0.0 // indirect
 	github.com/manifoldco/promptui v0.8.0
 	github.com/mattn/go-isatty v0.0.13 // indirect
+	github.com/mattn/go-runewidth v0.0.13 // indirect
 	github.com/melbahja/goph v1.2.1
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
 	github.com/mitchellh/go-homedir v1.1.0

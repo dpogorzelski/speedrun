@@ -2,7 +2,6 @@ package main
 
 import (
 	"os"
-
 	"speedrun/cmd"
 
 	"github.com/apex/log"

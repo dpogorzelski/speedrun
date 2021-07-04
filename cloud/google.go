@@ -35,7 +35,7 @@ func NewGCPClient(project string) (*GCPClient, error) {
 
 	gce, err := compute.NewService(ctx)
 	if err != nil {
-		err = fmt.Errorf("couldn't initialize GCP client (Compute): %v", err)
+		err = fmt.Errorf("couldn't initialize GCP client: %v", err)
 		return nil, err
 	}
 

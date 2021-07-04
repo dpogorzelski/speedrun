@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"fmt"
 	"speedrun/cloud"
-	"speedrun/colors"
 	"speedrun/key"
 	"speedrun/marathon"
 	"strings"
@@ -75,7 +73,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Info("Fetching list of GCE instances")
-	instances, err := gcpClient.GetInstances(filter)
+	instances, err := gcpClient.GetInstances(filter, usePrivateIP)
 	if err != nil {
 		return err
 	}
@@ -93,10 +91,8 @@ func run(cmd *cobra.Command, args []string) error {
 		k.User = user
 	}
 
-	log.Info(fmt.Sprintf("Running [%s]", colors.Blue(command)))
 	m := marathon.New(command, timeout, concurrency)
-
-	err = m.Run(instances, k, ignoreFingerprint, usePrivateIP)
+	err = m.Run(instances, k, ignoreFingerprint)
 	if err != nil {
 		log.Fatal(err.Error())
 	}
