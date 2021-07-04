@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"speedrun/key"
 
+	"github.com/apex/log"
 	"google.golang.org/api/oslogin/v1"
 )
 
@@ -33,4 +34,29 @@ func (c *GCPClient) RemoveUserKey(key *key.Key) error {
 	name := fmt.Sprintf("users/%s/sshPublicKeys/%x", c.client_email, sha256.Sum256([]byte(authorizedKey)))
 	_, err = c.oslogin.Users.SshPublicKeys.Delete(name).Do()
 	return err
+}
+
+func (c *GCPClient) ListUserKeys() error {
+	parent := fmt.Sprintf("users/%s", c.client_email)
+
+	profile, err := c.oslogin.Users.GetLoginProfile(parent).Do()
+	if err != nil {
+		return err
+	}
+
+	for _, k := range profile.SshPublicKeys {
+		log.Info(k.Key)
+	}
+	return nil
+}
+
+func (c *GCPClient) GetSAUsername() (string, error) {
+	parent := fmt.Sprintf("users/%s", c.client_email)
+
+	profile, err := c.oslogin.Users.GetLoginProfile(parent).Do()
+	if err != nil {
+		return "", err
+	}
+
+	return profile.PosixAccounts[0].Username, nil
 }

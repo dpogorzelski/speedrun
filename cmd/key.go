@@ -47,10 +47,21 @@ var revokeKeyCmd = &cobra.Command{
 	RunE: revokeKey,
 }
 
+var listKeysCmd = &cobra.Command{
+	Use:     "list",
+	Short:   "List OS Login keys",
+	Example: "  speedrun key list",
+	PreRun: func(cmd *cobra.Command, args []string) {
+		initConfig()
+	},
+	RunE: listKeys,
+}
+
 func init() {
 	keyCmd.AddCommand(newKeyCmd)
 	keyCmd.AddCommand(authorizeKeyCmd)
 	keyCmd.AddCommand(revokeKeyCmd)
+	keyCmd.AddCommand(listKeysCmd)
 	authorizeKeyCmd.Flags().Bool("use-oslogin", false, "Authorize the key via OS Login rather than metadata")
 	viper.BindPFlag("gcp.use-oslogin", authorizeKeyCmd.Flags().Lookup("use-oslogin"))
 }
@@ -104,19 +115,18 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	log.Info("Authorizing public key")
 	if useOSlogin {
 		gcpClient.AddUserKey(k)
 		if err != nil {
 			return err
 		}
-		log.Debugf("Authorized key via OS Login in the %s project", gcpClient.Project)
+		log.Info("Authorized key via OS Login")
 	} else {
 		gcpClient.AddKeyToMetadata(k)
 		if err != nil {
 			return err
 		}
-		log.Debugf("Authorized key via metadata in the %s project", gcpClient.Project)
+		log.Info("Authorized key in the project metadata")
 	}
 
 	return nil
@@ -146,6 +156,22 @@ func revokeKey(cmd *cobra.Command, args []string) error {
 	}
 
 	err = gcpClient.RemoveUserKey(k)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func listKeys(cmd *cobra.Command, args []string) error {
+	project := viper.GetString("gcp.projectid")
+	gcpClient, err := cloud.NewGCPClient(project)
+	if err != nil {
+		return err
+	}
+
+	log.Info("Fetching OS Login keys")
+	err = gcpClient.ListUserKeys()
 	if err != nil {
 		return err
 	}

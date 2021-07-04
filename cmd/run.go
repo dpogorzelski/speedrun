@@ -33,7 +33,9 @@ func init() {
 	runCmd.Flags().Duration("timeout", time.Duration(10*time.Second), "SSH connection timeout")
 	runCmd.Flags().Int("concurrency", 100, "Number of maximum concurrent SSH workers")
 	runCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
+	runCmd.Flags().Bool("use-oslogin", false, "Authenticate via OS Login")
 	viper.BindPFlag("gcp.projectid", runCmd.Flags().Lookup("projectid"))
+	viper.BindPFlag("gcp.use-oslogin", runCmd.Flags().Lookup("use-oslogin"))
 	viper.BindPFlag("ssh.timeout", runCmd.Flags().Lookup("timeout"))
 	viper.BindPFlag("ssh.ignore-fingerprint", runCmd.Flags().Lookup("ignore-fingerprint"))
 	viper.BindPFlag("ssh.only-failures", runCmd.Flags().Lookup("only-failures"))
@@ -50,6 +52,8 @@ func run(cmd *cobra.Command, args []string) error {
 	onlyFailures := viper.GetBool("ssh.only-failures")
 	concurrency := viper.GetInt("ssh.concurrency")
 	usePrivateIP := viper.GetBool("ssh.use-private-ip")
+	useOSlogin := viper.GetBool("gcp.use-oslogin")
+
 	filter, err := cmd.Flags().GetString("filter")
 	if err != nil {
 		return err
@@ -73,11 +77,20 @@ func run(cmd *cobra.Command, args []string) error {
 	log.Info("Fetching list of GCE instances")
 	instances, err := gcpClient.GetInstances(filter)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
+
 	if len(instances) == 0 {
 		log.Warn("No instances found")
 		return nil
+	}
+
+	if useOSlogin {
+		user, err := gcpClient.GetSAUsername()
+		if err != nil {
+			return err
+		}
+		k.User = user
 	}
 
 	log.Info(fmt.Sprintf("Running [%s]", colors.Blue(command)))
