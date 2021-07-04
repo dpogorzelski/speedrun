@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"crypto/ed25519"
 	"crypto/rand"
+	"encoding/base64"
 	"encoding/gob"
 	"encoding/pem"
 	"io/ioutil"
@@ -27,7 +28,6 @@ type Key struct {
 
 func New() (*Key, error) {
 	key := &Key{}
-	log.Info("Generating new private key")
 	_, rawKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
@@ -61,8 +61,13 @@ func Read(path string) (*Key, error) {
 		return nil, err
 	}
 
+	b64Result, err := base64.StdEncoding.DecodeString(string(file))
+	if err != nil {
+		return nil, err
+	}
+
 	key := &Key{}
-	buf := bytes.NewBuffer(file)
+	buf := bytes.NewBuffer(b64Result)
 	enc := gob.NewDecoder(buf)
 
 	err = enc.Decode(key)
@@ -82,8 +87,13 @@ func (k *Key) Write(path string) error {
 		return err
 	}
 
+	b64Result := base64.StdEncoding.EncodeToString(buf.Bytes())
+	if err != nil {
+		return err
+	}
+
 	log.Debugf("Writing priviate key to %s", path)
-	err = ioutil.WriteFile(path, buf.Bytes(), 0600)
+	err = ioutil.WriteFile(path, []byte(b64Result), 0600)
 	if err != nil {
 		return err
 	}
