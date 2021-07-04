@@ -1,7 +1,6 @@
 package cloud
 
 type Instance struct {
-	PrivateAddress string
-	PublicAddress  string
-	Name           string
+	Address string
+	Name    string
 }
