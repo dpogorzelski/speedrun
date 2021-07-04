@@ -1,4 +1,4 @@
-package gcp
+package cloud
 
 import (
 	"context"
@@ -6,24 +6,26 @@ import (
 	"google.golang.org/api/compute/v1"
 )
 
-// GetIPAddresses returns a list of external IP addresses used for the SHH connection
-func (c *ComputeClient) GetIPAddresses(instances []*compute.Instance) []string {
-	addresses := []string{}
-	for _, instance := range instances {
-		addresses = append(addresses, instance.NetworkInterfaces[0].AccessConfigs[0].NatIP+":22")
-	}
-	return addresses
-}
-
 // GetInstances returns a list of external IP addresses used for the SHH connection
-func (c *ComputeClient) GetInstances(filter string) ([]*compute.Instance, error) {
-	listCall := c.Instances.AggregatedList(c.Project)
+func (c *GCPClient) GetInstances(filter string, usePrivateIP bool) ([]Instance, error) {
+	instances := []Instance{}
+	listCall := c.gce.Instances.AggregatedList(c.Project).Fields("nextPageToken", "items(Name,NetworkInterfaces)")
 	var ctx context.Context
-	instances := []*compute.Instance{}
 
 	listCall.Filter(filter).Pages(ctx, func(list *compute.InstanceAggregatedList) error {
 		for _, item := range list.Items {
-			instances = append(instances, item.Instances...)
+			for _, instance := range item.Instances {
+				i := &Instance{
+					Name: instance.Name,
+				}
+				if usePrivateIP {
+					i.Address = instance.NetworkInterfaces[0].NetworkIP
+				} else {
+					i.Address = instance.NetworkInterfaces[0].AccessConfigs[0].NatIP
+				}
+
+				instances = append(instances, *i)
+			}
 		}
 		return nil
 	})
