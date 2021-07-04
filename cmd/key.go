@@ -47,21 +47,10 @@ var revokeKeyCmd = &cobra.Command{
 	RunE: revokeKey,
 }
 
-var listKeyCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "List user keys",
-	Example: "  speedrun key list",
-	PreRun: func(cmd *cobra.Command, args []string) {
-		initConfig()
-	},
-	RunE: listKey,
-}
-
 func init() {
 	keyCmd.AddCommand(newKeyCmd)
 	keyCmd.AddCommand(authorizeKeyCmd)
 	keyCmd.AddCommand(revokeKeyCmd)
-	keyCmd.AddCommand(listKeyCmd)
 }
 
 func determineKeyFilePath() (string, error) {
@@ -139,21 +128,6 @@ func revokeKey(cmd *cobra.Command, args []string) error {
 
 	log.Info("Revoking public key")
 	err = client.RevokeKey(k)
-	if err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func listKey(cmd *cobra.Command, args []string) error {
-	project := viper.GetString("gcp.projectid")
-	client, err := cloud.NewClient(cloud.SetProject(project))
-	if err != nil {
-		return err
-	}
-
-	err = client.ListKeys()
 	if err != nil {
 		return err
 	}

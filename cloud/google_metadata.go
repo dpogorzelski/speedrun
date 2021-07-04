@@ -7,7 +7,6 @@ import (
 	"speedrun/key"
 	"strings"
 
-	"github.com/apex/log"
 	"google.golang.org/api/compute/v1"
 	"google.golang.org/api/oslogin/v1"
 )
@@ -37,21 +36,6 @@ func (c *gcpClient) removeUserKey(key *key.Key) error {
 	name := fmt.Sprintf("users/%s/sshPublicKeys/%x", c.client_email, sha256.Sum256([]byte(authorizedKey)))
 	_, err = c.oslogin.Users.SshPublicKeys.Delete(name).Do()
 	return err
-}
-
-func (c *gcpClient) listUserKeys() error {
-	parent := fmt.Sprintf("users/%s", c.client_email)
-
-	profile, err := c.oslogin.Users.GetLoginProfile(parent).Do()
-	if err != nil {
-		return err
-	}
-
-	for _, k := range profile.SshPublicKeys {
-		log.Info(k.Key)
-		log.Info(k.Name)
-	}
-	return nil
 }
 
 // addKeyToMetadataP updates SSH key entires in the project metadata
@@ -86,28 +70,6 @@ func (c *gcpClient) addKeyToMetadata(key *key.Key) error {
 	_, err = setMetadata.Do()
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-func (c *gcpClient) listMetadataKeys() error {
-	projectData, err := c.gce.Projects.Get(c.Project).Do()
-	if err != nil {
-		return err
-	}
-
-	flatMD := flattenMetadata(projectData.CommonInstanceMetadata)
-	if flatMD["ssh-keys"] == nil {
-		return nil
-	}
-
-	items := strings.Split(flatMD["ssh-keys"].(string), "\n")
-
-	for _, item := range items {
-		if strings.HasPrefix(item, c.client_email) {
-			log.Info(item)
-		}
 	}
 
 	return nil

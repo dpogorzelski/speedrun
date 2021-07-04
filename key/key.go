@@ -17,6 +17,8 @@ import (
 	"golang.org/x/crypto/ssh"
 )
 
+const Comment = "speedrun"
+
 type Key struct {
 	User    string
 	Comment string
@@ -43,7 +45,7 @@ func New() (*Key, error) {
 		return nil, err
 	}
 	key.User = user.Username
-	key.Comment = "speedrun"
+	key.Comment = Comment
 	return key, nil
 }
 

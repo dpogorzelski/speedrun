@@ -67,16 +67,6 @@ func (c *Client) RevokeKey(key *key.Key) error {
 	return err
 }
 
-func (c *Client) ListKeys() error {
-	err := c.gcp.listUserKeys()
-	if err != nil {
-		return err
-	}
-
-	err = c.gcp.listMetadataKeys()
-	return err
-}
-
 // func (c *Client) AuthorizeKeyInstance(key *key.Key, instancePool *InstancePool) error {
 // 	pool := pond.New(10, 0, pond.MinWorkers(10))
 // 	for _, instance := range instancePool.instances {
