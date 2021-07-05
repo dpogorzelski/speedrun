@@ -16,6 +16,7 @@ import (
 	"github.com/cheggaaa/pb/v3"
 	"github.com/melbahja/goph"
 	"github.com/mitchellh/go-homedir"
+	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -64,9 +65,11 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 	pool := pond.New(m.Concurrency, 10000)
 
 	bar := pb.New(len(instances))
-	bar.SetMaxWidth(1)
-	bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
-	bar.Start()
+	if log.MustParseLevel(viper.GetString("loglevel")) > 0 {
+		bar.SetMaxWidth(1)
+		bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
+		bar.Start()
+	}
 
 	for _, i := range instances {
 		instance := i
@@ -132,7 +135,7 @@ func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
 
 	if !hostFound && err != nil {
 		if err.Error() == "knownhosts: key is unknown" {
-			log.Warnf("Adding host %s to ~/.speedrun/known_hosts", host)
+			log.Debugf("Adding host %s to ~/.speedrun/known_hosts", host)
 			return goph.AddKnownHost(host, remote, key, knownhosts)
 		}
 		return err
