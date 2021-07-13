@@ -44,7 +44,7 @@ Download the precompiled binary from here: [Releases](https://github.com/dpogorz
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
 speedrun init
 speedrun key new
-speedrun key set
+speedrun key authorize
 speedrun run whoami
 ```
 
@@ -73,14 +73,6 @@ Use a different config file
 ```bash
 speedrun run whoami -c /path/to/config.toml
 ```
-
-Set public key on specific instances instead of project metadata (useful if instances are blocking project wide keys):
-
-```bash
-speedrun key set --filter "labels.env = dev"
-```
-
-
 
 ## Configuration
 
