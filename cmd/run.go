@@ -15,7 +15,7 @@ import (
 var runCmd = &cobra.Command{
 	Use:     "run <command to run>",
 	Short:   "Run command on remote servers",
-	Example: "  speedrun run whoami\n  speedrun run whoami --only-failures --filter \"labels.foo = bar AND labels.environment = staging\"",
+	Example: "  speedrun run whoami\n  speedrun run whoami --only-failures --target \"labels.foo = bar AND labels.environment = staging\"",
 	Args:    cobra.MinimumNArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
@@ -24,7 +24,7 @@ var runCmd = &cobra.Command{
 }
 
 func init() {
-	runCmd.Flags().String("filter", "", "Fetch instances that match the filter")
+	runCmd.Flags().String("target", "", "Fetch instances that match the target selection criteria")
 	runCmd.Flags().String("projectid", "", "Override GCP project id")
 	runCmd.Flags().Bool("only-failures", false, "Print only failures and errors")
 	runCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
@@ -39,7 +39,6 @@ func init() {
 	viper.BindPFlag("ssh.only-failures", runCmd.Flags().Lookup("only-failures"))
 	viper.BindPFlag("ssh.concurrency", runCmd.Flags().Lookup("concurrency"))
 	viper.BindPFlag("ssh.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
-
 }
 
 func run(cmd *cobra.Command, args []string) error {
@@ -52,7 +51,7 @@ func run(cmd *cobra.Command, args []string) error {
 	usePrivateIP := viper.GetBool("ssh.use-private-ip")
 	useOSlogin := viper.GetBool("gcp.use-oslogin")
 
-	filter, err := cmd.Flags().GetString("filter")
+	target, err := cmd.Flags().GetString("target")
 	if err != nil {
 		return err
 	}
@@ -73,7 +72,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Info("Fetching list of GCE instances")
-	instances, err := gcpClient.GetInstances(filter, usePrivateIP)
+	instances, err := gcpClient.GetInstances(target, usePrivateIP)
 	if err != nil {
 		return err
 	}
@@ -94,7 +93,7 @@ func run(cmd *cobra.Command, args []string) error {
 	m := marathon.New(command, timeout, concurrency)
 	err = m.Run(instances, k, ignoreFingerprint)
 	if err != nil {
-		log.Fatal(err.Error())
+		return err
 	}
 
 	m.PrintResult(onlyFailures)
