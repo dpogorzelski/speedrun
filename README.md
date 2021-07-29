@@ -21,7 +21,7 @@ speedrun run systemctl stop nginx
 
 No hassles with setting up and maintaining a server with agents as speedrun has none. No runtime to install/maintain as it's a single self-contained binary. Speedrun leverages SSH as transport with tight cloud vendor integration to take the burden of mundane things like key generation and propagation/revocation away from the user.
 
-Server selection is made as intuitive as possible, currently based on [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) but in the future will be replaced by a generic selection mechanism to provide a seamless experience across different cloud vendors.
+Server targeting (`--target`) is made as intuitive as possible, currently based on [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) but in the future will be replaced by a generic selection mechanism to provide a seamless experience across different cloud vendors.
 
 
 Features:
@@ -56,16 +56,16 @@ Use 1000 concurrent SSH workers
 speedrun run "uname -r" --concurrency 1000
 ```
 
-Stop Nginx on VMs matching the filter
+Stop Nginx on VMs matching the target selector
 
 ```bash
-speedrun run sudo systemctl stop nginx --filter "labels.env=staging AND labels.app=foobar"
+speedrun run sudo systemctl stop nginx --target "labels.env=staging AND labels.app=foobar"
 ```
 
 Ignore SSH fingerprint mismatch and connect via private IP addresses
 
 ```bash
-speedrun run "ls -la" --filter "labels.env != prod" --ignore-fingerprint --concurrency 1000 --use-private-ip
+speedrun run "ls -la" --target "labels.env != prod" --ignore-fingerprint --concurrency 1000 --use-private-ip
 ```
 
 Use a different config file
