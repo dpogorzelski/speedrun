@@ -65,7 +65,12 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 	pool := pond.New(m.Concurrency, 10000)
 
 	bar := pb.New(len(instances))
-	if log.MustParseLevel(viper.GetString("loglevel")) > 0 {
+	lvl, err := log.ParseLevel(viper.GetString("loglevel"))
+	if err != nil {
+		return fmt.Errorf("couldn't parse log level: %s", err)
+	}
+
+	if lvl > 0 {
 		bar.SetMaxWidth(1)
 		bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
 		bar.Start()
