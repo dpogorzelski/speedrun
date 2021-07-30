@@ -173,7 +173,6 @@ func checkHostsFile() error {
 
 // PrintResult prints the results of the ssh command run
 func (m *Marathon) PrintResult(failures bool) {
-
 	if !failures {
 		for host, msg := range m.successes {
 			fmt.Printf("  %s:\n%s\n", colors.Green(host), colors.White(msg))

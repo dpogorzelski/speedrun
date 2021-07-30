@@ -71,7 +71,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	log.Info("Fetching list of GCE instances")
+	log.Info("Fetching instance list")
 	instances, err := gcpClient.GetInstances(target, usePrivateIP)
 	if err != nil {
 		return err
