@@ -8,15 +8,9 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: golang-1.17rc1-buster
     steps:
       - uses: actions/checkout@v2
-
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          stable: 'false'
-          go-version: 1.17rc1
 
       - name: Build
         run: go build -v ./...
