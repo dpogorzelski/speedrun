@@ -65,9 +65,14 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 	pool := pond.New(m.Concurrency, 10000)
 
 	bar := pb.New(len(instances))
-	if log.MustParseLevel(viper.GetString("loglevel")) > 0 {
+	lvl, err := log.ParseLevel(viper.GetString("loglevel"))
+	if err != nil {
+		return fmt.Errorf("couldn't parse log level: %s", err)
+	}
+
+	if lvl > 0 {
 		bar.SetMaxWidth(1)
-		bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
+		bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Purple(m.Command)))
 		bar.Start()
 	}
 
@@ -168,7 +173,6 @@ func checkHostsFile() error {
 
 // PrintResult prints the results of the ssh command run
 func (m *Marathon) PrintResult(failures bool) {
-
 	if !failures {
 		for host, msg := range m.successes {
 			fmt.Printf("  %s:\n%s\n", colors.Green(host), colors.White(msg))
