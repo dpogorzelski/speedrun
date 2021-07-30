@@ -24,7 +24,7 @@ var runCmd = &cobra.Command{
 }
 
 func init() {
-	runCmd.Flags().String("target", "", "Fetch instances that match the target selection criteria")
+	runCmd.Flags().StringP("target", "t", "", "Fetch instances that match the target selection criteria")
 	runCmd.Flags().String("projectid", "", "Override GCP project id")
 	runCmd.Flags().Bool("only-failures", false, "Print only failures and errors")
 	runCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
