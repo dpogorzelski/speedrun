@@ -16,7 +16,7 @@ jobs:
         uses: actions/setup-go@v2
         with:
           stable: 'false'
-          go-version: go1.17rc1
+          # go-version: go1.17rc1
 
       - name: Build
         run: go build -v ./...
