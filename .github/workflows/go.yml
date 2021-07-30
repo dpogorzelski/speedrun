@@ -12,10 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Set up Go
+        uses: actions/setup-go@v2
+        with:
+          stable: 'false'
+          go-version: go1.17rc1
+
       - name: Build
-        uses: docker://golang:1.17rc1-buster
         run: go build -v ./...
 
       - name: Test
-        uses: docker://golang:1.17rc1-buster
         run: go test -v ./...
