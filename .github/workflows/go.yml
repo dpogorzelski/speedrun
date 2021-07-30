@@ -8,12 +8,14 @@ on:
 
 jobs:
   build:
-    runs-on: golang-1.17rc1-buster
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
 
       - name: Build
+        uses: docker://golang:1.17rc1-buster
         run: go build -v ./...
 
       - name: Test
+        uses: docker://golang:1.17rc1-buster
         run: go test -v ./...
