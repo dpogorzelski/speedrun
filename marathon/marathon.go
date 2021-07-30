@@ -72,7 +72,7 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 
 	if lvl > 0 {
 		bar.SetMaxWidth(1)
-		bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Blue(m.Command)))
+		bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Purple(m.Command)))
 		bar.Start()
 	}
 

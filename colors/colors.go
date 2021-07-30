@@ -28,3 +28,8 @@ func Blue(s string) string {
 func White(s string) string {
 	return gchalk.White(s)
 }
+
+// Purple returns a purple string
+func Purple(s string) string {
+	return gchalk.RGB(196, 16, 224)(s)
+}
