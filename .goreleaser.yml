@@ -11,6 +11,7 @@ builds:
 archives:
   - replacements:
       amd64: x86_64
+    format: zip
 checksum:
   name_template: "checksums.txt"
 snapshot:
