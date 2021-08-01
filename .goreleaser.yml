@@ -16,6 +16,7 @@ checksum:
 snapshot:
   name_template: "{{ .Tag }}"
 changelog:
+  skip: true
   sort: asc
   filters:
     exclude:
