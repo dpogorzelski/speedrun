@@ -92,6 +92,10 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 
 This project is in a very early stage so expect a lot of breaking changes in the nearest future
 
+## Community & Support
+
+Join the [#Speedrun](https://discord.gg/nkVvPnRvrJ) channel on Discord to chat and ask questions
+
 ## License
 
 [MPL-2.0](LICENSE)
