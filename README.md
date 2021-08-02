@@ -20,7 +20,7 @@ speedrun run systemctl stop nginx
 
  to stop nginx across 3k machines.
 
-No hassles with setting up and maintaining a server with agents as speedrun has none. No runtime to install/maintain as it's a single self-contained binary. Speedrun leverages SSH as transport with tight cloud vendor integration to take the burden of mundane things like key generation and propagation/revocation away from the user.
+No hassles with setting up and maintaining a server with agents as speedrun has none. Single self-contained binary. Speedrun leverages SSH as transport with tight cloud vendor integration to take the burden of mundane things like key generation and propagation/revocation away from the user.
 
 Server targeting (`--target`) is made as intuitive as possible, currently based on [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) but in the future will be replaced by a generic selection mechanism to provide a seamless experience across different cloud vendors.
 
