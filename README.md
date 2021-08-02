@@ -36,8 +36,13 @@ Features:
 
 ## Installation
 
-Download the precompiled binary from here: [Releases](https://github.com/dpogorzelski/speedrun/releases)
+#### Homebrew (MacOS, Linux)
+```bash
+brew install dpogorzelski/tap/speedrun
+```
 
+#### Manual (MacOS, Linux, Windows)
+Download the precompiled binary from here: [Releases](https://github.com/dpogorzelski/speedrun/releases)
 ## Usage
 
 ```bash
