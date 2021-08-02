@@ -11,6 +11,7 @@
 [![Go](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml/badge.svg)](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml)
 
 Speedrun is an action execution framework that works at scale.
+
 It allows you to run any action/command across any number of servers, projects and cloud vendors with ease and fast (currently GCP only but AWS and Azure will be supported as well), example:
 
 ```bash
