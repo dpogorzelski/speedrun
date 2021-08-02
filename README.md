@@ -94,7 +94,7 @@ This project is in a very early stage so expect a lot of breaking changes in the
 
 ## Community & Support
 
-Join the [#Speedrun](https://discord.gg/nkVvPnRvrJ) channel on Discord to chat and ask questions
+Join the [#Speedrun](https://discord.gg/nkVvPnRvrJ) channel on Discord to chat and ask questions 😃
 
 ## License
 
