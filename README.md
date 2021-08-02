@@ -10,8 +10,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/dpogorzelski/speedrun)](https://goreportcard.com/report/github.com/dpogorzelski/speedrun)
 [![Go](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml/badge.svg)](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml)
 
-Speedrun is a command execution framework that works at scale.
-The point of Speedrun is so that you can run any command across any number of servers, projects and cloud vendors with ease and fast (currently GCP only but AWS and Azure will be supported as well), example:
+Speedrun is an action execution framework that works at scale.
+It allows you to run any action/command across any number of servers, projects and cloud vendors with ease and fast (currently GCP only but AWS and Azure will be supported as well), example:
 
 ```bash
 speedrun run systemctl stop nginx
