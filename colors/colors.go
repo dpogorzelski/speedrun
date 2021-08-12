@@ -31,5 +31,6 @@ func White(s string) string {
 
 // Purple returns a purple string
 func Purple(s string) string {
+	//fix detect truecolor support
 	return gchalk.RGB(196, 16, 224)(s)
 }
