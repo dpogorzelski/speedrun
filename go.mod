@@ -6,7 +6,7 @@ require (
 	github.com/alitto/pond v1.5.1
 	github.com/apex/log v1.9.0
 	github.com/cheggaaa/pb/v3 v3.0.8
-	github.com/jwalton/gchalk v1.0.3
+	github.com/jwalton/gchalk v1.1.0
 	github.com/manifoldco/promptui v0.8.0
 	github.com/melbahja/goph v1.2.1
 	github.com/mikesmitty/edkey v0.0.0-20170222072505-3356ea4e686a
@@ -14,12 +14,12 @@ require (
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.8.1
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97
-	golang.org/x/oauth2 v0.0.0-20210628180205-a41e5a781914
+	golang.org/x/oauth2 v0.0.0-20210805134026-6f1e6394065a
 	google.golang.org/api v0.52.0
 )
 
 require (
-	cloud.google.com/go v0.89.0 // indirect
+	cloud.google.com/go v0.90.0
 	github.com/VividCortex/ewma v1.2.0 // indirect
 	github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e // indirect
 	github.com/fatih/color v1.12.0 // indirect
@@ -48,14 +48,17 @@ require (
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	go.opencensus.io v0.23.0 // indirect
-	golang.org/x/net v0.0.0-20210503060351-7fd8e65b6420 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
+	golang.org/x/net v0.0.0-20210805182204-aaa1db679c0d // indirect
+	golang.org/x/sys v0.0.0-20210809222454-d867a43fc93e // indirect
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20210729151513-df9385d47c1b // indirect
-	google.golang.org/grpc v1.39.0 // indirect
-	google.golang.org/protobuf v1.27.1 // indirect
+	google.golang.org/genproto v0.0.0-20210809142519-0135a39c2737
+	google.golang.org/grpc v1.39.1
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+require github.com/google/go-cmp v0.5.6 // indirect
+
+require google.golang.org/protobuf v1.27.1 // indirect
