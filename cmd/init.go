@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"speedrun/config"
+	"github.com/speedrunsh/speedrun/config"
 
 	"github.com/spf13/cobra"
 )

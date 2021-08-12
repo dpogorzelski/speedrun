@@ -4,7 +4,8 @@ import (
 	"context"
 	"crypto/sha256"
 	"fmt"
-	"speedrun/key"
+
+	"github.com/speedrunsh/speedrun/key"
 
 	"github.com/apex/log"
 	common "google.golang.org/genproto/googleapis/cloud/oslogin/common"

@@ -2,7 +2,8 @@ package main
 
 import (
 	"os"
-	"speedrun/cmd"
+
+	"github.com/speedrunsh/speedrun/cmd"
 
 	"github.com/apex/log"
 	loghandler "github.com/apex/log/handlers/cli"

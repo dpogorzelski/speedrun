@@ -5,11 +5,12 @@ import (
 	"net"
 	"os"
 	"path/filepath"
-	"speedrun/cloud"
-	"speedrun/colors"
-	"speedrun/key"
 	"sync"
 	"time"
+
+	"github.com/speedrunsh/speedrun/cloud"
+	"github.com/speedrunsh/speedrun/colors"
+	"github.com/speedrunsh/speedrun/key"
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"

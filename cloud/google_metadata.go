@@ -3,8 +3,9 @@ package cloud
 import (
 	"fmt"
 	"sort"
-	"speedrun/key"
 	"strings"
+
+	"github.com/speedrunsh/speedrun/key"
 
 	"google.golang.org/api/compute/v1"
 )

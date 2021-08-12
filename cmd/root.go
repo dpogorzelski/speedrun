@@ -3,6 +3,7 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
+	"github.com/speedrunsh/speedrun/cloud"
 
 	"github.com/apex/log"
 	homedir "github.com/mitchellh/go-homedir"

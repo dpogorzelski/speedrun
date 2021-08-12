@@ -4,8 +4,9 @@ import (
 	"path/filepath"
 	"context"
 
-	"speedrun/cloud"
-	"speedrun/key"
+	"github.com/speedrunsh/speedrun/cloud"
+	"github.com/speedrunsh/speedrun/key"
+	"github.com/speedrunsh/speedrun/util"
 
 	"github.com/apex/log"
 	homedir "github.com/mitchellh/go-homedir"

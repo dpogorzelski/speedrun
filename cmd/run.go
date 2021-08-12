@@ -1,12 +1,14 @@
 package cmd
 
 import (
-	"speedrun/cloud"
-	"speedrun/key"
-	"speedrun/marathon"
 	"context"
 	"strings"
 	"time"
+
+	"github.com/speedrunsh/speedrun/cloud"
+	"github.com/speedrunsh/speedrun/key"
+	"github.com/speedrunsh/speedrun/marathon"
+	"github.com/speedrunsh/speedrun/util"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
