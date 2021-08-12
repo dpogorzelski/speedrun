@@ -1,7 +1,6 @@
 package cmd
 
 import (
-	"path/filepath"
 	"context"
 
 	"github.com/speedrunsh/speedrun/cloud"
@@ -9,7 +8,6 @@ import (
 	"github.com/speedrunsh/speedrun/util"
 
 	"github.com/apex/log"
-	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -68,24 +66,13 @@ func init() {
 	viper.BindPFlag("gcp.use-oslogin", authorizeKeyCmd.Flags().Lookup("use-oslogin"))
 }
 
-func determineKeyFilePath() (string, error) {
-	log.Debug("Determining private key path")
-	home, err := homedir.Dir()
-	if err != nil {
-		return "", err
-	}
-
-	path := filepath.Join(home, ".speedrun/privatekey")
-	return path, nil
-}
-
 func newKey(cmd *cobra.Command, args []string) error {
 	k, err := key.New()
 	if err != nil {
 		return err
 	}
 
-	path, err := determineKeyFilePath()
+	path, err := util.DetermineKeyFilePath()
 	if err != nil {
 		return err
 	}
@@ -108,7 +95,7 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := determineKeyFilePath()
+	path, err := util.DetermineKeyFilePath()
 	if err != nil {
 		return err
 	}
@@ -144,7 +131,7 @@ func revokeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := determineKeyFilePath()
+	path, err := util.DetermineKeyFilePath()
 	if err != nil {
 		return err
 	}

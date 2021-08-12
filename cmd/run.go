@@ -64,7 +64,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := determineKeyFilePath()
+	path, err := util.DetermineKeyFilePath()
 	if err != nil {
 		return err
 	}
