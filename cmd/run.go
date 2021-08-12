@@ -4,6 +4,7 @@ import (
 	"speedrun/cloud"
 	"speedrun/key"
 	"speedrun/marathon"
+	"context"
 	"strings"
 	"time"
 
@@ -83,7 +84,9 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if useOSlogin {
-		user, err := gcpClient.GetSAUsername()
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		user, err := gcpClient.GetSAUsername(ctx)
 		if err != nil {
 			return err
 		}

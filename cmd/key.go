@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"path/filepath"
+	"context"
 
 	"speedrun/cloud"
 	"speedrun/key"
@@ -117,7 +118,9 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 	}
 
 	if useOSlogin {
-		gcpClient.AddUserKey(k)
+		ctx, cancel := context.WithCancel(context.Background())
+		defer cancel()
+		gcpClient.AddUserKey(ctx, k)
 		if err != nil {
 			return err
 		}
@@ -155,8 +158,9 @@ func revokeKey(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-
-	err = gcpClient.RemoveUserKey(k)
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	err = gcpClient.RemoveUserKey(ctx, k)
 	if err != nil {
 		return err
 	}
@@ -172,7 +176,9 @@ func listKeys(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Info("Fetching OS Login keys")
-	err = gcpClient.ListUserKeys()
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel()
+	err = gcpClient.ListUserKeys(ctx)
 	if err != nil {
 		return err
 	}

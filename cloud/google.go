@@ -5,14 +5,14 @@ import (
 	"encoding/json"
 	"fmt"
 
+	oslogin "cloud.google.com/go/oslogin/apiv1"
 	"golang.org/x/oauth2/google"
 	"google.golang.org/api/compute/v1"
-	"google.golang.org/api/oslogin/v1"
 )
 
 type GCPClient struct {
 	gce          *compute.Service
-	oslogin      *oslogin.Service
+	oslogin      *oslogin.Client
 	client_email string
 	Project      string
 }
@@ -39,7 +39,7 @@ func NewGCPClient(project string) (*GCPClient, error) {
 		return nil, err
 	}
 
-	osc, err := oslogin.NewService(ctx)
+	osc, err := oslogin.NewClient(ctx)
 	if err != nil {
 		return nil, err
 	}

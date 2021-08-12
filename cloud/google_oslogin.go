@@ -1,15 +1,17 @@
 package cloud
 
 import (
+	"context"
 	"crypto/sha256"
 	"fmt"
 	"speedrun/key"
 
 	"github.com/apex/log"
-	"google.golang.org/api/oslogin/v1"
+	common "google.golang.org/genproto/googleapis/cloud/oslogin/common"
+	osloginpb "google.golang.org/genproto/googleapis/cloud/oslogin/v1"
 )
 
-func (c *GCPClient) AddUserKey(key *key.Key) error {
+func (c *GCPClient) AddUserKey(ctx context.Context, key *key.Key) error {
 	parent := fmt.Sprintf("users/%s", c.client_email)
 
 	authorizedKey, err := key.MarshalAuthorizedKey()
@@ -17,29 +19,35 @@ func (c *GCPClient) AddUserKey(key *key.Key) error {
 		return err
 	}
 
-	sshPublicKey := &oslogin.SshPublicKey{
+	k := &common.SshPublicKey{
 		Key: string(authorizedKey),
 	}
 
-	_, err = c.oslogin.Users.ImportSshPublicKey(parent, sshPublicKey).Do()
+	req := &osloginpb.ImportSshPublicKeyRequest{
+		Parent:       parent,
+		SshPublicKey: k,
+	}
+
+	_, err = c.oslogin.ImportSshPublicKey(ctx, req)
 	return err
 }
 
-func (c *GCPClient) RemoveUserKey(key *key.Key) error {
+func (c *GCPClient) RemoveUserKey(ctx context.Context, key *key.Key) error {
 	authorizedKey, err := key.MarshalAuthorizedKey()
 	if err != nil {
 		return err
 	}
 
 	name := fmt.Sprintf("users/%s/sshPublicKeys/%x", c.client_email, sha256.Sum256([]byte(authorizedKey)))
-	_, err = c.oslogin.Users.SshPublicKeys.Delete(name).Do()
-	return err
+	req := &osloginpb.DeleteSshPublicKeyRequest{Name: name}
+	return c.oslogin.DeleteSshPublicKey(ctx, req)
 }
 
-func (c *GCPClient) ListUserKeys() error {
+func (c *GCPClient) ListUserKeys(ctx context.Context) error {
 	parent := fmt.Sprintf("users/%s", c.client_email)
 
-	profile, err := c.oslogin.Users.GetLoginProfile(parent).Do()
+	req := &osloginpb.GetLoginProfileRequest{Name: parent}
+	profile, err := c.oslogin.GetLoginProfile(ctx, req)
 	if err != nil {
 		return err
 	}
@@ -50,10 +58,11 @@ func (c *GCPClient) ListUserKeys() error {
 	return nil
 }
 
-func (c *GCPClient) GetSAUsername() (string, error) {
+func (c *GCPClient) GetSAUsername(ctx context.Context) (string, error) {
 	parent := fmt.Sprintf("users/%s", c.client_email)
 
-	profile, err := c.oslogin.Users.GetLoginProfile(parent).Do()
+	req := &osloginpb.GetLoginProfileRequest{Name: parent}
+	profile, err := c.oslogin.GetLoginProfile(ctx, req)
 	if err != nil {
 		return "", err
 	}
