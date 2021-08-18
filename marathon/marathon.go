@@ -46,6 +46,38 @@ func New(command string, timeout time.Duration, concurrency int) *Marathon {
 	return &r
 }
 
+func Connect(address string, key *key.Key, ignoreFingerprint bool) (*goph.Client, error) {
+	auth, err := key.GetAuth()
+	if err != nil {
+		return nil, err
+	}
+
+	err = checkHostsFile()
+	if err != nil {
+		return nil, err
+	}
+
+	cb := verifyHost
+	if ignoreFingerprint {
+		cb = ssh.InsecureIgnoreHostKey()
+	}
+
+	client, err := goph.NewConn(&goph.Config{
+		User:     key.User,
+		Addr:     address,
+		Port:     22,
+		Auth:     auth,
+		Callback: cb,
+		Timeout:  time.Second * 10,
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return client, nil
+}
+
 // Run runs a given command on servers in the addresses list
 func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerprint bool) error {
 	auth, err := key.GetAuth()
