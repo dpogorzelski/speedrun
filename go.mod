@@ -54,7 +54,7 @@ require (
 	golang.org/x/term v0.0.0-20210220032956-6a3ed077a48d // indirect
 	golang.org/x/text v0.3.6 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
-	google.golang.org/genproto v0.0.0-20210825212027-de86158e7fda
+	google.golang.org/genproto v0.0.0-20210828152312-66f60bf46e71
 	google.golang.org/grpc v1.40.0
 	gopkg.in/ini.v1 v1.62.0 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
@@ -80,5 +80,6 @@ require (
 require (
 	github.com/coreos/go-systemd/v22 v22.3.2
 	github.com/speedrunsh/grpc-quic v0.0.0-20210812143325-4d9fe0bf507c
+	github.com/speedrunsh/portal v0.0.0-20210828175320-01fa9029cb53
 	google.golang.org/protobuf v1.27.1 // indirect
 )

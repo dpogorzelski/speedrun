@@ -28,9 +28,9 @@ var deployCmd = &cobra.Command{
 }
 
 func init() {
-	deployCmd.Flags().StringP("target", "t", "", "Select instances that match the given criteria")
-	deployCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
-	viper.BindPFlag("ssh.ignore-fingerprint", runCmd.Flags().Lookup("ignore-fingerprint"))
+	portalCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
+	portalCmd.PersistentFlags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
+	viper.BindPFlag("ssh.ignore-fingerprint", portalCmd.PersistentFlags().Lookup("ignore-fingerprint"))
 	portalCmd.AddCommand(deployCmd)
 }
 

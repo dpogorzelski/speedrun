@@ -2,12 +2,17 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"strings"
 	"time"
 
+	"github.com/speedrunsh/portal/command"
+	"github.com/speedrunsh/portal/transport"
 	"github.com/speedrunsh/speedrun/cloud"
+	"github.com/speedrunsh/speedrun/colors"
 	"github.com/speedrunsh/speedrun/key"
-	"github.com/speedrunsh/speedrun/ssh"
+	"google.golang.org/grpc"
+	"google.golang.org/grpc/status"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -16,7 +21,7 @@ import (
 
 var runCmd = &cobra.Command{
 	Use:     "run <command to run>",
-	Short:   "Run command on remote servers",
+	Short:   "Run a command on remote servers",
 	Example: "  speedrun run whoami\n  speedrun run whoami --only-failures --target \"labels.foo = bar AND labels.environment = staging\"",
 	Args:    cobra.MinimumNArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -34,6 +39,7 @@ func init() {
 	runCmd.Flags().Int("concurrency", 100, "Number of maximum concurrent SSH workers")
 	runCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	runCmd.Flags().Bool("use-oslogin", false, "Authenticate via OS Login")
+	runCmd.Flags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
 	viper.BindPFlag("gcp.projectid", runCmd.Flags().Lookup("projectid"))
 	viper.BindPFlag("gcp.use-oslogin", runCmd.Flags().Lookup("use-oslogin"))
 	viper.BindPFlag("ssh.timeout", runCmd.Flags().Lookup("timeout"))
@@ -41,17 +47,13 @@ func init() {
 	viper.BindPFlag("ssh.only-failures", runCmd.Flags().Lookup("only-failures"))
 	viper.BindPFlag("ssh.concurrency", runCmd.Flags().Lookup("concurrency"))
 	viper.BindPFlag("ssh.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
+	viper.BindPFlag("portal.use-tunnel", runCmd.Flags().Lookup("use-tunnel"))
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	command := strings.Join(args, " ")
 	project := viper.GetString("gcp.projectid")
-	timeout := viper.GetDuration("ssh.timeout")
+	useTunnel := viper.GetBool("portal.use-tunnel")
 	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
-	onlyFailures := viper.GetBool("ssh.only-failures")
-	concurrency := viper.GetInt("ssh.concurrency")
-	usePrivateIP := viper.GetBool("ssh.use-private-ip")
-	useOSlogin := viper.GetBool("gcp.use-oslogin")
 
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -63,18 +65,8 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := key.Path()
-	if err != nil {
-		return err
-	}
-
-	k, err := key.Read(path)
-	if err != nil {
-		return err
-	}
-
 	log.Info("Fetching instance list")
-	instances, err := gcpClient.GetInstances(target, usePrivateIP)
+	instances, err := gcpClient.GetInstances(target, false)
 	if err != nil {
 		return err
 	}
@@ -84,29 +76,55 @@ func run(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	if useOSlogin {
+	for _, instance := range instances {
+		var grpcConn *grpc.ClientConn
+
+		if useTunnel {
+			path, err := key.Path()
+			if err != nil {
+				return err
+			}
+
+			k, err := key.Read(path)
+			if err != nil {
+				return err
+			}
+
+			log.WithField("instance", instance.Name).Debug("Using tunnel")
+			if ignoreFingerprint {
+				grpcConn, err = transport.SSHTransportInsecure(instance.Address, k)
+			} else {
+				grpcConn, err = transport.SSHTransport(instance.Address, k)
+			}
+			if err != nil {
+				log.Errorf("%s:\n    %v\n", colors.Red(instance.Name), err)
+				continue
+			}
+		} else {
+			log.WithField("instance", instance.Name).Debug("Not using tunnel")
+			grpcConn, err = transport.HTTP2Transport(instance.Address)
+			if err != nil {
+				log.Errorf("%s:\n    %v\n", colors.Red(instance.Name), err)
+				continue
+			}
+		}
+
+		defer grpcConn.Close()
+		c := command.NewPortalClient(grpcConn)
+
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
-		user, err := gcpClient.GetSAUsername(ctx)
+
+		r, err := c.RunCommand(ctx, &command.Command{Name: strings.Join(args, " ")})
 		if err != nil {
-			return err
+
+			if e, ok := status.FromError(err); ok {
+				fmt.Printf("  %s:\n    %s\n\n", colors.Yellow(instance.Name), e.Message())
+			}
+			continue
 		}
-		k.User = user
+		fmt.Printf("  %s:\n    %s\n\n", colors.Green(instance.Name), r.GetContent())
 	}
 
-	m := ssh.NewMarathon(command, timeout, concurrency)
-	if ignoreFingerprint {
-		err = m.RunInsecure(instances, k)
-		if err != nil {
-			return err
-		}
-	} else {
-		err = m.Run(instances, k)
-		if err != nil {
-			return err
-		}
-	}
-
-	m.PrintResult(onlyFailures)
 	return nil
 }
