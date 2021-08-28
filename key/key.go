@@ -15,6 +15,7 @@ import (
 	"github.com/apex/log"
 	"github.com/melbahja/goph"
 	"github.com/mikesmitty/edkey"
+	"github.com/mitchellh/go-homedir"
 	"golang.org/x/crypto/ssh"
 )
 
@@ -77,6 +78,18 @@ func Read(path string) (*Key, error) {
 
 	return key, nil
 
+}
+
+// Path returns full path to the private key or an error otherwise
+func Path() (string, error) {
+	log.Debug("Determining private key path")
+	home, err := homedir.Dir()
+	if err != nil {
+		return "", err
+	}
+
+	path := filepath.Join(home, ".speedrun/privatekey")
+	return path, nil
 }
 
 func (k *Key) Write(path string) error {

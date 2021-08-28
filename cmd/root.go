@@ -3,7 +3,6 @@ package cmd
 import (
 	"fmt"
 	"path/filepath"
-	"github.com/speedrunsh/speedrun/cloud"
 
 	"github.com/apex/log"
 	homedir "github.com/mitchellh/go-homedir"
@@ -23,13 +22,15 @@ func Execute() {
 		Use:           "speedrun",
 		Short:         "Cloud first command execution",
 		Version:       fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
-		SilenceUsage:  true,
+		SilenceUsage:  false,
 		SilenceErrors: true,
 	}
 
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(keyCmd)
 	rootCmd.AddCommand(runCmd)
+	rootCmd.AddCommand(portalCmd)
+	rootCmd.AddCommand(serviceCmd)
 
 	home, err := homedir.Dir()
 	if err != nil {
@@ -41,6 +42,8 @@ func Execute() {
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", path, "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
 	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
+
+	rootCmd.DisableSuggestions = false
 
 	if err := rootCmd.Execute(); err != nil {
 		log.Fatal(err.Error())
@@ -65,7 +68,7 @@ func initConfig() {
 	}
 	lvl, err := log.ParseLevel(viper.GetString("loglevel"))
 	if err != nil {
-		log.Fatalf("Couldn't parse log level: %s", err)
+		log.Fatalf("Couldn't parse log level: %s (%s)", err, lvl)
 		return
 	}
 	log.SetLevel(lvl)

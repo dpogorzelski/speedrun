@@ -5,7 +5,6 @@ import (
 
 	"github.com/speedrunsh/speedrun/cloud"
 	"github.com/speedrunsh/speedrun/key"
-	"github.com/speedrunsh/speedrun/util"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -72,7 +71,7 @@ func newKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := util.DetermineKeyFilePath()
+	path, err := key.Path()
 	if err != nil {
 		return err
 	}
@@ -95,7 +94,7 @@ func authorizeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := util.DetermineKeyFilePath()
+	path, err := key.Path()
 	if err != nil {
 		return err
 	}
@@ -131,7 +130,7 @@ func revokeKey(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := util.DetermineKeyFilePath()
+	path, err := key.Path()
 	if err != nil {
 		return err
 	}

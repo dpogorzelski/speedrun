@@ -1,10 +1,8 @@
-package marathon
+package ssh
 
 import (
 	"fmt"
-	"net"
-	"os"
-	"path/filepath"
+	"strings"
 	"sync"
 	"time"
 
@@ -16,7 +14,6 @@ import (
 	"github.com/apex/log"
 	"github.com/cheggaaa/pb/v3"
 	"github.com/melbahja/goph"
-	"github.com/mitchellh/go-homedir"
 	"github.com/spf13/viper"
 	"golang.org/x/crypto/ssh"
 )
@@ -33,7 +30,7 @@ type Marathon struct {
 }
 
 // New creates a new instance of the Marathon type
-func New(command string, timeout time.Duration, concurrency int) *Marathon {
+func NewMarathon(command string, timeout time.Duration, concurrency int) *Marathon {
 	r := Marathon{
 		errors:      make(map[string]error),
 		failures:    make(map[string]string),
@@ -46,40 +43,8 @@ func New(command string, timeout time.Duration, concurrency int) *Marathon {
 	return &r
 }
 
-func Connect(address string, key *key.Key, ignoreFingerprint bool) (*goph.Client, error) {
-	auth, err := key.GetAuth()
-	if err != nil {
-		return nil, err
-	}
-
-	err = checkHostsFile()
-	if err != nil {
-		return nil, err
-	}
-
-	cb := verifyHost
-	if ignoreFingerprint {
-		cb = ssh.InsecureIgnoreHostKey()
-	}
-
-	client, err := goph.NewConn(&goph.Config{
-		User:     key.User,
-		Addr:     address,
-		Port:     22,
-		Auth:     auth,
-		Callback: cb,
-		Timeout:  time.Second * 10,
-	})
-
-	if err != nil {
-		return nil, err
-	}
-
-	return client, nil
-}
-
 // Run runs a given command on servers in the addresses list
-func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerprint bool) error {
+func (m *Marathon) Run(instances []cloud.Instance, key *key.Key) error {
 	auth, err := key.GetAuth()
 	if err != nil {
 		return err
@@ -88,11 +53,6 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 	err = checkHostsFile()
 	if err != nil {
 		return err
-	}
-
-	cb := verifyHost
-	if ignoreFingerprint {
-		cb = ssh.InsecureIgnoreHostKey()
 	}
 
 	pool := pond.New(m.Concurrency, 10000)
@@ -121,7 +81,7 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 				Addr:     instance.Address,
 				Port:     22,
 				Auth:     auth,
-				Callback: cb,
+				Callback: verifyHost,
 				Timeout:  m.Timeout,
 			})
 
@@ -155,52 +115,69 @@ func (m *Marathon) Run(instances []cloud.Instance, key *key.Key, ignoreFingerpri
 	return nil
 }
 
-// VerifyHost chekcks that the remote host's fingerprint matches the know one to avoid MITM.
-// If the host is new the fingerprint is added to known hostss file
-func verifyHost(host string, remote net.Addr, key ssh.PublicKey) error {
-	home, err := homedir.Dir()
+func (m *Marathon) RunInsecure(instances []cloud.Instance, key *key.Key) error {
+	auth, err := key.GetAuth()
 	if err != nil {
 		return err
 	}
 
-	knownhosts := filepath.Join(home, ".speedrun", "known_hosts")
+	pool := pond.New(m.Concurrency, 10000)
 
-	hostFound, err := goph.CheckKnownHost(host, remote, key, knownhosts)
-	if hostFound && err != nil {
-		log.Debugf("Host fingerprint known")
-		return err
-	}
-
-	if !hostFound && err != nil {
-		if err.Error() == "knownhosts: key is unknown" {
-			log.Debugf("Adding host %s to ~/.speedrun/known_hosts", host)
-			return goph.AddKnownHost(host, remote, key, knownhosts)
-		}
-		return err
-	}
-
-	if hostFound {
-		log.Debugf("Host %s is already known", host)
-		return nil
-	}
-
-	return nil
-}
-
-func checkHostsFile() error {
-	home, err := homedir.Dir()
+	bar := pb.New(len(instances))
+	lvl, err := log.ParseLevel(viper.GetString("loglevel"))
 	if err != nil {
-		return err
+		return fmt.Errorf("couldn't parse log level: %s", err)
 	}
 
-	knownhosts := filepath.Join(home, ".speedrun", "known_hosts")
-
-	if _, err := os.Stat(knownhosts); os.IsNotExist(err) {
-		_, err = os.Create(knownhosts)
-		if err != nil {
-			return err
-		}
+	if lvl > 0 {
+		bar.SetMaxWidth(1)
+		bar.SetTemplateString(fmt.Sprintf("%s Running [%s]: {{counters . }}", colors.Blue("•"), colors.Purple(m.Command)))
+		bar.Start()
 	}
+
+	for _, i := range instances {
+		instance := i
+		log.Debugf("Adding %s to the queue", instance.Name)
+		pool.Submit(func() {
+			var client *goph.Client
+			var err error
+
+			client, err = goph.NewConn(&goph.Config{
+				User:     key.User,
+				Addr:     instance.Address,
+				Port:     22,
+				Auth:     auth,
+				Callback: ssh.InsecureIgnoreHostKey(),
+				Timeout:  m.Timeout,
+			})
+
+			if err != nil {
+				log.WithField("host", instance.Name).Debugf("Error encountered while trying to connect: %s", err)
+				m.Lock()
+				bar.Increment()
+				m.errors[instance.Name] = err
+				m.Unlock()
+				return
+			}
+			defer client.Close()
+
+			out, err := client.Run(m.Command)
+			if err != nil {
+				m.Lock()
+				bar.Increment()
+				m.failures[instance.Name] = formatOutput(string(out))
+				m.Unlock()
+				return
+			}
+			m.Lock()
+			bar.Increment()
+			m.successes[instance.Name] = formatOutput(string(out))
+			m.Unlock()
+		})
+	}
+	pool.StopAndWait()
+	bar.Finish()
+
 	return nil
 }
 
@@ -220,4 +197,15 @@ func (m *Marathon) PrintResult(failures bool) {
 		fmt.Printf("  %s:\n    %s\n\n", colors.Red(host), colors.White(msg.Error()))
 	}
 	fmt.Printf("%s: %d\n%s: %d\n%s:   %d\n", colors.Green("Success"), len(m.successes), colors.Yellow("Failure"), len(m.failures), colors.Red("Error"), len(m.errors))
+}
+
+func formatOutput(body string) string {
+	f := []string{}
+	for _, line := range strings.Split(body, "\n") {
+		line = fmt.Sprintf("    %s", line)
+		f = append(f, line)
+	}
+
+	f = append(f[:len(f)-1], "")
+	return strings.Join(f, "\n")
 }

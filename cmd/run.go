@@ -7,8 +7,7 @@ import (
 
 	"github.com/speedrunsh/speedrun/cloud"
 	"github.com/speedrunsh/speedrun/key"
-	"github.com/speedrunsh/speedrun/marathon"
-	"github.com/speedrunsh/speedrun/util"
+	"github.com/speedrunsh/speedrun/ssh"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -64,7 +63,7 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	path, err := util.DetermineKeyFilePath()
+	path, err := key.Path()
 	if err != nil {
 		return err
 	}
@@ -95,10 +94,17 @@ func run(cmd *cobra.Command, args []string) error {
 		k.User = user
 	}
 
-	m := marathon.New(command, timeout, concurrency)
-	err = m.Run(instances, k, ignoreFingerprint)
-	if err != nil {
-		return err
+	m := ssh.NewMarathon(command, timeout, concurrency)
+	if ignoreFingerprint {
+		err = m.RunInsecure(instances, k)
+		if err != nil {
+			return err
+		}
+	} else {
+		err = m.Run(instances, k)
+		if err != nil {
+			return err
+		}
 	}
 
 	m.PrintResult(onlyFailures)

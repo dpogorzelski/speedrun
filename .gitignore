@@ -4,7 +4,8 @@
 *.dll
 *.so
 *.dylib
-speedrun
+bin/speedrun/speedrun
+bin/portal/portal
 TODO
 .vscode
 .idea
