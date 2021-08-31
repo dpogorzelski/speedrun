@@ -62,7 +62,7 @@ func checkHostsFile() error {
 	return nil
 }
 
-func Connect(address string, key key.Key) (*goph.Client, error) {
+func Connect(address string, key *key.Key) (*goph.Client, error) {
 	auth, err := key.GetAuth()
 	if err != nil {
 		return nil, err
