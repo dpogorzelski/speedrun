@@ -89,7 +89,7 @@ func Connect(address string, key *key.Key) (*goph.Client, error) {
 	return client, nil
 }
 
-func ConnectInsecure(address string, key key.Key) (*goph.Client, error) {
+func ConnectInsecure(address string, key *key.Key) (*goph.Client, error) {
 	auth, err := key.GetAuth()
 	if err != nil {
 		return nil, err
