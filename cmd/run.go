@@ -6,8 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/speedrunsh/portal/command"
-	"github.com/speedrunsh/portal/transport"
+	"github.com/speedrunsh/portal"
 	"github.com/speedrunsh/speedrun/cloud"
 	"github.com/speedrunsh/speedrun/colors"
 	"github.com/speedrunsh/speedrun/key"
@@ -76,20 +75,38 @@ func run(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	for _, instance := range instances {
-
-		if useTunnel {
-			grpcConn, err := getConn()
-		} else {
-
+	var k *key.Key
+	if useTunnel {
+		path, err := key.Path()
+		if err != nil {
+			return err
 		}
-		defer grpcConn.Close()
-		c := command.NewPortalClient(grpcConn)
+
+		k, err = key.Read(path)
+		if err != nil {
+			return err
+		}
+	}
+
+	for _, instance := range instances {
+		var t *grpc.ClientConn
+		var err error
+		if useTunnel {
+			t, err = portal.NewTransport(instance.Address, portal.WithSSH(*k), portal.WithInsecure(ignoreFingerprint))
+		} else {
+			t, err = portal.NewTransport(instance.Address)
+		}
+		if err != nil {
+			log.Warn(err.Error())
+			continue
+		}
+		defer t.Close()
+		c := portal.NewPortalClient(t)
 
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		r, err := c.RunCommand(ctx, &command.Command{Name: strings.Join(args, " ")})
+		r, err := c.RunCommand(ctx, &portal.Command{Name: strings.Join(args, " ")})
 		if err != nil {
 
 			if e, ok := status.FromError(err); ok {
@@ -101,78 +118,4 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func getTransport() (*grpc.ClientConn, error) {
-	var grpcConn *grpc.ClientConn
-
-	return grpcConn, nil
-}
-
-func getConn() (*grpc.ClientConn, error) {
-	var grpcConn *grpc.ClientConn
-
-	if useTunnel {
-		path, err := key.Path()
-		if err != nil {
-			return err
-		}
-
-		k, err := key.Read(path)
-		if err != nil {
-			return err
-		}
-
-		log.WithField("instance", instance.Name).Debug("Using tunnel")
-		if ignoreFingerprint {
-			grpcConn, err = transport.SSHTransportInsecure(instance.Address, k)
-		} else {
-			grpcConn, err = transport.SSHTransport(instance.Address, k)
-		}
-		if err != nil {
-			log.Errorf("%s:\n    %v\n", colors.Red(instance.Name), err)
-			continue
-		}
-	} else {
-		log.WithField("instance", instance.Name).Debug("Not using tunnel")
-		grpcConn, err = transport.HTTP2Transport(instance.Address)
-		if err != nil {
-			log.Errorf("%s:\n    %v\n", colors.Red(instance.Name), err)
-			continue
-		}
-	}
-}
-
-func getTunnelConn() (*grpc.ClientConn, error) {
-	var grpcConn *grpc.ClientConn
-
-	if useTunnel {
-		path, err := key.Path()
-		if err != nil {
-			return err
-		}
-
-		k, err := key.Read(path)
-		if err != nil {
-			return err
-		}
-
-		log.WithField("instance", instance.Name).Debug("Using tunnel")
-		if ignoreFingerprint {
-			grpcConn, err = transport.SSHTransportInsecure(instance.Address, k)
-		} else {
-			grpcConn, err = transport.SSHTransport(instance.Address, k)
-		}
-		if err != nil {
-			log.Errorf("%s:\n    %v\n", colors.Red(instance.Name), err)
-			continue
-		}
-	} else {
-		log.WithField("instance", instance.Name).Debug("Not using tunnel")
-		grpcConn, err = transport.HTTP2Transport(instance.Address)
-		if err != nil {
-			log.Errorf("%s:\n    %v\n", colors.Red(instance.Name), err)
-			continue
-		}
-	}
 }
