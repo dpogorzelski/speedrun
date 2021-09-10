@@ -14,37 +14,37 @@ import (
 	"github.com/spf13/viper"
 )
 
-var execCmd = &cobra.Command{
-	Use:     "exec <command to run>",
-	Short:   "Execute a shell command on remote servers",
-	Example: "  speedrun exec whoami\n  speedrun exec whoami --only-failures --target \"labels.foo = bar AND labels.environment = staging\"",
+var runCmd = &cobra.Command{
+	Use:     "run <command to run>",
+	Short:   "Run a shell command on remote servers",
+	Example: "  speedrun run whoami\n  speedrun run whoami --only-failures --target \"labels.foo = bar AND labels.environment = staging\"",
 	Args:    cobra.MinimumNArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
 	},
-	RunE: exec,
+	RunE: run,
 }
 
 func init() {
-	execCmd.Flags().StringP("target", "t", "", "Fetch instances that match the target selection criteria")
-	execCmd.Flags().String("projectid", "", "Override GCP project id")
-	execCmd.Flags().Bool("only-failures", false, "Print only failures and errors")
-	execCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
-	execCmd.Flags().Duration("timeout", time.Duration(10*time.Second), "SSH connection timeout")
-	execCmd.Flags().Int("concurrency", 100, "Number of maximum concurrent SSH workers")
-	execCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
-	execCmd.Flags().Bool("use-oslogin", false, "Authenticate via OS Login")
-	viper.BindPFlag("gcp.projectid", execCmd.Flags().Lookup("projectid"))
-	viper.BindPFlag("gcp.use-oslogin", execCmd.Flags().Lookup("use-oslogin"))
-	viper.BindPFlag("ssh.timeout", execCmd.Flags().Lookup("timeout"))
-	viper.BindPFlag("ssh.ignore-fingerprint", execCmd.Flags().Lookup("ignore-fingerprint"))
-	viper.BindPFlag("ssh.only-failures", execCmd.Flags().Lookup("only-failures"))
-	viper.BindPFlag("ssh.concurrency", execCmd.Flags().Lookup("concurrency"))
-	viper.BindPFlag("ssh.use-private-ip", execCmd.Flags().Lookup("use-private-ip"))
-	execCmd.SetUsageTemplate(usage)
+	runCmd.Flags().StringP("target", "t", "", "Fetch instances that match the target selection criteria")
+	runCmd.Flags().String("projectid", "", "Override GCP project id")
+	runCmd.Flags().Bool("only-failures", false, "Print only failures and errors")
+	runCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
+	runCmd.Flags().Duration("timeout", time.Duration(10*time.Second), "SSH connection timeout")
+	runCmd.Flags().Int("concurrency", 100, "Number of maximum concurrent SSH workers")
+	runCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
+	runCmd.Flags().Bool("use-oslogin", false, "Authenticate via OS Login")
+	viper.BindPFlag("gcp.projectid", runCmd.Flags().Lookup("projectid"))
+	viper.BindPFlag("gcp.use-oslogin", runCmd.Flags().Lookup("use-oslogin"))
+	viper.BindPFlag("ssh.timeout", runCmd.Flags().Lookup("timeout"))
+	viper.BindPFlag("ssh.ignore-fingerprint", runCmd.Flags().Lookup("ignore-fingerprint"))
+	viper.BindPFlag("ssh.only-failures", runCmd.Flags().Lookup("only-failures"))
+	viper.BindPFlag("ssh.concurrency", runCmd.Flags().Lookup("concurrency"))
+	viper.BindPFlag("ssh.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
+	runCmd.SetUsageTemplate(usage)
 }
 
-func exec(cmd *cobra.Command, args []string) error {
+func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
 	project := viper.GetString("gcp.projectid")
 	timeout := viper.GetDuration("ssh.timeout")
