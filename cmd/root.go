@@ -38,7 +38,6 @@ func Execute() {
 	rootCmd.AddCommand(keyCmd)
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(portalCmd)
-	rootCmd.AddCommand(execCmd)
 	rootCmd.AddCommand(serviceCmd)
 
 	home, err := homedir.Dir()
