@@ -416,6 +416,8 @@ github.com/speedrunsh/portal v0.0.0-20210910203232-62c134c1f2f7 h1:BXUvQtUdci7iS
 github.com/speedrunsh/portal v0.0.0-20210910203232-62c134c1f2f7/go.mod h1:U9a6le16ZlE4rLd9VoCZbtzzqaIczJrGREvv0yALdd8=
 github.com/speedrunsh/portal v0.0.0-20210910204310-501b43c870d0 h1:o8q1KFV6hZOzQeqbyo0Xa1rmSqf1uSeFdcQ0+DY/LVI=
 github.com/speedrunsh/portal v0.0.0-20210910204310-501b43c870d0/go.mod h1:U9a6le16ZlE4rLd9VoCZbtzzqaIczJrGREvv0yALdd8=
+github.com/speedrunsh/portal v0.0.0-20210910210532-d592bb480e6a h1:4pH0HHFx1315JllBvDm3OqSF+jklTU4myn7LwtOk0Ec=
+github.com/speedrunsh/portal v0.0.0-20210910210532-d592bb480e6a/go.mod h1:U9a6le16ZlE4rLd9VoCZbtzzqaIczJrGREvv0yALdd8=
 github.com/spf13/afero v1.6.0 h1:xoax2sJ2DT8S8xA2paPFjDCScCNeWsg75VG0DLRreiY=
 github.com/spf13/afero v1.6.0/go.mod h1:Ai8FlHk4v/PARR026UzYexafAt9roJ7LcLMAmO6Z93I=
 github.com/spf13/cast v1.3.1/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=

@@ -24,7 +24,7 @@ var serviceCmd = &cobra.Command{
 
 var restartCmd = &cobra.Command{
 	Use:     "restart <servicename>",
-	Short:   "restart a service",
+	Short:   "Restart a service",
 	Example: "  speedrun service restart nginx",
 	Args:    cobra.MinimumNArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -35,7 +35,7 @@ var restartCmd = &cobra.Command{
 
 var startCmd = &cobra.Command{
 	Use:     "start <servicename>",
-	Short:   "start a service",
+	Short:   "Start a service",
 	Example: "  speedrun service start nginx",
 	Args:    cobra.MinimumNArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
@@ -46,8 +46,19 @@ var startCmd = &cobra.Command{
 
 var stopCmd = &cobra.Command{
 	Use:     "stop <servicename>",
-	Short:   "stop a service",
+	Short:   "Stop a service",
 	Example: "  speedrun service stop nginx",
+	Args:    cobra.MinimumNArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		initConfig()
+	},
+	RunE: action,
+}
+
+var statusCmd = &cobra.Command{
+	Use:     "status <servicename>",
+	Short:   "Return the status of the service",
+	Example: "  speedrun service status nginx",
 	Args:    cobra.MinimumNArgs(1),
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
@@ -60,6 +71,7 @@ func init() {
 	serviceCmd.AddCommand(restartCmd)
 	serviceCmd.AddCommand(startCmd)
 	serviceCmd.AddCommand(stopCmd)
+	serviceCmd.AddCommand(statusCmd)
 	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
 	serviceCmd.PersistentFlags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
 	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
@@ -132,6 +144,8 @@ func action(cmd *cobra.Command, args []string) error {
 			r, err = c.ServiceStart(ctx, &portal.Service{Name: strings.Join(args, " ")})
 		case "stop":
 			r, err = c.ServiceStop(ctx, &portal.Service{Name: strings.Join(args, " ")})
+		case "status":
+			r, err = c.ServiceStatus(ctx, &portal.Service{Name: strings.Join(args, " ")})
 		}
 		if err != nil {
 
