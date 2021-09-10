@@ -30,20 +30,44 @@ var restartCmd = &cobra.Command{
 	PreRun: func(cmd *cobra.Command, args []string) {
 		initConfig()
 	},
-	RunE: restart,
+	RunE: action,
+}
+
+var startCmd = &cobra.Command{
+	Use:     "start <servicename>",
+	Short:   "start a service",
+	Example: "  speedrun service start nginx",
+	Args:    cobra.MinimumNArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		initConfig()
+	},
+	RunE: action,
+}
+
+var stopCmd = &cobra.Command{
+	Use:     "stop <servicename>",
+	Short:   "stop a service",
+	Example: "  speedrun service stop nginx",
+	Args:    cobra.MinimumNArgs(1),
+	PreRun: func(cmd *cobra.Command, args []string) {
+		initConfig()
+	},
+	RunE: action,
 }
 
 func init() {
 	restartCmd.Flags().StringP("target", "t", "", "Select instances that match the given criteria")
 	restartCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
-	serviceCmd.Flags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
+	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
 	viper.BindPFlag("ssh.ignore-fingerprint", serviceCmd.Flags().Lookup("ignore-fingerprint"))
 	viper.BindPFlag("portal.use-tunnel", serviceCmd.Flags().Lookup("use-tunnel"))
 	serviceCmd.SetUsageTemplate(usage)
 	serviceCmd.AddCommand(restartCmd)
+	serviceCmd.AddCommand(startCmd)
+	serviceCmd.AddCommand(stopCmd)
 }
 
-func restart(cmd *cobra.Command, args []string) error {
+func action(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
 	useTunnel := viper.GetBool("portal.use-tunnel")
 	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
@@ -100,7 +124,15 @@ func restart(cmd *cobra.Command, args []string) error {
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
-		r, err := c.ServiceRestart(ctx, &portal.Service{Name: strings.Join(args, " ")})
+		var r *portal.Response
+		switch cmd.Name() {
+		case "restart":
+			r, err = c.ServiceRestart(ctx, &portal.Service{Name: strings.Join(args, " ")})
+		case "start":
+			r, err = c.ServiceStart(ctx, &portal.Service{Name: strings.Join(args, " ")})
+		case "stop":
+			r, err = c.ServiceStop(ctx, &portal.Service{Name: strings.Join(args, " ")})
+		}
 		if err != nil {
 
 			if e, ok := status.FromError(err); ok {

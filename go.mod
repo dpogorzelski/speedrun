@@ -77,6 +77,6 @@ require (
 )
 
 require (
-	github.com/speedrunsh/portal v0.0.0-20210906203021-ea1855f84e5c
+	github.com/speedrunsh/portal v0.0.0-20210910204310-501b43c870d0
 	google.golang.org/protobuf v1.27.1 // indirect
 )
