@@ -56,15 +56,15 @@ var stopCmd = &cobra.Command{
 }
 
 func init() {
-	restartCmd.Flags().StringP("target", "t", "", "Select instances that match the given criteria")
-	restartCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
-	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
-	viper.BindPFlag("ssh.ignore-fingerprint", serviceCmd.Flags().Lookup("ignore-fingerprint"))
-	viper.BindPFlag("portal.use-tunnel", serviceCmd.Flags().Lookup("use-tunnel"))
 	serviceCmd.SetUsageTemplate(usage)
 	serviceCmd.AddCommand(restartCmd)
 	serviceCmd.AddCommand(startCmd)
 	serviceCmd.AddCommand(stopCmd)
+	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
+	serviceCmd.PersistentFlags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
+	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
+	viper.BindPFlag("ssh.ignore-fingerprint", serviceCmd.Flags().Lookup("ignore-fingerprint"))
+	viper.BindPFlag("portal.use-tunnel", serviceCmd.Flags().Lookup("use-tunnel"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
