@@ -63,6 +63,7 @@ func init() {
 	keyCmd.AddCommand(listKeysCmd)
 	authorizeKeyCmd.Flags().Bool("use-oslogin", false, "Authorize the key via OS Login rather than metadata")
 	viper.BindPFlag("gcp.use-oslogin", authorizeKeyCmd.Flags().Lookup("use-oslogin"))
+	keyCmd.SetUsageTemplate(usage)
 }
 
 func newKey(cmd *cobra.Command, args []string) error {

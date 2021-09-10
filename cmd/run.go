@@ -47,6 +47,7 @@ func init() {
 	viper.BindPFlag("ssh.concurrency", runCmd.Flags().Lookup("concurrency"))
 	viper.BindPFlag("ssh.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
 	viper.BindPFlag("portal.use-tunnel", runCmd.Flags().Lookup("use-tunnel"))
+	runCmd.SetUsageTemplate(usage)
 }
 
 func run(cmd *cobra.Command, args []string) error {

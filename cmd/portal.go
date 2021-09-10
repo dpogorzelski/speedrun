@@ -32,6 +32,7 @@ func init() {
 	portalCmd.PersistentFlags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
 	viper.BindPFlag("ssh.ignore-fingerprint", portalCmd.PersistentFlags().Lookup("ignore-fingerprint"))
 	portalCmd.AddCommand(deployCmd)
+	portalCmd.SetUsageTemplate(usage)
 }
 
 func deploy(cmd *cobra.Command, args []string) error {

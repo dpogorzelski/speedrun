@@ -13,3 +13,7 @@ var initCmd = &cobra.Command{
 		return config.Create()
 	},
 }
+
+func init() {
+	initCmd.SetUsageTemplate(usage)
+}

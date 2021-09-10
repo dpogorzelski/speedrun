@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	_ "embed"
 	"fmt"
 	"path/filepath"
 
@@ -15,22 +16,30 @@ var version string
 var commit string
 var date string
 
+//go:embed templates/root.tmpl
+var rootUsage string
+
+//go:embed templates/usage.tmpl
+var usage string
+
 //Execute runs the root command
 func Execute() {
 	// cobra.OnInitialize(initConfig)
 	var rootCmd = &cobra.Command{
 		Use:           "speedrun",
-		Short:         "Cloud first command execution",
+		Short:         "Control your compute fleet at scale",
 		Version:       fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
 		SilenceUsage:  false,
 		SilenceErrors: true,
 	}
 
+	rootCmd.SetUsageTemplate(rootUsage)
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(keyCmd)
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(portalCmd)
 	rootCmd.AddCommand(execCmd)
+	rootCmd.AddCommand(serviceCmd)
 
 	home, err := homedir.Dir()
 	if err != nil {

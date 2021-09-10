@@ -41,6 +41,7 @@ func init() {
 	viper.BindPFlag("ssh.only-failures", execCmd.Flags().Lookup("only-failures"))
 	viper.BindPFlag("ssh.concurrency", execCmd.Flags().Lookup("concurrency"))
 	viper.BindPFlag("ssh.use-private-ip", execCmd.Flags().Lookup("use-private-ip"))
+	execCmd.SetUsageTemplate(usage)
 }
 
 func exec(cmd *cobra.Command, args []string) error {
