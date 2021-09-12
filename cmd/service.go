@@ -75,14 +75,20 @@ func init() {
 	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
 	serviceCmd.PersistentFlags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
 	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
+	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
+	serviceCmd.PersistentFlags().Bool("use-oslogin", false, "Authenticate via OS Login")
 	viper.BindPFlag("ssh.ignore-fingerprint", serviceCmd.Flags().Lookup("ignore-fingerprint"))
 	viper.BindPFlag("portal.use-tunnel", serviceCmd.Flags().Lookup("use-tunnel"))
+	viper.BindPFlag("portal.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
+	viper.BindPFlag("gcp.use-oslogin", runCmd.Flags().Lookup("use-oslogin"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
 	useTunnel := viper.GetBool("portal.use-tunnel")
 	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
+	usePrivateIP := viper.GetBool("portal.use-private-ip")
+	useOSlogin := viper.GetBool("gcp.use-oslogin")
 
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -95,7 +101,7 @@ func action(cmd *cobra.Command, args []string) error {
 	}
 
 	log.Info("Fetching instance list")
-	instances, err := gcpClient.GetInstances(target, false)
+	instances, err := gcpClient.GetInstances(target, usePrivateIP)
 	if err != nil {
 		return err
 	}
@@ -115,6 +121,16 @@ func action(cmd *cobra.Command, args []string) error {
 		k, err = key.Read(path)
 		if err != nil {
 			return err
+		}
+
+		if useOSlogin {
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+			user, err := gcpClient.GetSAUsername(ctx)
+			if err != nil {
+				return err
+			}
+			k.User = user
 		}
 	}
 
@@ -148,7 +164,6 @@ func action(cmd *cobra.Command, args []string) error {
 			r, err = c.ServiceStatus(ctx, &portal.Service{Name: strings.Join(args, " ")})
 		}
 		if err != nil {
-
 			if e, ok := status.FromError(err); ok {
 				fmt.Printf("  %s:\n    %s\n\n", colors.Yellow(instance.Name), e.Message())
 			}
