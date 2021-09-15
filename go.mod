@@ -70,7 +70,6 @@ require (
 	github.com/marten-seemann/qtls-go1-17 v0.1.0 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
 	github.com/onsi/ginkgo v1.16.4 // indirect
-	github.com/speedrunsh/grpc-quic v0.0.0-20210812143325-4d9fe0bf507c // indirect
 	golang.org/x/mod v0.5.0 // indirect
 	golang.org/x/tools v0.1.5 // indirect
 	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
@@ -79,6 +78,6 @@ require (
 
 require (
 	github.com/coreos/go-systemd/v22 v22.3.2
-	github.com/speedrunsh/portal v0.0.0-20210912214401-052c5cbe210d
-	google.golang.org/protobuf v1.27.1 // indirect
+	github.com/speedrunsh/grpc-quic v0.0.0-20210812143325-4d9fe0bf507c
+	google.golang.org/protobuf v1.27.1
 )
