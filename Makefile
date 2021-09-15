@@ -36,11 +36,11 @@ speedrun: requirements speedrun-linux speedrun-darwin
 
 portal-linux-amd64: requirements
 	GOOS=linux GOARCH=amd64 go build -o $(DIST)/portal-linux-amd64 ./cmd/portal
-# zip $(DIST)/portal-linux-amd64.zip $(LINUX_PATH)/amd64/portal
+	zip $(DIST)/portal-linux-amd64.zip $(DIST)/portal-linux-amd64
 
 portal-linux-arm64: requirements
 	GOOS=linux GOARCH=arm64 go build -o $(DIST)/portal-linux-arm64 ./cmd/portal
-# zip $(DIST)/portal-linux-arm64.zip $(LINUX_PATH)/arm64/portal
+	zip $(DIST)/portal-linux-arm64.zip $(DIST)/portal-linux-arm64
 
 portal-linux: requirements portal-linux-amd64 portal-linux-arm64
 

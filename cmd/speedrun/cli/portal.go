@@ -47,7 +47,11 @@ func deploy(cmd *cobra.Command, args []string) error {
 	}
 	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
 	upload, err := cmd.Flags().GetBool("upload")
-	// install, err := cmd.Flags().GetBool("install")
+	if err != nil {
+		return err
+	}
+
+	install, err := cmd.Flags().GetBool("install")
 	if err != nil {
 		return err
 	}
@@ -79,7 +83,11 @@ func deploy(cmd *cobra.Command, args []string) error {
 	}
 
 	if upload {
+		log.Debug("will upload")
+	}
 
+	if install {
+		log.Debug("will upload")
 	}
 
 	for _, instance := range instances {
