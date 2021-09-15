@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/melbahja/goph"
 	"github.com/speedrunsh/speedrun/cloud"
 	"github.com/speedrunsh/speedrun/key"
@@ -30,6 +32,8 @@ var deployCmd = &cobra.Command{
 func init() {
 	portalCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
 	portalCmd.PersistentFlags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
+	deployCmd.Flags().Bool("upload", false, "Upload portal's binary via local machine")
+	deployCmd.Flags().Bool("install", true, "Install portal as a service")
 	viper.BindPFlag("ssh.ignore-fingerprint", portalCmd.PersistentFlags().Lookup("ignore-fingerprint"))
 	portalCmd.AddCommand(deployCmd)
 	portalCmd.SetUsageTemplate(usage)
@@ -38,7 +42,12 @@ func init() {
 func deploy(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
 	target, err := cmd.Flags().GetString("target")
+	if err != nil {
+		return err
+	}
 	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
+	upload, err := cmd.Flags().GetBool("upload")
+	// install, err := cmd.Flags().GetBool("install")
 	if err != nil {
 		return err
 	}
@@ -69,6 +78,10 @@ func deploy(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	if upload {
+
+	}
+
 	for _, instance := range instances {
 		var sshclient *goph.Client
 		if ignoreFingerprint {
@@ -80,11 +93,45 @@ func deploy(cmd *cobra.Command, args []string) error {
 			log.WithField("instance", instance.Name).Errorf("failed to establish SSH connection: %v", err)
 			continue
 		}
-		err = sshclient.Upload("./tpl", "tmp/tpl")
+		// err = sshclient.Upload("./tpl", "tmp/tpl")
+		arch, err := sshclient.Run("uname -m")
+		if err != nil {
+			log.WithField("instance", instance.Name).Errorf("failed to deploy portal: %v", err)
+			continue
+		}
+
+		url, err := getUrl(string(arch))
+		if err != nil {
+			log.WithField("instance", instance.Name).Errorf("failed to deploy portal: %v", err)
+			continue
+		}
+
+		downloadCommand := fmt.Sprintf("curl -L --silent %s -o /tmp/portal.zip", url)
+
+		_, err = sshclient.Run(downloadCommand)
 		if err != nil {
 			log.WithField("instance", instance.Name).Errorf("failed to deploy portal: %v", err)
 			continue
 		}
 	}
 	return nil
+}
+
+func getUrl(arch string) (string, error) {
+	var url string
+	switch string(arch) {
+	case "x86_64":
+		url = "https://download.speedrun.sh/portal-linux-amd64.zip"
+	case "armv8l":
+		url = "https://download.speedrun.sh/portal-linux-arm64.zip"
+	case "armv8b":
+		url = "https://download.speedrun.sh/portal-linux-arm64.zip"
+	case "aarch64":
+		url = "https://download.speedrun.sh/portal-linux-arm64.zip"
+	case "aarch64_be":
+		url = "https://download.speedrun.sh/portal-linux-arm64.zip"
+	default:
+		return "", fmt.Errorf("unsupported CPU architecture")
+	}
+	return url, nil
 }
