@@ -1,9 +1,11 @@
 package main
 
 import (
-	"log"
 	"net"
+	"os"
 
+	"github.com/apex/log"
+	loghandler "github.com/apex/log/handlers/text"
 	"github.com/speedrunsh/speedrun/pkg/portal"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"google.golang.org/grpc"
@@ -12,6 +14,9 @@ import (
 const addr = "0.0.0.0:1337"
 
 func main() {
+	h := loghandler.New(os.Stdout)
+	log.SetHandler(h)
+
 	lis, err := net.Listen("tcp", addr)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
