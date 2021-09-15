@@ -63,6 +63,7 @@ require (
 	cloud.google.com/go v0.94.1 // indirect
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
+	github.com/godbus/dbus/v5 v5.0.5 // indirect
 	github.com/google/go-cmp v0.5.6 // indirect
 	github.com/lucas-clemente/quic-go v0.23.0 // indirect
 	github.com/marten-seemann/qtls-go1-16 v0.1.4 // indirect
@@ -77,6 +78,7 @@ require (
 )
 
 require (
+	github.com/coreos/go-systemd/v22 v22.3.2
 	github.com/speedrunsh/portal v0.0.0-20210912214401-052c5cbe210d
 	google.golang.org/protobuf v1.27.1 // indirect
 )

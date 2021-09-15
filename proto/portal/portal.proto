@@ -1,0 +1,24 @@
+syntax = "proto3";
+option go_package = "github.com/speedrunsh/speedrun/proto/portal";
+package portal;
+
+message Command{
+  string name = 1;
+}
+
+message Service{
+  string name = 1;
+}
+
+message Response{
+  string content = 1;
+}
+
+service Portal{
+  rpc ServiceRestart(Service) returns (Response) {}
+  rpc ServiceStart(Service) returns (Response) {}
+  rpc ServiceStop(Service) returns (Response) {}
+  rpc ServiceStatus(Service) returns (Response) {}
+  rpc RunCommand(Command) returns (Response) {}
+  // rpc EnsureMountedDisk()
+}
