@@ -1,8 +1,11 @@
 GITCOMMIT=$(shell git rev-parse --short HEAD 2>/dev/null)
 DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
 VERSION=$(shell git branch --show-current)
+DIST=dist
+LINUX_PATH=$(DIST)/linux
+DARWIN_PATH=$(DIST)/darwin
 
-all: requirements speedrun-linux speedrun-darwin
+all: requirements speedrun-linux speedrun-darwin portal-linux
 
 clean:
 	rm -rf dist
@@ -13,20 +16,35 @@ requirements:
 	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 speedrun-linux-amd64: requirements
-	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o dist/linux/amd64/speedrun
+	GOOS=linux GOARCH=amd64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o $(LINUX_PATH)/amd64/speedrun
 
 speedrun-linux-arm64: requirements
-	GOOS=linux GOARCH=arm64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o dist/linux/arm64/speedrun
+	GOOS=linux GOARCH=arm64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o $(LINUX_PATH)/arm64/speedrun
 
 speedrun-linux: requirements speedrun-linux-amd64 speedrun-linux-arm64
 
 speedrun-darwin-amd64: requirements
-	GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o dist/darwin/amd64/speedrun
+	GOOS=darwin GOARCH=amd64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o $(DARWIN_PATH)/amd64/speedrun
 
 speedrun-darwin-arm64: requirements
-	GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o dist/darwin/arm64/speedrun
+	GOOS=darwin GOARCH=arm64 go build -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" -o $(DARWIN_PATH)/arm64/speedrun
 
 speedrun-darwin: requirements speedrun-darwin-amd64 speedrun-darwin-arm64
 
-portal:
+speedrun: requirements speedrun-linux speedrun-darwin
+
+
+portal-linux-amd64: requirements
+	GOOS=linux GOARCH=amd64 go build -o $(LINUX_PATH)/amd64/portal
+	# zip $(DIST)/portal-linux-amd64.zip $(LINUX_PATH)/amd64/portal
+
+portal-linux-arm64: requirements
+	GOOS=linux GOARCH=arm64 go build -o $(LINUX_PATH)/arm64/portal
+	# zip $(DIST)/portal-linux-arm64.zip $(LINUX_PATH)/arm64/portal
+
+portal-linux: requirements portal-linux-amd64 portal-linux-arm64
+
+portal: requirements portal-linux
+
+proto:
 	protoc --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. proto/portal/portal.proto
