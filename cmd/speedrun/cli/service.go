@@ -78,10 +78,10 @@ func init() {
 	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	serviceCmd.PersistentFlags().Bool("use-oslogin", false, "Authenticate via OS Login")
-	viper.BindPFlag("ssh.ignore-fingerprint", serviceCmd.Flags().Lookup("ignore-fingerprint"))
-	viper.BindPFlag("portal.use-tunnel", serviceCmd.Flags().Lookup("use-tunnel"))
-	viper.BindPFlag("portal.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
-	viper.BindPFlag("gcp.use-oslogin", runCmd.Flags().Lookup("use-oslogin"))
+	viper.BindPFlag("ssh.ignore-fingerprint", serviceCmd.PersistentFlags().Lookup("ignore-fingerprint"))
+	viper.BindPFlag("portal.use-tunnel", serviceCmd.PersistentFlags().Lookup("use-tunnel"))
+	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
+	viper.BindPFlag("gcp.use-oslogin", serviceCmd.PersistentFlags().Lookup("use-oslogin"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
@@ -114,6 +114,7 @@ func action(cmd *cobra.Command, args []string) error {
 
 	var k *key.Key
 	if useTunnel {
+		log.Debug("Using SSH tunnel")
 		path, err := key.Path()
 		if err != nil {
 			return err
@@ -125,6 +126,7 @@ func action(cmd *cobra.Command, args []string) error {
 		}
 
 		if useOSlogin {
+			log.Debug("Using OS Login")
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 			user, err := gcpClient.GetSAUsername(ctx)
