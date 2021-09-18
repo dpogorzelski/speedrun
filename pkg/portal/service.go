@@ -4,20 +4,31 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/apex/log"
 	"github.com/coreos/go-systemd/v22/dbus"
 	"github.com/speedrunsh/speedrun/proto/portal"
 )
 
-func (s *Server) ServiceRestart(ctx context.Context, in *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceRestart(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+	fields := log.Fields{
+		"context": "service",
+		"command": "restart",
+		"name":    service.GetName(),
+	}
+	log := log.WithFields(fields)
+
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 	defer conn.Close()
+
 	responseChan := make(chan string, 1)
-	serviceName := fmt.Sprintf("%s.service", in.GetName())
+	serviceName := fmt.Sprintf("%s.service", service.GetName())
 	_, err = conn.RestartUnitContext(ctx, serviceName, "replace", responseChan)
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 
@@ -26,16 +37,26 @@ func (s *Server) ServiceRestart(ctx context.Context, in *portal.Service) (*porta
 
 }
 
-func (s *Server) ServiceStop(ctx context.Context, in *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+	fields := log.Fields{
+		"context": "service",
+		"command": "stop",
+		"name":    service.GetName(),
+	}
+	log := log.WithFields(fields)
+
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 	defer conn.Close()
+
 	responseChan := make(chan string, 1)
-	serviceName := fmt.Sprintf("%s.service", in.GetName())
+	serviceName := fmt.Sprintf("%s.service", service.GetName())
 	_, err = conn.StopUnitContext(ctx, serviceName, "replace", responseChan)
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 
@@ -44,16 +65,26 @@ func (s *Server) ServiceStop(ctx context.Context, in *portal.Service) (*portal.R
 
 }
 
-func (s *Server) ServiceStart(ctx context.Context, in *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+	fields := log.Fields{
+		"context": "service",
+		"command": "start",
+		"name":    service.GetName(),
+	}
+	log := log.WithFields(fields)
+
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 	defer conn.Close()
+
 	responseChan := make(chan string, 1)
-	serviceName := fmt.Sprintf("%s.service", in.GetName())
+	serviceName := fmt.Sprintf("%s.service", service.GetName())
 	_, err = conn.StartUnitContext(ctx, serviceName, "replace", responseChan)
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 
@@ -62,15 +93,25 @@ func (s *Server) ServiceStart(ctx context.Context, in *portal.Service) (*portal.
 
 }
 
-func (s *Server) ServiceStatus(ctx context.Context, in *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+	fields := log.Fields{
+		"context": "service",
+		"command": "status",
+		"name":    service.GetName(),
+	}
+	log := log.WithFields(fields)
+
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 	defer conn.Close()
-	serviceName := fmt.Sprintf("%s.service", in.GetName())
+
+	serviceName := fmt.Sprintf("%s.service", service.GetName())
 	res, err := conn.ListUnitsByNamesContext(ctx, []string{serviceName})
 	if err != nil {
+		log.Error(err.Error())
 		return nil, err
 	}
 
