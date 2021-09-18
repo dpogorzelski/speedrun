@@ -21,7 +21,7 @@ speedrun-linux-amd64: requirements
 speedrun-linux-arm64: requirements
 	GOOS=linux GOARCH=arm64 go build -o $(DIST)/speedrun-linux-arm64 -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" ./cmd/speedrun
 
-speedrun-linux: requirements speedrun-linux-amd64 speedrun-linux-arm64
+speedrun-linux: speedrun-linux-amd64 speedrun-linux-arm64
 
 speedrun-darwin-amd64: requirements
 	GOOS=darwin GOARCH=amd64 go build -o $(DIST)/speedrun-darwin-amd64 -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" ./cmd/speedrun
@@ -29,9 +29,9 @@ speedrun-darwin-amd64: requirements
 speedrun-darwin-arm64: requirements
 	GOOS=darwin GOARCH=arm64 go build -o $(DIST)/speedrun-darwin-arm64 -ldflags "-X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version=$(VERSION) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit=$(GITCOMMIT) -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date=$(DATE)" ./cmd/speedrun
 
-speedrun-darwin: requirements speedrun-darwin-amd64 speedrun-darwin-arm64
+speedrun-darwin: speedrun-darwin-amd64 speedrun-darwin-arm64
 
-speedrun: requirements speedrun-linux speedrun-darwin
+speedrun: speedrun-linux speedrun-darwin
 
 
 portal-linux-amd64: requirements
@@ -42,9 +42,11 @@ portal-linux-arm64: requirements
 	GOOS=linux GOARCH=arm64 go build -o $(DIST)/portal-linux-arm64 ./cmd/portal
 	zip $(DIST)/portal-linux-arm64.zip $(DIST)/portal-linux-arm64
 
-portal-linux: requirements portal-linux-amd64 portal-linux-arm64
+portal-linux: portal-linux-amd64 portal-linux-arm64
 
-portal: requirements portal-linux
+portal: portal-linux
+
+dev: speedrun-darwin-amd64 portal-linux-amd64
 
 proto:
 	protoc --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. proto/portal/portal.proto
