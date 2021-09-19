@@ -29,7 +29,7 @@ func init() {
 	runCmd.Flags().StringP("target", "t", "", "Fetch instances that match the target selection criteria")
 	runCmd.Flags().String("projectid", "", "Override GCP project id")
 	runCmd.Flags().Bool("only-failures", false, "Print only failures and errors")
-	runCmd.Flags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
+	runCmd.Flags().Bool("insecure", true, "Ignore host's fingerprint mismatch")
 	runCmd.Flags().Duration("timeout", time.Duration(10*time.Second), "SSH connection timeout")
 	runCmd.Flags().Int("concurrency", 100, "Number of maximum concurrent SSH workers")
 	runCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
@@ -37,7 +37,7 @@ func init() {
 	viper.BindPFlag("gcp.projectid", runCmd.Flags().Lookup("projectid"))
 	viper.BindPFlag("gcp.use-oslogin", runCmd.Flags().Lookup("use-oslogin"))
 	viper.BindPFlag("ssh.timeout", runCmd.Flags().Lookup("timeout"))
-	viper.BindPFlag("ssh.ignore-fingerprint", runCmd.Flags().Lookup("ignore-fingerprint"))
+	viper.BindPFlag("transport.insecure", runCmd.Flags().Lookup("insecure"))
 	viper.BindPFlag("ssh.only-failures", runCmd.Flags().Lookup("only-failures"))
 	viper.BindPFlag("ssh.concurrency", runCmd.Flags().Lookup("concurrency"))
 	viper.BindPFlag("ssh.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
@@ -48,7 +48,7 @@ func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
 	project := viper.GetString("gcp.projectid")
 	timeout := viper.GetDuration("ssh.timeout")
-	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
+	insecure := viper.GetBool("transport.insecure")
 	onlyFailures := viper.GetBool("ssh.only-failures")
 	concurrency := viper.GetInt("ssh.concurrency")
 	usePrivateIP := viper.GetBool("ssh.use-private-ip")
@@ -96,7 +96,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	m := marathon.NewMarathon(command, timeout, concurrency)
-	if ignoreFingerprint {
+	if insecure {
 		err = m.RunInsecure(instances, k)
 		if err != nil {
 			return err

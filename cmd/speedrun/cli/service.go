@@ -74,11 +74,11 @@ func init() {
 	serviceCmd.AddCommand(stopCmd)
 	serviceCmd.AddCommand(statusCmd)
 	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
-	serviceCmd.PersistentFlags().Bool("ignore-fingerprint", false, "Ignore host's fingerprint mismatch")
+	serviceCmd.PersistentFlags().Bool("insecure", true, "Ignore host's fingerprint mismatch (SSH) or skip Portal's certificate verification (gRPC/QUIC)")
 	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	serviceCmd.PersistentFlags().Bool("use-oslogin", false, "Authenticate via OS Login")
-	viper.BindPFlag("ssh.ignore-fingerprint", serviceCmd.PersistentFlags().Lookup("ignore-fingerprint"))
+	viper.BindPFlag("transport.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("portal.use-tunnel", serviceCmd.PersistentFlags().Lookup("use-tunnel"))
 	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
 	viper.BindPFlag("gcp.use-oslogin", serviceCmd.PersistentFlags().Lookup("use-oslogin"))
@@ -87,7 +87,7 @@ func init() {
 func action(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
 	useTunnel := viper.GetBool("portal.use-tunnel")
-	ignoreFingerprint := viper.GetBool("ssh.ignore-fingerprint")
+	insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	useOSlogin := viper.GetBool("gcp.use-oslogin")
 
@@ -141,7 +141,7 @@ func action(cmd *cobra.Command, args []string) error {
 		var t *grpc.ClientConn
 		var err error
 		if useTunnel {
-			t, err = transport.NewTransport(instance.Address, transport.WithSSH(*k), transport.WithInsecure(ignoreFingerprint))
+			t, err = transport.NewTransport(instance.Address, transport.WithSSH(*k), transport.WithInsecure(insecure))
 		} else {
 			t, err = transport.NewTransport(instance.Address)
 		}

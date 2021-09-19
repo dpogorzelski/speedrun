@@ -77,9 +77,11 @@ func NewTransport(address string, opts ...TransportOption) (*grpc.ClientConn, er
 			return nil, err
 		}
 	} else {
-		t.Conn, err = http2TransportInsecure(address)
-		if err != nil {
-			return nil, err
+		if t.opts.insecure {
+			t.Conn, err = http2TransportInsecure(address)
+			if err != nil {
+				return nil, err
+			}
 		}
 	}
 
