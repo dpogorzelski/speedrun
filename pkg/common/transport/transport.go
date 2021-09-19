@@ -68,31 +68,16 @@ func NewTransport(address string, opts ...TransportOption) (*grpc.ClientConn, er
 	}
 
 	if t.opts.key != nil {
-		var sshclient *goph.Client
-
 		if t.opts.insecure {
-			sshclient, err = ssh.ConnectInsecure(address, t.opts.key)
-			if err != nil {
-				return nil, err
-			}
+			t.Conn, err = ssh2TransportInsecure(address, t.opts.key)
 		} else {
-			sshclient, err = ssh.Connect(address, t.opts.key)
-			if err != nil {
-				return nil, err
-			}
+			t.Conn, err = ssh2Transport(address, t.opts.key)
 		}
-
-		dialer := func(ctx context.Context, addr string) (net.Conn, error) {
-			return sshclient.Dial("tcp", "127.0.0.1:1337")
-		}
-
-		t.Conn, err = grpc.Dial("127.0.0.1:1337", grpc.WithInsecure(), grpc.WithContextDialer(dialer))
 		if err != nil {
 			return nil, err
 		}
 	} else {
-		target := fmt.Sprintf("%s:%d", address, 1337)
-		t.Conn, err = grpc.Dial(target, grpc.WithInsecure())
+		t.Conn, err = http2TransportInsecure(address)
 		if err != nil {
 			return nil, err
 		}
@@ -101,7 +86,37 @@ func NewTransport(address string, opts ...TransportOption) (*grpc.ClientConn, er
 	return t.Conn, nil
 }
 
-func HTTP2Transport(address string) (*grpc.ClientConn, error) {
+func ssh2TransportInsecure(address string, key *key.Key) (*grpc.ClientConn, error) {
+	var sshclient *goph.Client
+
+	sshclient, err := ssh.ConnectInsecure(address, key)
+	if err != nil {
+		return nil, err
+	}
+
+	dialer := func(ctx context.Context, addr string) (net.Conn, error) {
+		return sshclient.Dial("tcp", "127.0.0.1:1337")
+	}
+
+	return grpc.Dial("127.0.0.1:1337", grpc.WithInsecure(), grpc.WithContextDialer(dialer))
+}
+
+func ssh2Transport(address string, key *key.Key) (*grpc.ClientConn, error) {
+	var sshclient *goph.Client
+
+	sshclient, err := ssh.Connect(address, key)
+	if err != nil {
+		return nil, err
+	}
+
+	dialer := func(ctx context.Context, addr string) (net.Conn, error) {
+		return sshclient.Dial("tcp", "127.0.0.1:1337")
+	}
+
+	return grpc.Dial("127.0.0.1:1337", grpc.WithInsecure(), grpc.WithContextDialer(dialer))
+}
+
+func http2TransportInsecure(address string) (*grpc.ClientConn, error) {
 	target := fmt.Sprintf("%s:%d", address, 1337)
 	return grpc.Dial(target, grpc.WithInsecure())
 }

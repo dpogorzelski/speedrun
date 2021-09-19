@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/speedrunsh/speedrun/pkg/common/key"
-	"github.com/speedrunsh/speedrun/pkg/common/ssh"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
+	"github.com/speedrunsh/speedrun/pkg/speedrun/marathon"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -95,7 +95,7 @@ func run(cmd *cobra.Command, args []string) error {
 		k.User = user
 	}
 
-	m := ssh.NewMarathon(command, timeout, concurrency)
+	m := marathon.NewMarathon(command, timeout, concurrency)
 	if ignoreFingerprint {
 		err = m.RunInsecure(instances, k)
 		if err != nil {
