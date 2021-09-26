@@ -241,5 +241,5 @@ var Portal_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "proto/portal/portal.proto",
+	Metadata: "portal/portal.proto",
 }

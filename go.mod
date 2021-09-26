@@ -78,6 +78,6 @@ require (
 
 require (
 	github.com/coreos/go-systemd/v22 v22.3.2
-	github.com/speedrunsh/grpc-quic v0.0.0-20210812143325-4d9fe0bf507c
+	github.com/speedrunsh/grpc-quic v0.0.0-20210926202554-46d11d92778e
 	google.golang.org/protobuf v1.27.1
 )

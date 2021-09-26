@@ -8,4 +8,4 @@ requirements:
 	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
 
 portal:
-	protoc --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. *.proto
+	protoc --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. portal/*.proto

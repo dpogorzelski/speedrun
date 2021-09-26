@@ -434,8 +434,8 @@ github.com/smartystreets/gunit v1.0.0/go.mod h1:qwPWnhz6pn0NnRBP++URONOVyNkPyr4S
 github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d/go.mod h1:UdhH50NIW0fCiwBSr0co2m7BnFLdv4fQTgdqdJTHFeE=
 github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e/go.mod h1:HuIsMU8RRBOtsCgI77wP899iHVBQpCmg4ErYMZB+2IA=
 github.com/spaolacci/murmur3 v0.0.0-20180118202830-f09979ecbc72/go.mod h1:JwIasOWyU6f++ZhiEuf87xNszmSA2myDM2Kzu9HwQUA=
-github.com/speedrunsh/grpc-quic v0.0.0-20210812143325-4d9fe0bf507c h1:ZQHjfXU7ZXTNp39xRt+iGmkwAhT7NaOl0tQZibGZJr4=
-github.com/speedrunsh/grpc-quic v0.0.0-20210812143325-4d9fe0bf507c/go.mod h1:5YfqA6C7b0/kViRVzIf5R/WxS+9rSMX2Lc+vKq5R3vE=
+github.com/speedrunsh/grpc-quic v0.0.0-20210926202554-46d11d92778e h1:fZ0E8RNAW8PxWfeb6Unocu0oP7WmJNaByMwaKcsRqDY=
+github.com/speedrunsh/grpc-quic v0.0.0-20210926202554-46d11d92778e/go.mod h1:70WAJLGuCaOdtERiFbbmE9sjv5FklEPfmQ9/q85sZ0U=
 github.com/spf13/afero v1.6.0 h1:xoax2sJ2DT8S8xA2paPFjDCScCNeWsg75VG0DLRreiY=
 github.com/spf13/afero v1.6.0/go.mod h1:Ai8FlHk4v/PARR026UzYexafAt9roJ7LcLMAmO6Z93I=
 github.com/spf13/cast v1.3.1/go.mod h1:Qx5cxh0v+4UWYiBimWS+eyWzqEqokIECu5etghLkUJE=

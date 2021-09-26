@@ -3,10 +3,10 @@ package cli
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
-	"github.com/speedrunsh/speedrun/pkg/common/key"
 	transport "github.com/speedrunsh/speedrun/pkg/common/transport"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/result"
@@ -74,24 +74,21 @@ func init() {
 	serviceCmd.AddCommand(statusCmd)
 	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
 	serviceCmd.PersistentFlags().Bool("insecure", true, "Ignore host's fingerprint mismatch (SSH) or skip Portal's certificate verification (gRPC/QUIC)")
-	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
-	serviceCmd.PersistentFlags().Bool("use-oslogin", false, "Authenticate via OS Login")
 	serviceCmd.PersistentFlags().Bool("only-failures", false, "Print only failures and errors")
+	serviceCmd.PersistentFlags().Bool("http2", false, "Use HTTP2 instead of QUIC")
 	viper.BindPFlag("transport.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
-	viper.BindPFlag("portal.use-tunnel", serviceCmd.PersistentFlags().Lookup("use-tunnel"))
 	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
-	viper.BindPFlag("gcp.use-oslogin", serviceCmd.PersistentFlags().Lookup("use-oslogin"))
 	viper.BindPFlag("portal.only-failures", serviceCmd.PersistentFlags().Lookup("only-failures"))
+	viper.BindPFlag("transport.http2", serviceCmd.PersistentFlags().Lookup("http2"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
-	useTunnel := viper.GetBool("portal.use-tunnel")
 	insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
-	useOSlogin := viper.GetBool("gcp.use-oslogin")
 	onlyFailures := viper.GetBool("portal.only-failures")
+	http2 := viper.GetBool("transport.http2")
 
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -114,38 +111,13 @@ func action(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	var k *key.Key
-	if useTunnel {
-		log.Debug("Using SSH tunnel")
-		path, err := key.Path()
-		if err != nil {
-			return err
-		}
-
-		k, err = key.Read(path)
-		if err != nil {
-			return err
-		}
-
-		if useOSlogin {
-			log.Debug("Using OS Login")
-			ctx, cancel := context.WithCancel(context.Background())
-			defer cancel()
-			user, err := gcpClient.GetSAUsername(ctx)
-			if err != nil {
-				return err
-			}
-			k.User = user
-		}
-	}
-
 	pool := pond.New(1000, 10000)
 	res := result.NewResult()
 
 	for _, i := range instances {
 		instance := i
 		pool.Submit(func() {
-			t, err := transport.NewGRPCTransport(instance.Address, transport.WithSSH(useTunnel), transport.WithSSHKey(*k), transport.WithInsecure(insecure))
+			t, err := transport.NewGRPCTransport(instance.Address, transport.WithInsecure(insecure), transport.WithHTTP2(http2))
 			if err != nil {
 				res.AddError(instance.Name, err)
 				return
@@ -153,7 +125,7 @@ func action(cmd *cobra.Command, args []string) error {
 			defer t.Close()
 
 			c := portalpb.NewPortalClient(t)
-			ctx, cancel := context.WithCancel(context.Background())
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
 			var r *portalpb.Response
