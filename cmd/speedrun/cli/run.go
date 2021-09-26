@@ -8,6 +8,7 @@ import (
 	"github.com/speedrunsh/speedrun/pkg/common/key"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/marathon"
+	"github.com/speedrunsh/speedrun/pkg/speedrun/result"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -96,18 +97,19 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	m := marathon.NewMarathon(command, timeout, concurrency)
+	var res *result.Result
 	if insecure {
-		err = m.RunInsecure(instances, k)
+		res, err = m.RunInsecure(instances, k)
 		if err != nil {
 			return err
 		}
 	} else {
-		err = m.Run(instances, k)
+		res, err = m.Run(instances, k)
 		if err != nil {
 			return err
 		}
 	}
 
-	m.PrintResult(onlyFailures)
+	res.Print(onlyFailures)
 	return nil
 }
