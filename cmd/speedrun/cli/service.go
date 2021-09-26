@@ -2,14 +2,14 @@ package cli
 
 import (
 	"context"
-	"fmt"
 	"strings"
 
+	"github.com/alitto/pond"
 	"github.com/apex/log"
-	"github.com/speedrunsh/speedrun/pkg/common/colors"
 	"github.com/speedrunsh/speedrun/pkg/common/key"
 	transport "github.com/speedrunsh/speedrun/pkg/common/transport"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
+	"github.com/speedrunsh/speedrun/pkg/speedrun/result"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -77,10 +77,12 @@ func init() {
 	serviceCmd.PersistentFlags().Bool("use-tunnel", true, "Connect to the portals via SSH tunnel")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	serviceCmd.PersistentFlags().Bool("use-oslogin", false, "Authenticate via OS Login")
+	serviceCmd.PersistentFlags().Bool("only-failures", false, "Print only failures and errors")
 	viper.BindPFlag("transport.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("portal.use-tunnel", serviceCmd.PersistentFlags().Lookup("use-tunnel"))
 	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
 	viper.BindPFlag("gcp.use-oslogin", serviceCmd.PersistentFlags().Lookup("use-oslogin"))
+	viper.BindPFlag("portal.only-failures", serviceCmd.PersistentFlags().Lookup("only-failures"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
@@ -89,6 +91,7 @@ func action(cmd *cobra.Command, args []string) error {
 	insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	useOSlogin := viper.GetBool("gcp.use-oslogin")
+	onlyFailures := viper.GetBool("portal.only-failures")
 
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -136,37 +139,45 @@ func action(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	for _, instance := range instances {
-		t, err := transport.NewGRPCTransport(instance.Address, transport.WithSSH(useTunnel), transport.WithSSHKey(*k), transport.WithInsecure(insecure))
-		if err != nil {
-			log.Warn(err.Error())
-			continue
-		}
-		defer t.Close()
+	pool := pond.New(1000, 10000)
+	res := result.NewResult()
 
-		c := portalpb.NewPortalClient(t)
-		ctx, cancel := context.WithCancel(context.Background())
-		defer cancel()
-
-		var r *portalpb.Response
-		switch cmd.Name() {
-		case "restart":
-			r, err = c.ServiceRestart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
-		case "start":
-			r, err = c.ServiceStart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
-		case "stop":
-			r, err = c.ServiceStop(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
-		case "status":
-			r, err = c.ServiceStatus(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
-		}
-		if err != nil {
-			if e, ok := status.FromError(err); ok {
-				fmt.Printf("  %s:\n    %s\n\n", colors.Yellow(instance.Name), e.Message())
+	for _, i := range instances {
+		instance := i
+		pool.Submit(func() {
+			t, err := transport.NewGRPCTransport(instance.Address, transport.WithSSH(useTunnel), transport.WithSSHKey(*k), transport.WithInsecure(insecure))
+			if err != nil {
+				res.AddError(instance.Name, err)
+				return
 			}
-			continue
-		}
-		fmt.Printf("  %s:\n    %s\n\n", colors.Green(instance.Name), r.GetContent())
+			defer t.Close()
+
+			c := portalpb.NewPortalClient(t)
+			ctx, cancel := context.WithCancel(context.Background())
+			defer cancel()
+
+			var r *portalpb.Response
+			switch cmd.Name() {
+			case "restart":
+				r, err = c.ServiceRestart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+			case "start":
+				r, err = c.ServiceStart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+			case "stop":
+				r, err = c.ServiceStop(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+			case "status":
+				r, err = c.ServiceStatus(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+			}
+			if err != nil {
+				if e, ok := status.FromError(err); ok {
+					res.AddFailure(instance.Name, e.Message())
+				}
+				return
+			}
+			res.AddSuccess(instance.Name, r.GetContent())
+		})
 	}
+	pool.StopAndWait()
+	res.Print(onlyFailures)
 
 	return nil
 }
