@@ -1,4 +1,4 @@
-package portal
+package transport
 
 import (
 	"context"
@@ -14,14 +14,15 @@ import (
 	"google.golang.org/grpc"
 )
 
-type Transport struct {
+type GRPCTransport struct {
 	Conn    *grpc.ClientConn
-	Address string
+	address string
 	opts    options
 }
 
 type options struct {
 	insecure bool
+	useSSH   bool
 	key      *key.Key
 }
 
@@ -32,6 +33,7 @@ type TransportOption interface {
 func defaultOptions() options {
 	return options{
 		insecure: false,
+		useSSH:   true,
 	}
 }
 
@@ -45,33 +47,43 @@ func WithInsecure(enable bool) TransportOption {
 	return withInsecure(enable)
 }
 
-type withSSH key.Key
+type withSSH bool
 
 func (w withSSH) apply(o *options) {
+	o.insecure = bool(w)
+}
+
+func WithSSH(enable bool) TransportOption {
+	return withSSH(enable)
+}
+
+type withSSHKey key.Key
+
+func (w withSSHKey) apply(o *options) {
 	a := key.Key(w)
 	o.key = &a
 }
 
-func WithSSH(key key.Key) TransportOption {
-	return withSSH(key)
+func WithSSHKey(key key.Key) TransportOption {
+	return withSSHKey(key)
 }
 
-func NewTransport(address string, opts ...TransportOption) (*grpc.ClientConn, error) {
+func NewGRPCTransport(address string, opts ...TransportOption) (*grpc.ClientConn, error) {
 	var err error
 
-	t := &Transport{
-		Address: address,
+	t := &GRPCTransport{
+		address: address,
 		opts:    defaultOptions(),
 	}
 	for _, opt := range opts {
 		opt.apply(&t.opts)
 	}
 
-	if t.opts.key != nil {
+	if t.opts.useSSH {
 		if t.opts.insecure {
-			t.Conn, err = ssh2TransportInsecure(address, t.opts.key)
+			t.Conn, err = sshTransportInsecure(t.address, t.opts.key)
 		} else {
-			t.Conn, err = ssh2Transport(address, t.opts.key)
+			t.Conn, err = sshTransport(t.address, t.opts.key)
 		}
 		if err != nil {
 			return nil, err
@@ -88,7 +100,7 @@ func NewTransport(address string, opts ...TransportOption) (*grpc.ClientConn, er
 	return t.Conn, nil
 }
 
-func ssh2TransportInsecure(address string, key *key.Key) (*grpc.ClientConn, error) {
+func sshTransportInsecure(address string, key *key.Key) (*grpc.ClientConn, error) {
 	var sshclient *goph.Client
 
 	sshclient, err := ssh.ConnectInsecure(address, key)
@@ -103,7 +115,7 @@ func ssh2TransportInsecure(address string, key *key.Key) (*grpc.ClientConn, erro
 	return grpc.Dial("127.0.0.1:1337", grpc.WithInsecure(), grpc.WithContextDialer(dialer))
 }
 
-func ssh2Transport(address string, key *key.Key) (*grpc.ClientConn, error) {
+func sshTransport(address string, key *key.Key) (*grpc.ClientConn, error) {
 	var sshclient *goph.Client
 
 	sshclient, err := ssh.Connect(address, key)

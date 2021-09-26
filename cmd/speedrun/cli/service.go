@@ -13,7 +13,6 @@ import (
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc"
 	"google.golang.org/grpc/status"
 )
 
@@ -138,20 +137,14 @@ func action(cmd *cobra.Command, args []string) error {
 	}
 
 	for _, instance := range instances {
-		var t *grpc.ClientConn
-		var err error
-		if useTunnel {
-			t, err = transport.NewTransport(instance.Address, transport.WithSSH(*k), transport.WithInsecure(insecure))
-		} else {
-			t, err = transport.NewTransport(instance.Address)
-		}
+		t, err := transport.NewGRPCTransport(instance.Address, transport.WithSSH(useTunnel), transport.WithSSHKey(*k), transport.WithInsecure(insecure))
 		if err != nil {
 			log.Warn(err.Error())
 			continue
 		}
 		defer t.Close()
-		c := portalpb.NewPortalClient(t)
 
+		c := portalpb.NewPortalClient(t)
 		ctx, cancel := context.WithCancel(context.Background())
 		defer cancel()
 
