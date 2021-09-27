@@ -17,7 +17,6 @@ type GRPCTransport struct {
 
 type options struct {
 	insecure bool
-	http2    bool
 }
 
 type TransportOption interface {
@@ -27,7 +26,6 @@ type TransportOption interface {
 func defaultOptions() options {
 	return options{
 		insecure: false,
-		http2:    false,
 	}
 }
 
@@ -41,16 +39,6 @@ func WithInsecure(enable bool) TransportOption {
 	return withInsecure(enable)
 }
 
-type withHTTP2 bool
-
-func (w withHTTP2) apply(o *options) {
-	o.http2 = bool(w)
-}
-
-func WithHTTP2(enable bool) TransportOption {
-	return withHTTP2(enable)
-}
-
 func NewGRPCTransport(address string, opts ...TransportOption) (*grpc.ClientConn, error) {
 	var err error
 
@@ -62,19 +50,16 @@ func NewGRPCTransport(address string, opts ...TransportOption) (*grpc.ClientConn
 		opt.apply(&t.opts)
 	}
 
-	if t.opts.http2 {
-		if t.opts.insecure {
-			t.Conn, err = http2TransportInsecure(address)
-			if err != nil {
-				return nil, err
-			}
+	if t.opts.insecure {
+		t.Conn, err = quicTransport(address)
+		if err != nil {
+			return nil, err
 		}
 	} else {
-		if t.opts.insecure {
-			t.Conn, err = quicTransport(address)
-			if err != nil {
-				return nil, err
-			}
+		// this should seutp mtls
+		t.Conn, err = quicTransport(address)
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -83,11 +68,6 @@ func NewGRPCTransport(address string, opts ...TransportOption) (*grpc.ClientConn
 	}
 
 	return t.Conn, nil
-}
-
-func http2TransportInsecure(address string) (*grpc.ClientConn, error) {
-	target := fmt.Sprintf("%s:%d", address, 1337)
-	return grpc.Dial(target, grpc.WithInsecure())
 }
 
 func quicTransport(address string) (*grpc.ClientConn, error) {

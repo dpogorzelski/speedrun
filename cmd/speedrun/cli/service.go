@@ -76,11 +76,9 @@ func init() {
 	serviceCmd.PersistentFlags().Bool("insecure", true, "Ignore host's fingerprint mismatch (SSH) or skip Portal's certificate verification (gRPC/QUIC)")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	serviceCmd.PersistentFlags().Bool("only-failures", false, "Print only failures and errors")
-	serviceCmd.PersistentFlags().Bool("http2", false, "Use HTTP2 instead of QUIC")
 	viper.BindPFlag("transport.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
 	viper.BindPFlag("portal.only-failures", serviceCmd.PersistentFlags().Lookup("only-failures"))
-	viper.BindPFlag("transport.http2", serviceCmd.PersistentFlags().Lookup("http2"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
@@ -88,7 +86,6 @@ func action(cmd *cobra.Command, args []string) error {
 	insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	onlyFailures := viper.GetBool("portal.only-failures")
-	http2 := viper.GetBool("transport.http2")
 
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -117,7 +114,7 @@ func action(cmd *cobra.Command, args []string) error {
 	for _, i := range instances {
 		instance := i
 		pool.Submit(func() {
-			t, err := transport.NewGRPCTransport(instance.Address, transport.WithInsecure(insecure), transport.WithHTTP2(http2))
+			t, err := transport.NewGRPCTransport(instance.Address, transport.WithInsecure(insecure))
 			if err != nil {
 				res.AddError(instance.Name, err)
 				return
