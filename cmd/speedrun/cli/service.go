@@ -73,12 +73,14 @@ func init() {
 	serviceCmd.AddCommand(stopCmd)
 	serviceCmd.AddCommand(statusCmd)
 	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
-	serviceCmd.PersistentFlags().Bool("insecure", true, "Ignore host's fingerprint mismatch (SSH) or skip Portal's certificate verification (gRPC/QUIC)")
+	serviceCmd.PersistentFlags().String("projectid", "", "Override GCP project id")
+	serviceCmd.PersistentFlags().Bool("insecure", true, "Skip Portal's certificate verification (gRPC/QUIC)")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	serviceCmd.PersistentFlags().Bool("only-failures", false, "Print only failures and errors")
 	viper.BindPFlag("transport.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
 	viper.BindPFlag("portal.only-failures", serviceCmd.PersistentFlags().Lookup("only-failures"))
+	viper.BindPFlag("gcp.projectid", serviceCmd.PersistentFlags().Lookup("projectid"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
@@ -92,13 +94,13 @@ func action(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	gcpClient, err := cloud.NewGCPClient(project)
+	gcpClient, err := cloud.NewGCPClient()
 	if err != nil {
 		return err
 	}
 
 	log.Info("Fetching instance list")
-	instances, err := gcpClient.GetInstances(target, usePrivateIP)
+	instances, err := gcpClient.GetInstances(project, target)
 	if err != nil {
 		return err
 	}
@@ -114,7 +116,7 @@ func action(cmd *cobra.Command, args []string) error {
 	for _, i := range instances {
 		instance := i
 		pool.Submit(func() {
-			t, err := transport.NewGRPCTransport(instance.Address, transport.WithInsecure(insecure))
+			t, err := transport.NewGRPCTransport(instance.GetAddress(usePrivateIP), transport.WithInsecure(insecure))
 			if err != nil {
 				res.AddError(instance.Name, err)
 				return

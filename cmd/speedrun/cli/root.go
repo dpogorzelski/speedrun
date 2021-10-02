@@ -35,7 +35,6 @@ func Execute() {
 
 	rootCmd.SetUsageTemplate(rootUsage)
 	rootCmd.AddCommand(initCmd)
-	rootCmd.AddCommand(keyCmd)
 	rootCmd.AddCommand(runCmd)
 	rootCmd.AddCommand(serviceCmd)
 
