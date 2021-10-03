@@ -4,6 +4,7 @@ package portal;
 
 message Command{
   string name = 1;
+  repeated string args = 2;
 }
 
 message Service{

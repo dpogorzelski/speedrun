@@ -2,7 +2,6 @@ package cli
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/alitto/pond"
@@ -40,7 +39,6 @@ func init() {
 }
 
 func run(cmd *cobra.Command, args []string) error {
-	command := strings.Join(args, " ")
 	project := viper.GetString("gcp.projectid")
 	insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
@@ -84,7 +82,7 @@ func run(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
-			r, err := c.RunCommand(ctx, &portalpb.Command{Name: command})
+			r, err := c.RunCommand(ctx, &portalpb.Command{Name: args[0], Args: args[1:]})
 			if err != nil {
 				if e, ok := status.FromError(err); ok {
 					log.WithFields(fields).Warn(e.Message())
