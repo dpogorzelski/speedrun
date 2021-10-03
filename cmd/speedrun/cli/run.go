@@ -1,10 +1,16 @@
 package cli
 
 import (
+	"context"
 	"strings"
+	"time"
 
+	"github.com/alitto/pond"
+	transport "github.com/speedrunsh/speedrun/pkg/common/transport"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/result"
+	portalpb "github.com/speedrunsh/speedrun/proto/portal"
+	"google.golang.org/grpc/status"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -64,14 +70,34 @@ func run(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	var res *result.Result
-	if insecure {
-		log.Warn(command)
-		log.Warnf("%s", usePrivateIP)
-	} else {
-		log.Warn(command)
-	}
+	pool := pond.New(1000, 10000)
+	res := result.NewResult()
 
+	for _, i := range instances {
+		instance := i
+		pool.Submit(func() {
+			t, err := transport.NewGRPCTransport(instance.GetAddress(usePrivateIP), transport.WithInsecure(insecure))
+			if err != nil {
+				res.AddError(instance.Name, err)
+				return
+			}
+			defer t.Close()
+
+			c := portalpb.NewPortalClient(t)
+			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+			defer cancel()
+
+			r, err := c.RunCommand(ctx, &portalpb.Command{Name: command})
+			if err != nil {
+				if e, ok := status.FromError(err); ok {
+					res.AddFailure(instance.Name, e.Message())
+				}
+				return
+			}
+			res.AddSuccess(instance.Name, r.GetContent())
+		})
+	}
+	pool.StopAndWait()
 	res.Print(onlyFailures)
 	return nil
 }
