@@ -52,7 +52,6 @@ require (
 	github.com/cheekybits/genny v1.0.0 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20210107165309-348f09dbbbc0 // indirect
 	github.com/godbus/dbus/v5 v5.0.5 // indirect
-	github.com/lucas-clemente/quic-go v0.23.0 // indirect
 	github.com/marten-seemann/qtls-go1-16 v0.1.4 // indirect
 	github.com/marten-seemann/qtls-go1-17 v0.1.0 // indirect
 	github.com/nxadm/tail v1.4.8 // indirect
@@ -68,6 +67,7 @@ require (
 
 require (
 	github.com/coreos/go-systemd/v22 v22.3.2
+	github.com/lucas-clemente/quic-go v0.23.0
 	github.com/speedrunsh/grpc-quic v0.0.0-20210926202554-46d11d92778e
 	google.golang.org/protobuf v1.27.1
 )
