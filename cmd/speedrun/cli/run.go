@@ -43,9 +43,7 @@ func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
 	project := viper.GetString("gcp.projectid")
 	insecure := viper.GetBool("transport.insecure")
-	// onlyFailures := viper.GetBool("portal.only-failures")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
-
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
 		return err
