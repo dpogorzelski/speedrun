@@ -31,12 +31,10 @@ func init() {
 	runCmd.SetUsageTemplate(usage)
 	runCmd.Flags().StringP("target", "t", "", "Fetch instances that match the target selection criteria")
 	runCmd.Flags().String("projectid", "", "Override GCP project id")
-	runCmd.Flags().Bool("only-failures", false, "Print only failures and errors")
 	runCmd.Flags().Bool("insecure", true, "Skip Portal's certificate verification (gRPC/QUIC)")
 	runCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	viper.BindPFlag("gcp.projectid", runCmd.Flags().Lookup("projectid"))
 	viper.BindPFlag("transport.insecure", runCmd.Flags().Lookup("insecure"))
-	viper.BindPFlag("portal.only-failures", runCmd.Flags().Lookup("only-failures"))
 	viper.BindPFlag("portal.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
 
 }

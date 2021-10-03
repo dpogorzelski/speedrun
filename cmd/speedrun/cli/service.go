@@ -75,10 +75,8 @@ func init() {
 	serviceCmd.PersistentFlags().String("projectid", "", "Override GCP project id")
 	serviceCmd.PersistentFlags().Bool("insecure", true, "Skip Portal's certificate verification (gRPC/QUIC)")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
-	serviceCmd.PersistentFlags().Bool("only-failures", false, "Print only failures and errors")
 	viper.BindPFlag("transport.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
 	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
-	viper.BindPFlag("portal.only-failures", serviceCmd.PersistentFlags().Lookup("only-failures"))
 	viper.BindPFlag("gcp.projectid", serviceCmd.PersistentFlags().Lookup("projectid"))
 }
 
