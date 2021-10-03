@@ -70,8 +70,6 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	pool := pond.New(1000, 10000)
-	// res := result.NewResult()
-
 	for _, i := range instances {
 		instance := i
 		pool.Submit(func() {
@@ -101,6 +99,5 @@ func run(cmd *cobra.Command, args []string) error {
 		})
 	}
 	pool.StopAndWait()
-	// res.Print(onlyFailures)
 	return nil
 }
