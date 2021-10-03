@@ -11,6 +11,7 @@ import (
 
 	"github.com/apex/log"
 	loghandler "github.com/apex/log/handlers/text"
+	sysctl "github.com/lorenzosaino/go-sysctl"
 	"github.com/lucas-clemente/quic-go"
 	qnet "github.com/speedrunsh/grpc-quic"
 	"github.com/speedrunsh/speedrun/pkg/portal"
@@ -23,6 +24,11 @@ const addr = "0.0.0.0:1337"
 func main() {
 	h := loghandler.New(os.Stdout)
 	log.SetHandler(h)
+	err := sysctl.Set("net.core.rmem_max", "2500000")
+	if err != nil {
+		log.Fatalf("couldn't set net.core.rmem_max: %s", err.Error())
+	}
+
 	tlsConf, err := generateTLSConfig()
 	if err != nil {
 		log.Fatalf("QuicServer: failed to generateTLSConfig. %s", err.Error())

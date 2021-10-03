@@ -9,7 +9,6 @@ import (
 	"github.com/apex/log"
 	transport "github.com/speedrunsh/speedrun/pkg/common/transport"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
-	"github.com/speedrunsh/speedrun/pkg/speedrun/result"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -87,7 +86,7 @@ func action(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
 	insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
-	onlyFailures := viper.GetBool("portal.only-failures")
+	// onlyFailures := viper.GetBool("portal.only-failures")
 
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -111,14 +110,18 @@ func action(cmd *cobra.Command, args []string) error {
 	}
 
 	pool := pond.New(1000, 10000)
-	res := result.NewResult()
+	// res := result.NewResult()
 
 	for _, i := range instances {
 		instance := i
 		pool.Submit(func() {
+			fields := log.Fields{
+				"host":    instance.Name,
+				"address": instance.GetAddress(usePrivateIP),
+			}
 			t, err := transport.NewGRPCTransport(instance.GetAddress(usePrivateIP), transport.WithInsecure(insecure))
 			if err != nil {
-				res.AddError(instance.Name, err)
+				log.WithFields(fields).Error(err.Error())
 				return
 			}
 			defer t.Close()
@@ -140,15 +143,15 @@ func action(cmd *cobra.Command, args []string) error {
 			}
 			if err != nil {
 				if e, ok := status.FromError(err); ok {
-					res.AddFailure(instance.Name, e.Message())
+					log.WithFields(fields).Warn(e.Message())
 				}
 				return
 			}
-			res.AddSuccess(instance.Name, r.GetContent())
+			log.WithFields(fields).Info(r.GetContent())
 		})
 	}
 	pool.StopAndWait()
-	res.Print(onlyFailures)
+	// res.Print(onlyFailures)
 
 	return nil
 }
