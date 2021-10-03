@@ -17,7 +17,7 @@ func (s *Server) RunCommand(ctx context.Context, in *portal.Command) (*portal.Re
 	}
 	log := log.WithFields(fields)
 
-	log.Infof("Received command: %s", in.GetName())
+	log.Debugf("Received command: %s", in.GetName())
 	cmd := exec.Command(in.GetName(), in.GetArgs()...)
 	stdout, err := cmd.Output()
 
