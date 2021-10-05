@@ -12,12 +12,10 @@ import (
 func (s *Server) RunCommand(ctx context.Context, in *portal.Command) (*portal.Response, error) {
 	fields := log.Fields{
 		"context": "command",
-		"name":    in.GetName(),
-		"args":    in.GetArgs(),
 	}
 	log := log.WithFields(fields)
 
-	log.Debugf("Received command: %s", in.GetName())
+	log.Debugf("Received command: %s %s", in.GetName(), in.GetArgs())
 	cmd := exec.Command(in.GetName(), in.GetArgs()...)
 	stdout, err := cmd.Output()
 
