@@ -6,4 +6,3 @@ enabled = true
 
   [analyzers.meta]
   import_root = "github.com/speedrunsh/speedrun"
-  dependencies_vendored = false
