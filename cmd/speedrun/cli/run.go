@@ -2,14 +2,16 @@ package cli
 
 import (
 	"context"
+	"crypto/tls"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/alitto/pond"
-	transport "github.com/speedrunsh/speedrun/pkg/common/transport"
+	itls "github.com/speedrunsh/speedrun/pkg/common/tls"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
-	"google.golang.org/grpc/status"
+	"storj.io/drpc/drpcconn"
 
 	"github.com/apex/log"
 	"github.com/spf13/cobra"
@@ -43,7 +45,7 @@ func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
 	s := strings.Split(command, " ")
 	project := viper.GetString("gcp.projectid")
-	insecure := viper.GetBool("transport.insecure")
+	// insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -66,6 +68,11 @@ func run(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
+	tlsConfig, err := itls.GenerateTLSConfig()
+	if err != nil {
+		return err
+	}
+
 	pool := pond.New(1000, 10000)
 	for _, i := range instances {
 		instance := i
@@ -74,22 +81,23 @@ func run(cmd *cobra.Command, args []string) error {
 				"host":    instance.Name,
 				"address": instance.GetAddress(usePrivateIP),
 			}
-			t, err := transport.NewGRPCTransport(instance.GetAddress(usePrivateIP), transport.WithInsecure(insecure))
+			addr := fmt.Sprintf("%s:%d", instance.GetAddress(usePrivateIP), 1337)
+			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
 				log.WithFields(fields).Error(err.Error())
 				return
 			}
-			defer t.Close()
 
-			c := portalpb.NewPortalClient(t)
+			conn := drpcconn.New(rawconn)
+			defer conn.Close()
+
+			c := portalpb.NewDRPCPortalClient(conn)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
 			r, err := c.RunCommand(ctx, &portalpb.Command{Name: s[0], Args: s[1:]})
 			if err != nil {
-				if e, ok := status.FromError(err); ok {
-					log.WithFields(fields).Warn(e.Message())
-				}
+				log.WithFields(fields).Warn(err.Error())
 				return
 			}
 			log.WithFields(fields).Infof(r.GetContent())

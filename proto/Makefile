@@ -4,8 +4,7 @@ all: requirements portal
 
 requirements:
 	@go mod download
-	@go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-	@go install google.golang.org/grpc/cmd/protoc-gen-go-grpc@latest
+	@go install storj.io/drpc/cmd/protoc-gen-go-drpc@latest
 
 portal:
-	protoc --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. portal/*.proto
+	protoc --go_out=paths=source_relative:. --go-drpc_out=paths=source_relative:. portal/*.proto

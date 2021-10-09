@@ -2,17 +2,19 @@ package cli
 
 import (
 	"context"
+	"crypto/tls"
+	"fmt"
 	"strings"
 	"time"
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
-	transport "github.com/speedrunsh/speedrun/pkg/common/transport"
+	itls "github.com/speedrunsh/speedrun/pkg/common/tls"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"google.golang.org/grpc/status"
+	"storj.io/drpc/drpcconn"
 )
 
 var serviceCmd = &cobra.Command{
@@ -82,7 +84,7 @@ func init() {
 
 func action(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
-	insecure := viper.GetBool("transport.insecure")
+	// insecure := viper.GetBool("transport.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -105,6 +107,11 @@ func action(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
+	tlsConfig, err := itls.GenerateTLSConfig()
+	if err != nil {
+		return err
+	}
+
 	pool := pond.New(1000, 10000)
 	for _, i := range instances {
 		instance := i
@@ -113,14 +120,18 @@ func action(cmd *cobra.Command, args []string) error {
 				"host":    instance.Name,
 				"address": instance.GetAddress(usePrivateIP),
 			}
-			t, err := transport.NewGRPCTransport(instance.GetAddress(usePrivateIP), transport.WithInsecure(insecure))
+
+			addr := fmt.Sprintf("%s:%d", instance.GetAddress(usePrivateIP), 1337)
+			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
 				log.WithFields(fields).Error(err.Error())
 				return
 			}
-			defer t.Close()
 
-			c := portalpb.NewPortalClient(t)
+			conn := drpcconn.New(rawconn)
+			defer conn.Close()
+
+			c := portalpb.NewDRPCPortalClient(conn)
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
@@ -136,9 +147,7 @@ func action(cmd *cobra.Command, args []string) error {
 				r, err = c.ServiceStatus(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
 			}
 			if err != nil {
-				if e, ok := status.FromError(err); ok {
-					log.WithFields(fields).Warn(e.Message())
-				}
+				log.WithFields(fields).Warn(err.Error())
 				return
 			}
 			log.WithFields(fields).Info(r.GetContent())
