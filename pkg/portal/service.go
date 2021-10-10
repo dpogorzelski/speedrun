@@ -3,6 +3,7 @@ package portal
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/apex/log"
 	"github.com/coreos/go-systemd/v22/dbus"
@@ -35,7 +36,7 @@ func (s *Server) ServiceRestart(ctx context.Context, service *portal.Service) (*
 
 	res := <-responseChan
 	log.Debugf("Service restart result: %v", res)
-	return &portal.Response{Content: res}, nil
+	return &portal.Response{Content: strings.Title(res)}, nil
 
 }
 
@@ -75,7 +76,7 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*por
 
 	res := <-responseChan
 	log.Debugf("Service stop result: %v", res)
-	return &portal.Response{Content: res}, nil
+	return &portal.Response{Content: strings.Title(res)}, nil
 
 }
 
@@ -115,7 +116,7 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*po
 
 	res := <-responseChan
 	log.Debugf("Service start result: %v", res)
-	return &portal.Response{Content: res}, nil
+	return &portal.Response{Content: strings.Title(res)}, nil
 
 }
 
