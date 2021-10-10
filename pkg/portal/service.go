@@ -34,6 +34,7 @@ func (s *Server) ServiceRestart(ctx context.Context, service *portal.Service) (*
 	}
 
 	res := <-responseChan
+	log.Debugf("Service restart result: %v", res)
 	return &portal.Response{Content: res}, nil
 
 }
@@ -56,6 +57,16 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*por
 
 	responseChan := make(chan string, 1)
 	serviceName := fmt.Sprintf("%s.service", service.GetName())
+	list, err := conn.ListUnitsByNamesContext(ctx, []string{serviceName})
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+	log.Debugf("Fetched service list by name: %v", list)
+	if list[0].ActiveState == "inactive" {
+		return &portal.Response{Content: "Service already stopped"}, nil
+	}
+
 	_, err = conn.StopUnitContext(ctx, serviceName, "replace", responseChan)
 	if err != nil {
 		log.Error(err.Error())
@@ -63,6 +74,7 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*por
 	}
 
 	res := <-responseChan
+	log.Debugf("Service stop result: %v", res)
 	return &portal.Response{Content: res}, nil
 
 }
@@ -85,6 +97,16 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*po
 
 	responseChan := make(chan string, 1)
 	serviceName := fmt.Sprintf("%s.service", service.GetName())
+	list, err := conn.ListUnitsByNamesContext(ctx, []string{serviceName})
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+	log.Debugf("Fetched service list by name: %v", list)
+	if list[0].ActiveState == "active" {
+		return &portal.Response{Content: "Service already running"}, nil
+	}
+
 	_, err = conn.StartUnitContext(ctx, serviceName, "replace", responseChan)
 	if err != nil {
 		log.Error(err.Error())
@@ -92,6 +114,7 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*po
 	}
 
 	res := <-responseChan
+	log.Debugf("Service start result: %v", res)
 	return &portal.Response{Content: res}, nil
 
 }
@@ -119,6 +142,7 @@ func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*p
 		return nil, err
 	}
 	log.Debugf("Fetched service list by name: %v", res)
+
 	if res[0].LoadState == "not-found" {
 		log.Error("service not found")
 		return nil, fmt.Errorf("service not found")
