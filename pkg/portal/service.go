@@ -116,6 +116,10 @@ func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*p
 		return nil, err
 	}
 	log.Debugf("Fetched service list by name: %v", res)
+	if res[0].LoadState == "not-found" {
+		log.Error("service not found")
+		return nil, fmt.Errorf("service not found")
+	}
 
 	return &portal.ServiceStatusResponse{
 		ActiveState: res[0].ActiveState,

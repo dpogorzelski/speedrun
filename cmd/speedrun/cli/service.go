@@ -120,11 +120,12 @@ func action(cmd *cobra.Command, args []string) error {
 				"host":    instance.Name,
 				"address": instance.GetAddress(usePrivateIP),
 			}
+			log := log.WithFields(fields)
 
 			addr := fmt.Sprintf("%s:%d", instance.GetAddress(usePrivateIP), 1337)
 			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
-				log.WithFields(fields).Error(err.Error())
+				log.Error(err.Error())
 				return
 			}
 
@@ -140,31 +141,31 @@ func action(cmd *cobra.Command, args []string) error {
 			case "restart":
 				r, err = c.ServiceRestart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
 				if err != nil {
-					log.WithFields(fields).Warn(err.Error())
+					log.Error(err.Error())
 					return
 				}
-				log.WithFields(fields).Info(r.GetContent())
+				log.Info(r.GetContent())
 			case "start":
 				r, err = c.ServiceStart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
 				if err != nil {
-					log.WithFields(fields).Warn(err.Error())
+					log.Error(err.Error())
 					return
 				}
-				log.WithFields(fields).Info(r.GetContent())
+				log.Info(r.GetContent())
 			case "stop":
 				r, err = c.ServiceStop(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
 				if err != nil {
-					log.WithFields(fields).Warn(err.Error())
+					log.Error(err.Error())
 					return
 				}
-				log.WithFields(fields).Info(r.GetContent())
+				log.Info(r.GetContent())
 			case "status":
 				serviceStatusResponse, err := c.ServiceStatus(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
 				if err != nil {
-					log.WithFields(fields).Warn(err.Error())
+					log.Error(err.Error())
 					return
 				}
-				log.WithFields(fields).Info(serviceStatusResponse.String())
+				log.Info(serviceStatusResponse.String())
 			}
 
 		})
