@@ -16,6 +16,7 @@ func (s *Server) ServiceRestart(ctx context.Context, service *portal.Service) (*
 		"name":    service.GetName(),
 	}
 	log := log.WithFields(fields)
+	log.Debug("Received service restart request")
 
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
@@ -44,6 +45,7 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*por
 		"name":    service.GetName(),
 	}
 	log := log.WithFields(fields)
+	log.Debug("Received service stop request")
 
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
@@ -72,6 +74,7 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*po
 		"name":    service.GetName(),
 	}
 	log := log.WithFields(fields)
+	log.Debug("Received service start request")
 
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
