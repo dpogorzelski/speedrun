@@ -16,7 +16,7 @@ message ServiceRequest{
 }
 
 message ServiceResponse{
-  string status = 1;
+  bool changed = 1;
   string message = 2;
 }
 
