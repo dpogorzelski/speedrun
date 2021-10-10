@@ -29,12 +29,8 @@ func Execute() {
 		SilenceUsage:  false,
 		SilenceErrors: true,
 		Run: func(cmd *cobra.Command, args []string) {
-			const addr = "0.0.0.0:1337"
-
 			m := drpcmux.New()
 			portalpb.DRPCRegisterPortal(m, &portal.Server{})
-			log.Infof("Started portal on %s", addr)
-
 			s := drpcserver.New(m)
 
 			tlsConfig, err := itls.GenerateTLSConfig()
@@ -42,6 +38,9 @@ func Execute() {
 				log.Fatalf("failed to generate tls config: %v", err)
 			}
 
+			port := viper.GetInt("port")
+			ip := viper.GetString("address")
+			addr := fmt.Sprintf("%s:%d", ip, port)
 			lis, err := tls.Listen("tcp", addr, tlsConfig)
 			if err != nil {
 				log.Fatalf("failed to listen: %v", err)
@@ -49,6 +48,7 @@ func Execute() {
 			defer lis.Close()
 
 			ctx := context.Background()
+			log.Infof("Started portal on %s", addr)
 			if err := s.Serve(ctx, lis); err != nil {
 				log.Fatalf("failed to serve: %v", err)
 			}
@@ -61,7 +61,11 @@ func Execute() {
 	cobra.OnInitialize(initConfig)
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", path, "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
+	rootCmd.Flags().IntP("port", "p", 1337, "Port to listen on for connections")
+	rootCmd.Flags().StringP("address", "a", "0.0.0.0", "Address to listen on for connections")
 	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
+	viper.BindPFlag("port", rootCmd.Flags().Lookup("port"))
+	viper.BindPFlag("address", rootCmd.Flags().Lookup("address"))
 
 	rootCmd.DisableSuggestions = false
 
