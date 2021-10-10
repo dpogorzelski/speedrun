@@ -41,7 +41,7 @@ type DRPCPortalClient interface {
 	ServiceRestart(ctx context.Context, in *Service) (*Response, error)
 	ServiceStart(ctx context.Context, in *Service) (*Response, error)
 	ServiceStop(ctx context.Context, in *Service) (*Response, error)
-	ServiceStatus(ctx context.Context, in *Service) (*Response, error)
+	ServiceStatus(ctx context.Context, in *Service) (*ServiceStatusResponse, error)
 	RunCommand(ctx context.Context, in *Command) (*Response, error)
 }
 
@@ -82,8 +82,8 @@ func (c *drpcPortalClient) ServiceStop(ctx context.Context, in *Service) (*Respo
 	return out, nil
 }
 
-func (c *drpcPortalClient) ServiceStatus(ctx context.Context, in *Service) (*Response, error) {
-	out := new(Response)
+func (c *drpcPortalClient) ServiceStatus(ctx context.Context, in *Service) (*ServiceStatusResponse, error) {
+	out := new(ServiceStatusResponse)
 	err := c.cc.Invoke(ctx, "/portal.Portal/ServiceStatus", drpcEncoding_File_portal_portal_proto{}, in, out)
 	if err != nil {
 		return nil, err
@@ -104,7 +104,7 @@ type DRPCPortalServer interface {
 	ServiceRestart(context.Context, *Service) (*Response, error)
 	ServiceStart(context.Context, *Service) (*Response, error)
 	ServiceStop(context.Context, *Service) (*Response, error)
-	ServiceStatus(context.Context, *Service) (*Response, error)
+	ServiceStatus(context.Context, *Service) (*ServiceStatusResponse, error)
 	RunCommand(context.Context, *Command) (*Response, error)
 }
 
@@ -122,7 +122,7 @@ func (s *DRPCPortalUnimplementedServer) ServiceStop(context.Context, *Service) (
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
-func (s *DRPCPortalUnimplementedServer) ServiceStatus(context.Context, *Service) (*Response, error) {
+func (s *DRPCPortalUnimplementedServer) ServiceStatus(context.Context, *Service) (*ServiceStatusResponse, error) {
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
@@ -240,14 +240,14 @@ func (x *drpcPortal_ServiceStopStream) SendAndClose(m *Response) error {
 
 type DRPCPortal_ServiceStatusStream interface {
 	drpc.Stream
-	SendAndClose(*Response) error
+	SendAndClose(*ServiceStatusResponse) error
 }
 
 type drpcPortal_ServiceStatusStream struct {
 	drpc.Stream
 }
 
-func (x *drpcPortal_ServiceStatusStream) SendAndClose(m *Response) error {
+func (x *drpcPortal_ServiceStatusStream) SendAndClose(m *ServiceStatusResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}

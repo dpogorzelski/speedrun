@@ -139,18 +139,34 @@ func action(cmd *cobra.Command, args []string) error {
 			switch cmd.Name() {
 			case "restart":
 				r, err = c.ServiceRestart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				if err != nil {
+					log.WithFields(fields).Warn(err.Error())
+					return
+				}
+				log.WithFields(fields).Info(r.GetContent())
 			case "start":
 				r, err = c.ServiceStart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				if err != nil {
+					log.WithFields(fields).Warn(err.Error())
+					return
+				}
+				log.WithFields(fields).Info(r.GetContent())
 			case "stop":
 				r, err = c.ServiceStop(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				if err != nil {
+					log.WithFields(fields).Warn(err.Error())
+					return
+				}
+				log.WithFields(fields).Info(r.GetContent())
 			case "status":
-				r, err = c.ServiceStatus(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				serviceStatusResponse, err := c.ServiceStatus(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				if err != nil {
+					log.WithFields(fields).Warn(err.Error())
+					return
+				}
+				log.WithFields(fields).Info(serviceStatusResponse.String())
 			}
-			if err != nil {
-				log.WithFields(fields).Warn(err.Error())
-				return
-			}
-			log.WithFields(fields).Info(r.GetContent())
+
 		})
 	}
 	pool.StopAndWait()

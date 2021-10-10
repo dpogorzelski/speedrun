@@ -19,6 +19,7 @@ const addr = "0.0.0.0:1337"
 func main() {
 	h := loghandler.New(os.Stdout)
 	log.SetHandler(h)
+	log.SetLevel(log.DebugLevel)
 
 	m := drpcmux.New()
 

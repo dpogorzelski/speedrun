@@ -14,12 +14,17 @@ message Service{
 message Response{
   string content = 1;
 }
+message ServiceStatusResponse{
+	string LoadState=3;             // The load state (i.e. whether the unit file has been loaded successfully)
+	string ActiveState=4;           // The active state (i.e. whether the unit is currently started or not)
+	string SubState=5;              // The sub state (a more fine-grained version of the active state that is specific to the unit type, which the active state is not)
+}
 
 service Portal{
   rpc ServiceRestart(Service) returns (Response) {}
   rpc ServiceStart(Service) returns (Response) {}
   rpc ServiceStop(Service) returns (Response) {}
-  rpc ServiceStatus(Service) returns (Response) {}
+  rpc ServiceStatus(Service) returns (ServiceStatusResponse) {}
   rpc RunCommand(Command) returns (Response) {}
   // rpc EnsureMountedDisk()
 }

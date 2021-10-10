@@ -93,13 +93,14 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*po
 
 }
 
-func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*portal.ServiceStatusResponse, error) {
 	fields := log.Fields{
 		"context": "service",
 		"command": "status",
 		"name":    service.GetName(),
 	}
 	log := log.WithFields(fields)
+	log.Debug("Received service status request")
 
 	conn, err := dbus.NewWithContext(ctx)
 	if err != nil {
@@ -114,7 +115,12 @@ func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*p
 		log.Error(err.Error())
 		return nil, err
 	}
+	log.Debugf("Fetched service list by name: %v", res)
 
-	return &portal.Response{Content: res[0].ActiveState}, nil
+	return &portal.ServiceStatusResponse{
+		ActiveState: res[0].ActiveState,
+		LoadState:   res[0].LoadState,
+		SubState:    res[0].SubState,
+	}, nil
 
 }
