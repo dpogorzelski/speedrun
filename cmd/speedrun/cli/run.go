@@ -81,10 +81,12 @@ func run(cmd *cobra.Command, args []string) error {
 				"host":    instance.Name,
 				"address": instance.GetAddress(usePrivateIP),
 			}
+			log := log.WithFields(fields)
+
 			addr := fmt.Sprintf("%s:%d", instance.GetAddress(usePrivateIP), 1337)
 			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
-				log.WithFields(fields).Error(err.Error())
+				log.Error(err.Error())
 				return
 			}
 
@@ -97,10 +99,10 @@ func run(cmd *cobra.Command, args []string) error {
 
 			r, err := c.RunCommand(ctx, &portalpb.Command{Name: s[0], Args: s[1:]})
 			if err != nil {
-				log.WithFields(fields).Warn(err.Error())
+				log.Error(err.Error())
 				return
 			}
-			log.WithFields(fields).Infof(r.GetContent())
+			log.Infof(r.GetContent())
 		})
 	}
 	pool.StopAndWait()
