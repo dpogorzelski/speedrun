@@ -75,7 +75,7 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Errorf("Couldn't read config: %s", viper.ConfigFileUsed())
+		log.Warnf("Couldn't read config at \"%s\", starting with default settings", viper.ConfigFileUsed())
 	}
 
 	lvl, err := log.ParseLevel(viper.GetString("loglevel"))
