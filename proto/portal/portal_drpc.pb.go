@@ -38,11 +38,11 @@ func (drpcEncoding_File_portal_portal_proto) JSONUnmarshal(buf []byte, msg drpc.
 type DRPCPortalClient interface {
 	DRPCConn() drpc.Conn
 
-	ServiceRestart(ctx context.Context, in *Service) (*Response, error)
-	ServiceStart(ctx context.Context, in *Service) (*Response, error)
-	ServiceStop(ctx context.Context, in *Service) (*Response, error)
-	ServiceStatus(ctx context.Context, in *Service) (*ServiceStatusResponse, error)
-	RunCommand(ctx context.Context, in *Command) (*Response, error)
+	ServiceRestart(ctx context.Context, in *ServiceRequest) (*ServiceResponse, error)
+	ServiceStart(ctx context.Context, in *ServiceRequest) (*ServiceResponse, error)
+	ServiceStop(ctx context.Context, in *ServiceRequest) (*ServiceResponse, error)
+	ServiceStatus(ctx context.Context, in *ServiceRequest) (*ServiceStatusResponse, error)
+	RunCommand(ctx context.Context, in *CommandRequest) (*CommandResponse, error)
 }
 
 type drpcPortalClient struct {
@@ -55,8 +55,8 @@ func NewDRPCPortalClient(cc drpc.Conn) DRPCPortalClient {
 
 func (c *drpcPortalClient) DRPCConn() drpc.Conn { return c.cc }
 
-func (c *drpcPortalClient) ServiceRestart(ctx context.Context, in *Service) (*Response, error) {
-	out := new(Response)
+func (c *drpcPortalClient) ServiceRestart(ctx context.Context, in *ServiceRequest) (*ServiceResponse, error) {
+	out := new(ServiceResponse)
 	err := c.cc.Invoke(ctx, "/portal.Portal/ServiceRestart", drpcEncoding_File_portal_portal_proto{}, in, out)
 	if err != nil {
 		return nil, err
@@ -64,8 +64,8 @@ func (c *drpcPortalClient) ServiceRestart(ctx context.Context, in *Service) (*Re
 	return out, nil
 }
 
-func (c *drpcPortalClient) ServiceStart(ctx context.Context, in *Service) (*Response, error) {
-	out := new(Response)
+func (c *drpcPortalClient) ServiceStart(ctx context.Context, in *ServiceRequest) (*ServiceResponse, error) {
+	out := new(ServiceResponse)
 	err := c.cc.Invoke(ctx, "/portal.Portal/ServiceStart", drpcEncoding_File_portal_portal_proto{}, in, out)
 	if err != nil {
 		return nil, err
@@ -73,8 +73,8 @@ func (c *drpcPortalClient) ServiceStart(ctx context.Context, in *Service) (*Resp
 	return out, nil
 }
 
-func (c *drpcPortalClient) ServiceStop(ctx context.Context, in *Service) (*Response, error) {
-	out := new(Response)
+func (c *drpcPortalClient) ServiceStop(ctx context.Context, in *ServiceRequest) (*ServiceResponse, error) {
+	out := new(ServiceResponse)
 	err := c.cc.Invoke(ctx, "/portal.Portal/ServiceStop", drpcEncoding_File_portal_portal_proto{}, in, out)
 	if err != nil {
 		return nil, err
@@ -82,7 +82,7 @@ func (c *drpcPortalClient) ServiceStop(ctx context.Context, in *Service) (*Respo
 	return out, nil
 }
 
-func (c *drpcPortalClient) ServiceStatus(ctx context.Context, in *Service) (*ServiceStatusResponse, error) {
+func (c *drpcPortalClient) ServiceStatus(ctx context.Context, in *ServiceRequest) (*ServiceStatusResponse, error) {
 	out := new(ServiceStatusResponse)
 	err := c.cc.Invoke(ctx, "/portal.Portal/ServiceStatus", drpcEncoding_File_portal_portal_proto{}, in, out)
 	if err != nil {
@@ -91,8 +91,8 @@ func (c *drpcPortalClient) ServiceStatus(ctx context.Context, in *Service) (*Ser
 	return out, nil
 }
 
-func (c *drpcPortalClient) RunCommand(ctx context.Context, in *Command) (*Response, error) {
-	out := new(Response)
+func (c *drpcPortalClient) RunCommand(ctx context.Context, in *CommandRequest) (*CommandResponse, error) {
+	out := new(CommandResponse)
 	err := c.cc.Invoke(ctx, "/portal.Portal/RunCommand", drpcEncoding_File_portal_portal_proto{}, in, out)
 	if err != nil {
 		return nil, err
@@ -101,32 +101,32 @@ func (c *drpcPortalClient) RunCommand(ctx context.Context, in *Command) (*Respon
 }
 
 type DRPCPortalServer interface {
-	ServiceRestart(context.Context, *Service) (*Response, error)
-	ServiceStart(context.Context, *Service) (*Response, error)
-	ServiceStop(context.Context, *Service) (*Response, error)
-	ServiceStatus(context.Context, *Service) (*ServiceStatusResponse, error)
-	RunCommand(context.Context, *Command) (*Response, error)
+	ServiceRestart(context.Context, *ServiceRequest) (*ServiceResponse, error)
+	ServiceStart(context.Context, *ServiceRequest) (*ServiceResponse, error)
+	ServiceStop(context.Context, *ServiceRequest) (*ServiceResponse, error)
+	ServiceStatus(context.Context, *ServiceRequest) (*ServiceStatusResponse, error)
+	RunCommand(context.Context, *CommandRequest) (*CommandResponse, error)
 }
 
 type DRPCPortalUnimplementedServer struct{}
 
-func (s *DRPCPortalUnimplementedServer) ServiceRestart(context.Context, *Service) (*Response, error) {
+func (s *DRPCPortalUnimplementedServer) ServiceRestart(context.Context, *ServiceRequest) (*ServiceResponse, error) {
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
-func (s *DRPCPortalUnimplementedServer) ServiceStart(context.Context, *Service) (*Response, error) {
+func (s *DRPCPortalUnimplementedServer) ServiceStart(context.Context, *ServiceRequest) (*ServiceResponse, error) {
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
-func (s *DRPCPortalUnimplementedServer) ServiceStop(context.Context, *Service) (*Response, error) {
+func (s *DRPCPortalUnimplementedServer) ServiceStop(context.Context, *ServiceRequest) (*ServiceResponse, error) {
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
-func (s *DRPCPortalUnimplementedServer) ServiceStatus(context.Context, *Service) (*ServiceStatusResponse, error) {
+func (s *DRPCPortalUnimplementedServer) ServiceStatus(context.Context, *ServiceRequest) (*ServiceStatusResponse, error) {
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
-func (s *DRPCPortalUnimplementedServer) RunCommand(context.Context, *Command) (*Response, error) {
+func (s *DRPCPortalUnimplementedServer) RunCommand(context.Context, *CommandRequest) (*CommandResponse, error) {
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
@@ -142,7 +142,7 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 				return srv.(DRPCPortalServer).
 					ServiceRestart(
 						ctx,
-						in1.(*Service),
+						in1.(*ServiceRequest),
 					)
 			}, DRPCPortalServer.ServiceRestart, true
 	case 1:
@@ -151,7 +151,7 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 				return srv.(DRPCPortalServer).
 					ServiceStart(
 						ctx,
-						in1.(*Service),
+						in1.(*ServiceRequest),
 					)
 			}, DRPCPortalServer.ServiceStart, true
 	case 2:
@@ -160,7 +160,7 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 				return srv.(DRPCPortalServer).
 					ServiceStop(
 						ctx,
-						in1.(*Service),
+						in1.(*ServiceRequest),
 					)
 			}, DRPCPortalServer.ServiceStop, true
 	case 3:
@@ -169,7 +169,7 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 				return srv.(DRPCPortalServer).
 					ServiceStatus(
 						ctx,
-						in1.(*Service),
+						in1.(*ServiceRequest),
 					)
 			}, DRPCPortalServer.ServiceStatus, true
 	case 4:
@@ -178,7 +178,7 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 				return srv.(DRPCPortalServer).
 					RunCommand(
 						ctx,
-						in1.(*Command),
+						in1.(*CommandRequest),
 					)
 			}, DRPCPortalServer.RunCommand, true
 	default:
@@ -192,14 +192,14 @@ func DRPCRegisterPortal(mux drpc.Mux, impl DRPCPortalServer) error {
 
 type DRPCPortal_ServiceRestartStream interface {
 	drpc.Stream
-	SendAndClose(*Response) error
+	SendAndClose(*ServiceResponse) error
 }
 
 type drpcPortal_ServiceRestartStream struct {
 	drpc.Stream
 }
 
-func (x *drpcPortal_ServiceRestartStream) SendAndClose(m *Response) error {
+func (x *drpcPortal_ServiceRestartStream) SendAndClose(m *ServiceResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}
@@ -208,14 +208,14 @@ func (x *drpcPortal_ServiceRestartStream) SendAndClose(m *Response) error {
 
 type DRPCPortal_ServiceStartStream interface {
 	drpc.Stream
-	SendAndClose(*Response) error
+	SendAndClose(*ServiceResponse) error
 }
 
 type drpcPortal_ServiceStartStream struct {
 	drpc.Stream
 }
 
-func (x *drpcPortal_ServiceStartStream) SendAndClose(m *Response) error {
+func (x *drpcPortal_ServiceStartStream) SendAndClose(m *ServiceResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}
@@ -224,14 +224,14 @@ func (x *drpcPortal_ServiceStartStream) SendAndClose(m *Response) error {
 
 type DRPCPortal_ServiceStopStream interface {
 	drpc.Stream
-	SendAndClose(*Response) error
+	SendAndClose(*ServiceResponse) error
 }
 
 type drpcPortal_ServiceStopStream struct {
 	drpc.Stream
 }
 
-func (x *drpcPortal_ServiceStopStream) SendAndClose(m *Response) error {
+func (x *drpcPortal_ServiceStopStream) SendAndClose(m *ServiceResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}
@@ -256,14 +256,14 @@ func (x *drpcPortal_ServiceStatusStream) SendAndClose(m *ServiceStatusResponse) 
 
 type DRPCPortal_RunCommandStream interface {
 	drpc.Stream
-	SendAndClose(*Response) error
+	SendAndClose(*CommandResponse) error
 }
 
 type drpcPortal_RunCommandStream struct {
 	drpc.Stream
 }
 
-func (x *drpcPortal_RunCommandStream) SendAndClose(m *Response) error {
+func (x *drpcPortal_RunCommandStream) SendAndClose(m *CommandResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}

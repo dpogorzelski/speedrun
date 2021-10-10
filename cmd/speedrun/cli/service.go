@@ -136,36 +136,35 @@ func action(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
-			var r *portalpb.Response
 			switch cmd.Name() {
 			case "restart":
-				r, err = c.ServiceRestart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				r, err := c.ServiceRestart(ctx, &portalpb.ServiceRequest{Name: strings.Join(args, " ")})
 				if err != nil {
 					log.Error(err.Error())
 					return
 				}
-				log.Info(r.GetContent())
+				log.Info(r.GetMessage())
 			case "start":
-				r, err = c.ServiceStart(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				r, err := c.ServiceStart(ctx, &portalpb.ServiceRequest{Name: strings.Join(args, " ")})
 				if err != nil {
 					log.Error(err.Error())
 					return
 				}
-				log.Info(r.GetContent())
+				log.Info(r.GetMessage())
 			case "stop":
-				r, err = c.ServiceStop(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				r, err := c.ServiceStop(ctx, &portalpb.ServiceRequest{Name: strings.Join(args, " ")})
 				if err != nil {
 					log.Error(err.Error())
 					return
 				}
-				log.Info(r.GetContent())
+				log.Info(r.GetMessage())
 			case "status":
-				serviceStatusResponse, err := c.ServiceStatus(ctx, &portalpb.Service{Name: strings.Join(args, " ")})
+				r, err := c.ServiceStatus(ctx, &portalpb.ServiceRequest{Name: strings.Join(args, " ")})
 				if err != nil {
 					log.Error(err.Error())
 					return
 				}
-				log.Info(serviceStatusResponse.String())
+				log.Info(r.String())
 			}
 
 		})

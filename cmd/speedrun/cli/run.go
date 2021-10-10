@@ -97,12 +97,12 @@ func run(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
-			r, err := c.RunCommand(ctx, &portalpb.Command{Name: s[0], Args: s[1:]})
+			r, err := c.RunCommand(ctx, &portalpb.CommandRequest{Name: s[0], Args: s[1:]})
 			if err != nil {
 				log.Error(err.Error())
 				return
 			}
-			log.Infof(r.GetContent())
+			log.Infof(r.GetMessage())
 		})
 	}
 	pool.StopAndWait()

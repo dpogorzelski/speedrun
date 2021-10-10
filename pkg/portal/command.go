@@ -9,7 +9,7 @@ import (
 	"github.com/speedrunsh/speedrun/proto/portal"
 )
 
-func (s *Server) RunCommand(ctx context.Context, in *portal.Command) (*portal.Response, error) {
+func (s *Server) RunCommand(ctx context.Context, in *portal.CommandRequest) (*portal.CommandResponse, error) {
 	fields := log.Fields{
 		"context": "command",
 	}
@@ -23,5 +23,5 @@ func (s *Server) RunCommand(ctx context.Context, in *portal.Command) (*portal.Re
 		log.Error(err.Error())
 		return nil, err
 	}
-	return &portal.Response{Content: string(stdout)}, nil
+	return &portal.CommandResponse{Message: string(stdout)}, nil
 }

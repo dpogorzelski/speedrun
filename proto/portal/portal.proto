@@ -2,29 +2,35 @@ syntax = "proto3";
 option go_package = "github.com/speedrunsh/speedrun/proto/portal";
 package portal;
 
-message Command{
+message CommandRequest{
   string name = 1;
   repeated string args = 2;
 }
 
-message Service{
+message CommandResponse{
+  string message = 1;
+}
+
+message ServiceRequest{
   string name = 1;
 }
 
-message Response{
-  string content = 1;
+message ServiceResponse{
+  string status = 1;
+  string message = 2;
 }
+
 message ServiceStatusResponse{
-	string LoadState=3;             // The load state (i.e. whether the unit file has been loaded successfully)
-	string ActiveState=4;           // The active state (i.e. whether the unit is currently started or not)
-	string SubState=5;              // The sub state (a more fine-grained version of the active state that is specific to the unit type, which the active state is not)
+	string loadstate=1;             // The load state (i.e. whether the unit file has been loaded successfully)
+	string activestate=2;           // The active state (i.e. whether the unit is currently started or not)
+	string substate=3;              // The sub state (a more fine-grained version of the active state that is specific to the unit type, which the active state is not)
 }
 
 service Portal{
-  rpc ServiceRestart(Service) returns (Response) {}
-  rpc ServiceStart(Service) returns (Response) {}
-  rpc ServiceStop(Service) returns (Response) {}
-  rpc ServiceStatus(Service) returns (ServiceStatusResponse) {}
-  rpc RunCommand(Command) returns (Response) {}
+  rpc ServiceRestart(ServiceRequest) returns (ServiceResponse) {}
+  rpc ServiceStart(ServiceRequest) returns (ServiceResponse) {}
+  rpc ServiceStop(ServiceRequest) returns (ServiceResponse) {}
+  rpc ServiceStatus(ServiceRequest) returns (ServiceStatusResponse) {}
+  rpc RunCommand(CommandRequest) returns (CommandResponse) {}
   // rpc EnsureMountedDisk()
 }

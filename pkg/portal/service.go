@@ -10,7 +10,7 @@ import (
 	"github.com/speedrunsh/speedrun/proto/portal"
 )
 
-func (s *Server) ServiceRestart(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceRestart(ctx context.Context, service *portal.ServiceRequest) (*portal.ServiceResponse, error) {
 	fields := log.Fields{
 		"context": "service",
 		"command": "restart",
@@ -36,11 +36,11 @@ func (s *Server) ServiceRestart(ctx context.Context, service *portal.Service) (*
 
 	res := <-responseChan
 	log.Debugf("Service restart result: %v", res)
-	return &portal.Response{Content: strings.Title(res)}, nil
+	return &portal.ServiceResponse{Message: strings.Title(res)}, nil
 
 }
 
-func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceStop(ctx context.Context, service *portal.ServiceRequest) (*portal.ServiceResponse, error) {
 	fields := log.Fields{
 		"context": "service",
 		"command": "stop",
@@ -65,7 +65,7 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*por
 	}
 	log.Debugf("Fetched service list by name: %v", list)
 	if list[0].ActiveState == "inactive" {
-		return &portal.Response{Content: "Service already stopped"}, nil
+		return &portal.ServiceResponse{Message: "Service already stopped"}, nil
 	}
 
 	_, err = conn.StopUnitContext(ctx, serviceName, "replace", responseChan)
@@ -76,11 +76,11 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.Service) (*por
 
 	res := <-responseChan
 	log.Debugf("Service stop result: %v", res)
-	return &portal.Response{Content: strings.Title(res)}, nil
+	return &portal.ServiceResponse{Message: strings.Title(res)}, nil
 
 }
 
-func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*portal.Response, error) {
+func (s *Server) ServiceStart(ctx context.Context, service *portal.ServiceRequest) (*portal.ServiceResponse, error) {
 	fields := log.Fields{
 		"context": "service",
 		"command": "start",
@@ -105,7 +105,7 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*po
 	}
 	log.Debugf("Fetched service list by name: %v", list)
 	if list[0].ActiveState == "active" {
-		return &portal.Response{Content: "Service already running"}, nil
+		return &portal.ServiceResponse{Message: "Service already running"}, nil
 	}
 
 	_, err = conn.StartUnitContext(ctx, serviceName, "replace", responseChan)
@@ -116,11 +116,11 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.Service) (*po
 
 	res := <-responseChan
 	log.Debugf("Service start result: %v", res)
-	return &portal.Response{Content: strings.Title(res)}, nil
+	return &portal.ServiceResponse{Message: strings.Title(res)}, nil
 
 }
 
-func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*portal.ServiceStatusResponse, error) {
+func (s *Server) ServiceStatus(ctx context.Context, service *portal.ServiceRequest) (*portal.ServiceStatusResponse, error) {
 	fields := log.Fields{
 		"context": "service",
 		"command": "status",
@@ -150,9 +150,9 @@ func (s *Server) ServiceStatus(ctx context.Context, service *portal.Service) (*p
 	}
 
 	return &portal.ServiceStatusResponse{
-		ActiveState: res[0].ActiveState,
-		LoadState:   res[0].LoadState,
-		SubState:    res[0].SubState,
+		Activestate: res[0].ActiveState,
+		Loadstate:   res[0].LoadState,
+		Substate:    res[0].SubState,
 	}, nil
 
 }
