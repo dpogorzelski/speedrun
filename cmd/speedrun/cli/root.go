@@ -24,7 +24,6 @@ var usage string
 
 //Execute runs the root command
 func Execute() {
-	// cobra.OnInitialize(initConfig)
 	var rootCmd = &cobra.Command{
 		Use:           "speedrun",
 		Short:         "Control your compute fleet at scale",
@@ -33,6 +32,7 @@ func Execute() {
 		SilenceErrors: true,
 	}
 
+	cobra.OnInitialize(initConfig)
 	rootCmd.SetUsageTemplate(rootUsage)
 	rootCmd.AddCommand(initCmd)
 	rootCmd.AddCommand(runCmd)
@@ -57,26 +57,21 @@ func Execute() {
 }
 
 func initConfig() {
-	dir, file := filepath.Split(cfgFile)
-	viper.SetConfigName(file)
-	viper.SetConfigType("toml")
-	viper.AddConfigPath(dir)
+	viper.SetConfigFile(cfgFile)
+	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
 		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
-			if err != nil {
-				log.Error(err.Error())
-				log.Fatal("Run `speedrun init` first")
-			}
+			log.Warnf("Config file not found at \"%s\", starting with default settings", viper.ConfigFileUsed())
 		} else {
-			log.Fatal(err.Error())
+			log.Warnf("Couldn't read config at \"%s\", starting with default settings", viper.ConfigFileUsed())
 		}
 	}
+
 	lvl, err := log.ParseLevel(viper.GetString("loglevel"))
 	if err != nil {
 		log.Fatalf("Couldn't parse log level: %s (%s)", err, lvl)
 		return
 	}
 	log.SetLevel(lvl)
-
 }

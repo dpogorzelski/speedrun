@@ -59,6 +59,7 @@ func Execute() {
 	path := filepath.Join(dir, "config.toml")
 
 	cobra.OnInitialize(initConfig)
+	rootCmd.AddCommand(initCmd)
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", path, "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
 	rootCmd.Flags().IntP("port", "p", 1337, "Port to listen on for connections")
@@ -79,7 +80,11 @@ func initConfig() {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		log.Warnf("Couldn't read config at \"%s\", starting with default settings", viper.ConfigFileUsed())
+		if _, ok := err.(viper.ConfigFileNotFoundError); ok {
+			log.Warnf("Config file not found at \"%s\", starting with default settings", viper.ConfigFileUsed())
+		} else {
+			log.Warnf("Couldn't read config at \"%s\", starting with default settings", viper.ConfigFileUsed())
+		}
 	}
 
 	lvl, err := log.ParseLevel(viper.GetString("loglevel"))

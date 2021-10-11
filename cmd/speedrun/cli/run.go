@@ -33,19 +33,18 @@ func init() {
 	runCmd.SetUsageTemplate(usage)
 	runCmd.Flags().StringP("target", "t", "", "Fetch instances that match the target selection criteria")
 	runCmd.Flags().String("projectid", "", "Override GCP project id")
-	runCmd.Flags().Bool("insecure", true, "Skip Portal's certificate verification (gRPC/QUIC)")
+	runCmd.Flags().Bool("insecure", true, "Skip Portal's certificate verification")
 	runCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
 	viper.BindPFlag("gcp.projectid", runCmd.Flags().Lookup("projectid"))
-	viper.BindPFlag("transport.insecure", runCmd.Flags().Lookup("insecure"))
+	viper.BindPFlag("tls.insecure", runCmd.Flags().Lookup("insecure"))
 	viper.BindPFlag("portal.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
-
 }
 
 func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
 	s := strings.Split(command, " ")
 	project := viper.GetString("gcp.projectid")
-	// insecure := viper.GetBool("transport.insecure")
+	// insecure := viper.GetBool("tls.insecure")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
