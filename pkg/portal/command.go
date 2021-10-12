@@ -23,5 +23,5 @@ func (s *Server) RunCommand(ctx context.Context, in *portal.CommandRequest) (*po
 		log.Error(err.Error())
 		return nil, err
 	}
-	return &portal.CommandResponse{Message: string(stdout)}, nil
+	return &portal.CommandResponse{State: portal.State_UNKNOWN, Message: string(stdout)}, nil
 }

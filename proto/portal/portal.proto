@@ -6,6 +6,7 @@ enum State {
     CHANGED = 0;
     UNCHANGED = 1;
     STATELESS = 2;
+    UNKNOWN = 3;
 }
 
 message CommandRequest {
@@ -28,9 +29,10 @@ message ServiceResponse {
 }
 
 message ServiceStatusResponse {
-	string loadstate=1;             // The load state (i.e. whether the unit file has been loaded successfully)
-	string activestate=2;           // The active state (i.e. whether the unit is currently started or not)
-	string substate=3;              // The sub state (a more fine-grained version of the active state that is specific to the unit type, which the active state is not)
+  State state= 1;
+	string loadstate=2;             // The load state (i.e. whether the unit file has been loaded successfully)
+	string activestate=3;           // The active state (i.e. whether the unit is currently started or not)
+	string substate=4;              // The sub state (a more fine-grained version of the active state that is specific to the unit type, which the active state is not)
 }
 
 service Portal{
