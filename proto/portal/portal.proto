@@ -2,6 +2,16 @@ syntax = "proto3";
 option go_package = "github.com/speedrunsh/speedrun/proto/portal";
 package portal;
 
+message Response{
+  enum state {
+    changed = 0;
+    unchanged = 1;
+    unaffected = 2;
+  }
+
+  state type = 1;
+}
+
 message CommandRequest{
   string name = 1;
   repeated string args = 2;

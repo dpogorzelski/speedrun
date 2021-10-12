@@ -71,7 +71,7 @@ func Execute() {
 	rootCmd.DisableSuggestions = false
 
 	if err := rootCmd.Execute(); err != nil {
-		log.Fatal(err.Error())
+		log.Error(err.Error())
 	}
 }
 
