@@ -65,10 +65,6 @@ func initConfig() {
 	viper.SetConfigFile(cfgFile)
 	viper.AutomaticEnv()
 
-	if err := viper.ReadInConfig(); err != nil {
-		log.Warnf("Couldn't read config at \"%s\", starting with default settings", viper.ConfigFileUsed())
-	}
-
 	json := viper.GetBool("logging.json")
 	if json {
 		handler := jsonhandler.New(os.Stdout)
@@ -76,6 +72,10 @@ func initConfig() {
 	} else {
 		handler := texthandler.New(os.Stdout)
 		log.SetHandler(handler)
+	}
+
+	if err := viper.ReadInConfig(); err != nil {
+		log.Warnf("Couldn't read config at \"%s\", starting with default settings", viper.ConfigFileUsed())
 	}
 
 	lvl, err := log.ParseLevel(viper.GetString("logging.loglevel"))
