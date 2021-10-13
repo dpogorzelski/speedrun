@@ -143,21 +143,21 @@ func action(cmd *cobra.Command, args []string) error {
 					log.Error(err.Error())
 					return
 				}
-				log.WithField("changed", r.GetChanged()).Info(r.GetMessage())
+				log.WithField("state", r.GetState()).Info(r.GetMessage())
 			case "start":
 				r, err := c.ServiceStart(ctx, &portalpb.ServiceRequest{Name: strings.Join(args, " ")})
 				if err != nil {
 					log.Error(err.Error())
 					return
 				}
-				log.WithField("changed", r.GetChanged()).Info(r.GetMessage())
+				log.WithField("state", r.GetState()).Info(r.GetMessage())
 			case "stop":
 				r, err := c.ServiceStop(ctx, &portalpb.ServiceRequest{Name: strings.Join(args, " ")})
 				if err != nil {
 					log.Error(err.Error())
 					return
 				}
-				log.WithField("changed", r.GetChanged()).Info(r.GetMessage())
+				log.WithField("state", r.GetState()).Info(r.GetMessage())
 			case "status":
 				r, err := c.ServiceStatus(ctx, &portalpb.ServiceRequest{Name: strings.Join(args, " ")})
 				if err != nil {

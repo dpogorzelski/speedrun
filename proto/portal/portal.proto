@@ -3,10 +3,9 @@ option go_package = "github.com/speedrunsh/speedrun/proto/portal";
 package portal;
 
 enum State {
-    CHANGED = 0;
-    UNCHANGED = 1;
-    STATELESS = 2;
-    UNKNOWN = 3;
+  UNSPECIFIED = 0;
+  CHANGED = 1;
+  UNCHANGED = 2;
 }
 
 message CommandRequest {

@@ -101,7 +101,7 @@ func run(cmd *cobra.Command, args []string) error {
 				log.Error(err.Error())
 				return
 			}
-			log.Infof(r.GetMessage())
+			log.WithField("state", r.GetState()).Info(r.GetMessage())
 		})
 	}
 	pool.StopAndWait()
