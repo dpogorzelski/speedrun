@@ -36,7 +36,7 @@ func (s *Server) ServiceRestart(ctx context.Context, service *portal.ServiceRequ
 
 	res := <-responseChan
 	log.Debugf("Service restart result: %v", res)
-	return &portal.ServiceResponse{State: portal.State_STATE_CHANGED, Message: strings.Title(res)}, nil
+	return &portal.ServiceResponse{State: portal.State_CHANGED, Message: strings.Title(res)}, nil
 }
 
 func (s *Server) ServiceStop(ctx context.Context, service *portal.ServiceRequest) (*portal.ServiceResponse, error) {
@@ -64,7 +64,7 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.ServiceRequest
 	}
 	log.Debugf("Fetched service list by name: %v", list)
 	if list[0].ActiveState == "inactive" {
-		return &portal.ServiceResponse{State: portal.State_STATE_UNCHANGED, Message: "Service already stopped"}, nil
+		return &portal.ServiceResponse{State: portal.State_UNCHANGED, Message: "Service already stopped"}, nil
 	}
 
 	_, err = conn.StopUnitContext(ctx, serviceName, "replace", responseChan)
@@ -75,7 +75,7 @@ func (s *Server) ServiceStop(ctx context.Context, service *portal.ServiceRequest
 
 	res := <-responseChan
 	log.Debugf("Service stop result: %v", res)
-	return &portal.ServiceResponse{State: portal.State_STATE_CHANGED, Message: strings.Title(res)}, nil
+	return &portal.ServiceResponse{State: portal.State_CHANGED, Message: strings.Title(res)}, nil
 
 }
 
@@ -104,7 +104,7 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.ServiceReques
 	}
 	log.Debugf("Fetched service list by name: %v", list)
 	if list[0].ActiveState == "active" {
-		return &portal.ServiceResponse{State: portal.State_STATE_UNCHANGED, Message: "Service already running"}, nil
+		return &portal.ServiceResponse{State: portal.State_UNCHANGED, Message: "Service already running"}, nil
 	}
 
 	_, err = conn.StartUnitContext(ctx, serviceName, "replace", responseChan)
@@ -115,7 +115,7 @@ func (s *Server) ServiceStart(ctx context.Context, service *portal.ServiceReques
 
 	res := <-responseChan
 	log.Debugf("Service start result: %v", res)
-	return &portal.ServiceResponse{State: portal.State_STATE_CHANGED, Message: strings.Title(res)}, nil
+	return &portal.ServiceResponse{State: portal.State_CHANGED, Message: strings.Title(res)}, nil
 
 }
 
@@ -149,7 +149,7 @@ func (s *Server) ServiceStatus(ctx context.Context, service *portal.ServiceReque
 	}
 
 	return &portal.ServiceStatusResponse{
-		State:       portal.State_STATE_UNCHANGED,
+		State:       portal.State_UNCHANGED,
 		Activestate: res[0].ActiveState,
 		Loadstate:   res[0].LoadState,
 		Substate:    res[0].SubState,
