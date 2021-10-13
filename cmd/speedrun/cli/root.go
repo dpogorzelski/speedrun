@@ -3,9 +3,12 @@ package cli
 import (
 	_ "embed"
 	"fmt"
+	"os"
 	"path/filepath"
 
 	"github.com/apex/log"
+	jsonhandler "github.com/apex/log/handlers/json"
+	texthandler "github.com/apex/log/handlers/text"
 	homedir "github.com/mitchellh/go-homedir"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -47,7 +50,9 @@ func Execute() {
 
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", path, "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
-	viper.BindPFlag("loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
+	rootCmd.PersistentFlags().BoolP("json", "j", false, "Output logs in JSON format")
+	viper.BindPFlag("logging.loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
+	viper.BindPFlag("logging.json", rootCmd.PersistentFlags().Lookup("json"))
 
 	rootCmd.DisableSuggestions = false
 
@@ -64,7 +69,16 @@ func initConfig() {
 		log.Warnf("Couldn't read config at \"%s\", starting with default settings", viper.ConfigFileUsed())
 	}
 
-	lvl, err := log.ParseLevel(viper.GetString("loglevel"))
+	json := viper.GetBool("logging.json")
+	if json {
+		handler := jsonhandler.New(os.Stdout)
+		log.SetHandler(handler)
+	} else {
+		handler := texthandler.New(os.Stdout)
+		log.SetHandler(handler)
+	}
+
+	lvl, err := log.ParseLevel(viper.GetString("logging.loglevel"))
 	if err != nil {
 		log.Fatalf("couldn't parse log level: %s (%s)", err, lvl)
 		return
