@@ -43,6 +43,7 @@ type DRPCPortalClient interface {
 	ServiceStop(ctx context.Context, in *ServiceRequest) (*ServiceResponse, error)
 	ServiceStatus(ctx context.Context, in *ServiceRequest) (*ServiceStatusResponse, error)
 	RunCommand(ctx context.Context, in *CommandRequest) (*CommandResponse, error)
+	CPUusage(ctx context.Context, in *CPUusageRequest) (*CPUusageResponse, error)
 }
 
 type drpcPortalClient struct {
@@ -100,12 +101,22 @@ func (c *drpcPortalClient) RunCommand(ctx context.Context, in *CommandRequest) (
 	return out, nil
 }
 
+func (c *drpcPortalClient) CPUusage(ctx context.Context, in *CPUusageRequest) (*CPUusageResponse, error) {
+	out := new(CPUusageResponse)
+	err := c.cc.Invoke(ctx, "/portal.Portal/CPUusage", drpcEncoding_File_portal_portal_proto{}, in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type DRPCPortalServer interface {
 	ServiceRestart(context.Context, *ServiceRequest) (*ServiceResponse, error)
 	ServiceStart(context.Context, *ServiceRequest) (*ServiceResponse, error)
 	ServiceStop(context.Context, *ServiceRequest) (*ServiceResponse, error)
 	ServiceStatus(context.Context, *ServiceRequest) (*ServiceStatusResponse, error)
 	RunCommand(context.Context, *CommandRequest) (*CommandResponse, error)
+	CPUusage(context.Context, *CPUusageRequest) (*CPUusageResponse, error)
 }
 
 type DRPCPortalUnimplementedServer struct{}
@@ -130,9 +141,13 @@ func (s *DRPCPortalUnimplementedServer) RunCommand(context.Context, *CommandRequ
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
+func (s *DRPCPortalUnimplementedServer) CPUusage(context.Context, *CPUusageRequest) (*CPUusageResponse, error) {
+	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
+}
+
 type DRPCPortalDescription struct{}
 
-func (DRPCPortalDescription) NumMethods() int { return 5 }
+func (DRPCPortalDescription) NumMethods() int { return 6 }
 
 func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver, interface{}, bool) {
 	switch n {
@@ -181,6 +196,15 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 						in1.(*CommandRequest),
 					)
 			}, DRPCPortalServer.RunCommand, true
+	case 5:
+		return "/portal.Portal/CPUusage", drpcEncoding_File_portal_portal_proto{},
+			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
+				return srv.(DRPCPortalServer).
+					CPUusage(
+						ctx,
+						in1.(*CPUusageRequest),
+					)
+			}, DRPCPortalServer.CPUusage, true
 	default:
 		return "", nil, nil, nil, false
 	}
@@ -264,6 +288,22 @@ type drpcPortal_RunCommandStream struct {
 }
 
 func (x *drpcPortal_RunCommandStream) SendAndClose(m *CommandResponse) error {
+	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
+		return err
+	}
+	return x.CloseSend()
+}
+
+type DRPCPortal_CPUusageStream interface {
+	drpc.Stream
+	SendAndClose(*CPUusageResponse) error
+}
+
+type drpcPortal_CPUusageStream struct {
+	drpc.Stream
+}
+
+func (x *drpcPortal_CPUusageStream) SendAndClose(m *CPUusageResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}

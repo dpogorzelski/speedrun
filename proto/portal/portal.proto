@@ -3,7 +3,7 @@ option go_package = "github.com/speedrunsh/speedrun/proto/portal";
 package portal;
 
 enum State {
-  UNSPECIFIED = 0;
+  STATELESS = 0;
   CHANGED = 1;
   UNCHANGED = 2;
 }
@@ -14,7 +14,7 @@ message CommandRequest {
 }
 
 message CommandResponse {
-  State state= 1;
+  State state = 1;
   string message = 2;
 }
 
@@ -23,22 +23,34 @@ message ServiceRequest {
 }
 
 message ServiceResponse {
-  State state= 1;
+  State state = 1;
   string message = 2;
 }
 
 message ServiceStatusResponse {
-  State state= 1;
-	string loadstate=2;             // The load state (i.e. whether the unit file has been loaded successfully)
-	string activestate=3;           // The active state (i.e. whether the unit is currently started or not)
-	string substate=4;              // The sub state (a more fine-grained version of the active state that is specific to the unit type, which the active state is not)
+  State state = 1;
+  string loadstate = 2;
+  string activestate = 3;
+  string substate = 4;
 }
 
-service Portal{
+message CPUusageRequest {}
+
+message CPUusageResponse {
+  int32 loadavg1 = 1;
+  int32 loadavg5 = 2;
+  int32 loadavg15 = 3;
+}
+
+service Portal {
   rpc ServiceRestart(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStart(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStop(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStatus(ServiceRequest) returns (ServiceStatusResponse) {}
   rpc RunCommand(CommandRequest) returns (CommandResponse) {}
+  rpc CPUusage(CPUusageRequest) returns (CPUusageResponse) {
+  }  // --target group1 --target group2
+  // rpc CPUProfile(CPUProfileRequest) returns (CPUProfileResponse) {}
+  // rpc MemProfile(MemProfileRequest) returns (MemProfileResponse) {}
   // rpc EnsureMountedDisk()
 }
