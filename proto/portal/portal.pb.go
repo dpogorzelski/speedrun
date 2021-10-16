@@ -287,9 +287,9 @@ type ServiceStatusResponse struct {
 	unknownFields protoimpl.UnknownFields
 
 	State       State  `protobuf:"varint,1,opt,name=state,proto3,enum=portal.State" json:"state,omitempty"`
-	Loadstate   string `protobuf:"bytes,2,opt,name=loadstate,proto3" json:"loadstate,omitempty"`     // The load state (i.e. whether the unit file has been loaded successfully)
-	Activestate string `protobuf:"bytes,3,opt,name=activestate,proto3" json:"activestate,omitempty"` // The active state (i.e. whether the unit is currently started or not)
-	Substate    string `protobuf:"bytes,4,opt,name=substate,proto3" json:"substate,omitempty"`       // The sub state (a more fine-grained version of the active state that is specific to the unit type, which the active state is not)
+	Loadstate   string `protobuf:"bytes,2,opt,name=loadstate,proto3" json:"loadstate,omitempty"`
+	Activestate string `protobuf:"bytes,3,opt,name=activestate,proto3" json:"activestate,omitempty"`
+	Substate    string `protobuf:"bytes,4,opt,name=substate,proto3" json:"substate,omitempty"`
 }
 
 func (x *ServiceStatusResponse) Reset() {
