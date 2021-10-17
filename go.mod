@@ -5,7 +5,7 @@ go 1.17
 require (
 	github.com/alitto/pond v1.5.1
 	github.com/apex/log v1.9.0
-	github.com/jwalton/gchalk v1.1.1
+	github.com/jwalton/gchalk v1.2.1
 	github.com/mitchellh/go-homedir v1.1.0
 	github.com/spf13/cobra v1.2.1
 	github.com/spf13/viper v1.9.0
