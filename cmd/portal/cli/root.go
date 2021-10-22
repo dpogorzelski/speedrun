@@ -41,7 +41,7 @@ func Execute() {
 			var err error
 			err = portalpb.DRPCRegisterPortal(m, &portal.Server{})
 			if err != nil {
-				return err
+				return fmt.Errorf("could not register DRPC server: %v", err)
 			}
 			s := drpcserver.New(m)
 
@@ -61,7 +61,7 @@ func Execute() {
 			addr := fmt.Sprintf("%s:%d", ip, port)
 			lis, err := tls.Listen("tcp", addr, tlsConfig)
 			if err != nil {
-				return err
+				return fmt.Errorf("could not create a TCP socket on \"%s\": %v", addr, err)
 			}
 			defer lis.Close()
 
