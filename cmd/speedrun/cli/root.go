@@ -25,13 +25,12 @@ var rootUsage string
 //go:embed templates/usage.tmpl
 var usage string
 
-//Execute runs the root command
 func Execute() {
 	var rootCmd = &cobra.Command{
 		Use:           "speedrun",
 		Short:         "Control your compute fleet at scale",
 		Version:       fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
-		SilenceUsage:  false,
+		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 
@@ -45,10 +44,11 @@ func Execute() {
 	if err != nil {
 		log.Fatal(err.Error())
 	}
-	dir := filepath.Join(home, ".speedrun")
-	path := filepath.Join(dir, "config.toml")
 
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", path, "config file")
+	dir := filepath.Join(home, ".speedrun")
+	configPath := filepath.Join(dir, "config.toml")
+
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", configPath, "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
 	rootCmd.PersistentFlags().BoolP("json", "j", false, "Output logs in JSON format")
 	viper.BindPFlag("logging.loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))

@@ -33,10 +33,17 @@ func init() {
 	runCmd.SetUsageTemplate(usage)
 	runCmd.Flags().StringP("target", "t", "", "Fetch instances that match the target selection criteria")
 	runCmd.Flags().String("projectid", "", "Override GCP project id")
-	runCmd.Flags().Bool("insecure", true, "Skip Portal's certificate verification")
+	runCmd.Flags().Bool("insecure", false, "Skip server certificate verification")
+	runCmd.Flags().String("ca", "ca.crt", "Path to the CA cert")
+	runCmd.Flags().String("cert", "cert.crt", "Path to the client cert")
+	runCmd.Flags().String("key", "key.key", "Path to the client key")
 	runCmd.Flags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
+
 	viper.BindPFlag("gcp.projectid", runCmd.Flags().Lookup("projectid"))
 	viper.BindPFlag("tls.insecure", runCmd.Flags().Lookup("insecure"))
+	viper.BindPFlag("tls.ca", runCmd.Flags().Lookup("ca"))
+	viper.BindPFlag("tls.cert", runCmd.Flags().Lookup("cert"))
+	viper.BindPFlag("tls.key", runCmd.Flags().Lookup("key"))
 	viper.BindPFlag("portal.use-private-ip", runCmd.Flags().Lookup("use-private-ip"))
 }
 
@@ -44,7 +51,10 @@ func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
 	s := strings.Split(command, " ")
 	project := viper.GetString("gcp.projectid")
-	// insecure := viper.GetBool("tls.insecure")
+	insecure := viper.GetBool("tls.insecure")
+	caPath := viper.GetString("tls.ca")
+	certPath := viper.GetString("tls.cert")
+	keyPath := viper.GetString("tls.key")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -67,9 +77,18 @@ func run(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	tlsConfig, err := itls.GenerateTLSConfig()
-	if err != nil {
-		return err
+	var tlsConfig *tls.Config
+	if insecure {
+		tlsConfig, err = itls.InsecureTLSConfig()
+		if err != nil {
+			log.Fatalf("failed to generate tls config: %v", err)
+		}
+		log.Warn("Using insecure TLS configuration, this should be avoided in production environments")
+	} else {
+		tlsConfig, err = itls.ClientTLSConfig(caPath, certPath, keyPath)
+		if err != nil {
+			log.Fatalf("failed to generate tls config: %v", err)
+		}
 	}
 
 	pool := pond.New(1000, 10000)

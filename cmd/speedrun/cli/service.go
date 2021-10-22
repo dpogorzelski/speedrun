@@ -75,16 +75,26 @@ func init() {
 	serviceCmd.AddCommand(statusCmd)
 	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
 	serviceCmd.PersistentFlags().String("projectid", "", "Override GCP project id")
-	serviceCmd.PersistentFlags().Bool("insecure", true, "Skip Portal's certificate verification")
+	serviceCmd.PersistentFlags().Bool("insecure", false, "Skip server certificate verification")
+	serviceCmd.PersistentFlags().String("ca", "ca.crt", "Path to the CA cert")
+	serviceCmd.PersistentFlags().String("cert", "cert.crt", "Path to the client cert")
+	serviceCmd.PersistentFlags().String("key", "key.key", "Path to the client key")
 	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
-	viper.BindPFlag("tls.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
-	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
+
 	viper.BindPFlag("gcp.projectid", serviceCmd.PersistentFlags().Lookup("projectid"))
+	viper.BindPFlag("tls.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
+	viper.BindPFlag("tls.ca", serviceCmd.PersistentFlags().Lookup("ca"))
+	viper.BindPFlag("tls.cert", serviceCmd.PersistentFlags().Lookup("cert"))
+	viper.BindPFlag("tls.key", serviceCmd.PersistentFlags().Lookup("key"))
+	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
 	project := viper.GetString("gcp.projectid")
-	// insecure := viper.GetBool("tls.insecure")
+	insecure := viper.GetBool("tls.insecure")
+	caPath := viper.GetString("tls.ca")
+	certPath := viper.GetString("tls.cert")
+	keyPath := viper.GetString("tls.key")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 	target, err := cmd.Flags().GetString("target")
 	if err != nil {
@@ -107,9 +117,18 @@ func action(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	tlsConfig, err := itls.GenerateTLSConfig()
-	if err != nil {
-		return err
+	var tlsConfig *tls.Config
+	if insecure {
+		tlsConfig, err = itls.InsecureTLSConfig()
+		if err != nil {
+			log.Fatalf("failed to generate tls config: %v", err)
+		}
+		log.Warn("Using insecure TLS configuration, this should be avoided in production environments")
+	} else {
+		tlsConfig, err = itls.ClientTLSConfig(caPath, certPath, keyPath)
+		if err != nil {
+			log.Fatalf("failed to generate tls config: %v", err)
+		}
 	}
 
 	pool := pond.New(1000, 10000)

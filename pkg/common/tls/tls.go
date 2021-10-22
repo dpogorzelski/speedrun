@@ -6,10 +6,11 @@ import (
 	"crypto/tls"
 	"crypto/x509"
 	"encoding/pem"
+	"io/ioutil"
 	"math/big"
 )
 
-func GenerateTLSConfig() (*tls.Config, error) {
+func InsecureTLSConfig() (*tls.Config, error) {
 	publicKey, privateKey, err := ed25519.GenerateKey(rand.Reader)
 	if err != nil {
 		return nil, err
@@ -38,7 +39,52 @@ func GenerateTLSConfig() (*tls.Config, error) {
 		CipherSuites:       []uint16{tls.TLS_CHACHA20_POLY1305_SHA256},
 		Certificates:       []tls.Certificate{tlsCert},
 		InsecureSkipVerify: true,
-		// ClientAuth:         tls.RequireAndVerifyClientCert,
-		NextProtos: []string{"speedrun"},
+	}, nil
+}
+
+func ClientTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
+	caCert, err := ioutil.ReadFile(caPath)
+	if err != nil {
+		return nil, err
+	}
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tls.Config{
+		MinVersion:       tls.VersionTLS13,
+		CurvePreferences: []tls.CurveID{tls.X25519},
+		CipherSuites:     []uint16{tls.TLS_CHACHA20_POLY1305_SHA256},
+		Certificates:     []tls.Certificate{cert},
+		RootCAs:          caCertPool,
+	}, nil
+}
+
+func ServerTLSConfig(caPath, certPath, keyPath string) (*tls.Config, error) {
+	caCert, err := ioutil.ReadFile(caPath)
+	if err != nil {
+		return nil, err
+	}
+
+	caCertPool := x509.NewCertPool()
+	caCertPool.AppendCertsFromPEM(caCert)
+
+	cert, err := tls.LoadX509KeyPair(certPath, keyPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return &tls.Config{
+		MinVersion:       tls.VersionTLS13,
+		CurvePreferences: []tls.CurveID{tls.X25519},
+		CipherSuites:     []uint16{tls.TLS_CHACHA20_POLY1305_SHA256},
+		Certificates:     []tls.Certificate{cert},
+		ClientCAs:        caCertPool,
+		ClientAuth:       tls.RequireAndVerifyClientCert,
 	}, nil
 }

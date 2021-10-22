@@ -89,6 +89,43 @@ speedrun run whoami -c /path/to/config.toml
 
 Using certain flags repeteadly can be annoying, it's possible to persist their behavior via config file. Default config file is located at `~/.speedrun/config.toml` and can be re-initialized to it's default form via `speedrun init`.
 
+#### Run it as nomad job
+
+
+#### Run it as a systemd unit
+
+
+#### Use self signed certificates
+
+CA:
+openssl ecparam -name secp384r1 -genkey -noout -out ca.key
+openssl req -new -x509 -key ca.key -out ca.crt -days 1825 -subj "/C=SE/ST=/L=/O=Speedrun/OU=/CN=/"  -config <(
+cat <<-EOF
+[req]
+default_bits = 2048
+default_md = sha512
+distinguished_name = dn
+[ dn ]
+[alt_names]
+URI.1 = speedrun://local
+[v3_req]
+subjectKeyIdentifier=hash
+basicConstraints=critical,CA:TRUE
+keyUsage=critical,keyCertSign,cRLSign
+subjectAltName = @alt_names
+EOF
+) -extensions 'v3_req'
+
+portal cert:
+openssl ecparam -name secp384r1 -genkey -noout -out portal.key
+openssl req -new -key portal.key -out portal.csr -days 365 -subj "/C=SE/ST=/L=/O=Portal/OU=/CN=/" -extensions SAN -config <(cat /etc/ssl/openssl.cnf <(printf "[SAN]\nsubjectAltName='IP:34.74.21.99'"))
+openssl x509 -req -in portal.csr -CA ca.crt -CAkey ca.key -out portal.crt -days 365 -sha256 -CAcreateserial
+
+speedrun cert:
+openssl ecparam -name secp384r1 -genkey -noout -out speedrun.key
+openssl req -new -key speedrun.key -out speedrun.csr -days 365 -subj "/C=SE/ST=/L=/O=Speedrun/OU=/CN=/"
+openssl x509 -req -in speedrun.csr -CA ca.crt -CAkey ca.key -out speedrun.crt -days 365 -sha256 -CAcreateserial
+
 ## Contributing
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
