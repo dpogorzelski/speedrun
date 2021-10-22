@@ -78,9 +78,6 @@ func Execute() {
 
 	dir := "/etc/portal"
 	configPath := filepath.Join(dir, "config.toml")
-	caPath := filepath.Join(dir, "ca.crt")
-	certPath := filepath.Join(dir, "portal.crt")
-	keyPath := filepath.Join(dir, "portal.key")
 
 	cobra.OnInitialize(initConfig)
 	rootCmd.AddCommand(initCmd)
@@ -90,9 +87,9 @@ func Execute() {
 	rootCmd.Flags().IntP("port", "p", 1337, "Port to listen on for connections")
 	rootCmd.Flags().StringP("address", "a", "0.0.0.0", "Address to listen on for connections")
 	rootCmd.Flags().Bool("insecure", false, "Skip client certificate verification")
-	rootCmd.Flags().String("ca", caPath, "Path to the CA cert")
-	rootCmd.Flags().String("cert", certPath, "Path to the server cert")
-	rootCmd.Flags().String("key", keyPath, "Path to the server key")
+	rootCmd.Flags().String("ca", "ca.crt", "Path to the CA cert")
+	rootCmd.Flags().String("cert", "portal.crt", "Path to the server cert")
+	rootCmd.Flags().String("key", "portal.key", "Path to the server key")
 
 	viper.BindPFlag("tls.insecure", rootCmd.Flags().Lookup("insecure"))
 	viper.BindPFlag("tls.ca", rootCmd.Flags().Lookup("ca"))
