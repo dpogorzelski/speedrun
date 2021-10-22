@@ -10,15 +10,13 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/dpogorzelski/speedrun)](https://goreportcard.com/report/github.com/dpogorzelski/speedrun)
 [![Go](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml/badge.svg)](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml)
 
-Speedrun is an action execution framework that works at scale.
+Speedrun helps you control your compute fleet with minimal effort, at any scale.
 
-It allows you to run any action/command across any number of servers, projects and cloud vendors with ease and fast (currently GCP only but AWS and Azure will be supported as well), example:
+Example (stop nginx across 3k machines):
 
 ```bash
-speedrun run systemctl stop nginx
+speedrun service stop nginx
 ```
-
- to stop nginx across 3k machines.
 
 No hassles with setting up and maintaining a server with agents as speedrun has none. Single self-contained binary. Speedrun leverages SSH as transport with tight cloud vendor integration to take the burden of mundane things like key generation and propagation/revocation away from the user.
 
