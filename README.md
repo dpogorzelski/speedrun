@@ -70,7 +70,7 @@ speedrun service stop nginx --target "labels.env=staging AND labels.app=foobar"
 Ignore Portal's certificate and connect via private IP addresses
 
 ```bash
-speedrun run "ls -la" --target "labels.env != prod" --ignore-fingerprint --insecure --use-private-ip
+speedrun run "ls -la" --target "labels.env != prod" --insecure --use-private-ip
 ```
 
 Use a different config file
