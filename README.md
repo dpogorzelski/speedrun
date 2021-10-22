@@ -41,15 +41,17 @@ Download the precompiled binary from here: [Releases](https://github.com/dpogorz
 ## Usage
 
 #### Quickstart
+On a server:
+
+`sudo ./portal --insecure`
+
+On your machine:
+
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
 speedrun init
 speedrun run whoami --insecure
 ```
-
-#### Server
-
-`sudo ./portal --insecure`
 
 ## Examples
 
@@ -62,13 +64,13 @@ speedrun run "uname -r" --concurrency 1000
 Stop Nginx on VMs matching the target selector
 
 ```bash
-speedrun run sudo systemctl stop nginx --target "labels.env=staging AND labels.app=foobar"
+speedrun service stop nginx --target "labels.env=staging AND labels.app=foobar"
 ```
 
-Ignore SSH fingerprint mismatch and connect via private IP addresses
+Ignore Portal's certificate and connect via private IP addresses
 
 ```bash
-speedrun run "ls -la" --target "labels.env != prod" --ignore-fingerprint --concurrency 1000 --use-private-ip
+speedrun run "ls -la" --target "labels.env != prod" --ignore-fingerprint --insecure --use-private-ip
 ```
 
 Use a different config file
