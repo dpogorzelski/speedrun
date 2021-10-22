@@ -1,6 +1,6 @@
 <p align="center">
   <a rel="nofollow">
-    <img src="docs/logo.png?raw=true" width="200" style="max-width:100%;">
+    <img src="assets/logo.png?raw=true" width="200" style="max-width:100%;">
   </a>
 </p>
 
