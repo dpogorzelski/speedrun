@@ -10,7 +10,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/dpogorzelski/speedrun)](https://goreportcard.com/report/github.com/dpogorzelski/speedrun)
 [![Go](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml/badge.svg)](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml)
 
-Speedrun helps you control your compute fleet with minimal effort, at any scale.
+Speedrun helps you control your compute fleet with minimal effort.
 
 Example (stop nginx across 3k machines):
 
@@ -18,20 +18,16 @@ Example (stop nginx across 3k machines):
 speedrun service stop nginx
 ```
 
-No hassles with setting up and maintaining a server with agents as speedrun has none. Single self-contained binary. Speedrun leverages SSH as transport with tight cloud vendor integration to take the burden of mundane things like key generation and propagation/revocation away from the user.
 
-Server targeting (`--target`) is made as intuitive as possible, currently based on [gcloud topic filters](https://cloud.google.com/sdk/gcloud/reference/topic/filters) but in the future will be replaced by a generic selection mechanism to provide a seamless experience across different cloud vendors.
 
 
 Features:
 
-* native cloud integration (currently Google Cloud only, AWS and Azure coming up!)
-* stateless and agentless
+* stateless
+* serverless
+* idempotent
 * no complex configuration required
-* single self-contained binary
-* can run against any number of servers and projects seamlessly
-* a plugin system is in the plan to allow anyone to integrate execution modules that will wrap complex functionality instead of running raw shell commands
-
+* server discovery via native cloud integration (currently Google Cloud only, AWS and Azure coming up!)
 
 ## Installation
 
@@ -48,14 +44,12 @@ Download the precompiled binary from here: [Releases](https://github.com/dpogorz
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
 speedrun init
-speedrun key new
-speedrun key authorize
-speedrun run whoami
+speedrun run whoami --insecure
 ```
 
-#### Portals
+#### Server
 
-`sysctl -w net.core.rmem_max=2500000`
+`sudo ./portal --insecure`
 
 ## Examples
 
