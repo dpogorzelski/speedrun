@@ -61,7 +61,7 @@ func Execute() {
 			addr := fmt.Sprintf("%s:%d", ip, port)
 			lis, err := tls.Listen("tcp", addr, tlsConfig)
 			if err != nil {
-				return fmt.Errorf("could not create TCP: %v", err)
+				return fmt.Errorf("could not create TCP socket: %v", err)
 			}
 			defer lis.Close()
 
