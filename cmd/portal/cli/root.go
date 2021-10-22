@@ -53,7 +53,7 @@ func Execute() {
 				tlsConfig, err = cryptoutil.ServerTLSConfig(caPath, certPath, keyPath)
 			}
 			if err != nil {
-				return fmt.Errorf("could not instantiate TLS config: %v", err)
+				return fmt.Errorf("could not initialize TLS config: %v", err)
 			}
 
 			port := viper.GetInt("port")

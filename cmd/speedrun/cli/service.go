@@ -125,7 +125,7 @@ func action(cmd *cobra.Command, args []string) error {
 		tlsConfig, err = cryptoutil.ClientTLSConfig(caPath, certPath, keyPath)
 	}
 	if err != nil {
-		return fmt.Errorf("could not instantiate TLS config: %v", err)
+		return fmt.Errorf("could not initialize TLS config: %v", err)
 	}
 
 	pool := pond.New(1000, 10000)
