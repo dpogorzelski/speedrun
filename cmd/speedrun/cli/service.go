@@ -119,16 +119,13 @@ func action(cmd *cobra.Command, args []string) error {
 
 	var tlsConfig *tls.Config
 	if insecure {
-		tlsConfig, err = cryptoutil.InsecureTLSConfig()
-		if err != nil {
-			log.Fatalf("failed to generate tls config: %v", err)
-		}
 		log.Warn("Using insecure TLS configuration, this should be avoided in production environments")
+		tlsConfig, err = cryptoutil.InsecureTLSConfig()
 	} else {
 		tlsConfig, err = cryptoutil.ClientTLSConfig(caPath, certPath, keyPath)
-		if err != nil {
-			log.Fatalf("failed to generate tls config: %v", err)
-		}
+	}
+	if err != nil {
+		return err
 	}
 
 	pool := pond.New(1000, 10000)

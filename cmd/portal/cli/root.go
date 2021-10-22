@@ -31,7 +31,7 @@ func Execute() {
 		Version:       fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		Run: func(cmd *cobra.Command, args []string) {
+		RunE: func(cmd *cobra.Command, args []string) error {
 			insecure := viper.GetBool("tls.insecure")
 			caPath := viper.GetString("tls.ca")
 			certPath := viper.GetString("tls.cert")
@@ -41,22 +41,19 @@ func Execute() {
 			var err error
 			err = portalpb.DRPCRegisterPortal(m, &portal.Server{})
 			if err != nil {
-				log.Fatalf("failed to register DRPC server: %v", err)
+				return err
 			}
 			s := drpcserver.New(m)
 
 			var tlsConfig *tls.Config
 			if insecure {
-				tlsConfig, err = cryptoutil.InsecureTLSConfig()
-				if err != nil {
-					log.Fatalf("failed to generate tls config: %v", err)
-				}
 				log.Warn("Using insecure TLS configuration, this should be avoided in production environments")
+				tlsConfig, err = cryptoutil.InsecureTLSConfig()
 			} else {
 				tlsConfig, err = cryptoutil.ServerTLSConfig(caPath, certPath, keyPath)
-				if err != nil {
-					log.Fatalf("failed to generate tls config: %v", err)
-				}
+			}
+			if err != nil {
+				return err
 			}
 
 			port := viper.GetInt("port")
@@ -64,15 +61,13 @@ func Execute() {
 			addr := fmt.Sprintf("%s:%d", ip, port)
 			lis, err := tls.Listen("tcp", addr, tlsConfig)
 			if err != nil {
-				log.Fatalf("failed to listen: %v", err)
+				return err
 			}
 			defer lis.Close()
 
 			ctx := context.Background()
-			log.Infof("Started portal on %s", addr)
-			if err := s.Serve(ctx, lis); err != nil {
-				log.Fatalf("failed to serve: %v", err)
-			}
+			log.Infof("Starting portal on %s", addr)
+			return s.Serve(ctx, lis)
 		},
 	}
 
