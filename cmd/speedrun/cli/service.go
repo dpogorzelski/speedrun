@@ -9,7 +9,7 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
-	itls "github.com/speedrunsh/speedrun/pkg/common/tls"
+	"github.com/speedrunsh/speedrun/pkg/common/cryptoutil"
 	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
@@ -119,13 +119,13 @@ func action(cmd *cobra.Command, args []string) error {
 
 	var tlsConfig *tls.Config
 	if insecure {
-		tlsConfig, err = itls.InsecureTLSConfig()
+		tlsConfig, err = cryptoutil.InsecureTLSConfig()
 		if err != nil {
 			log.Fatalf("failed to generate tls config: %v", err)
 		}
 		log.Warn("Using insecure TLS configuration, this should be avoided in production environments")
 	} else {
-		tlsConfig, err = itls.ClientTLSConfig(caPath, certPath, keyPath)
+		tlsConfig, err = cryptoutil.ClientTLSConfig(caPath, certPath, keyPath)
 		if err != nil {
 			log.Fatalf("failed to generate tls config: %v", err)
 		}

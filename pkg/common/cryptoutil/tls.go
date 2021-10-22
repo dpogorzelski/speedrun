@@ -1,4 +1,4 @@
-package tls
+package cryptoutil
 
 import (
 	"crypto/ed25519"

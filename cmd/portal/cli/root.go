@@ -10,7 +10,7 @@ import (
 	"github.com/apex/log"
 	jsonhandler "github.com/apex/log/handlers/json"
 	texthandler "github.com/apex/log/handlers/text"
-	itls "github.com/speedrunsh/speedrun/pkg/common/tls"
+	"github.com/speedrunsh/speedrun/pkg/common/cryptoutil"
 	"github.com/speedrunsh/speedrun/pkg/portal"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
@@ -47,13 +47,13 @@ func Execute() {
 
 			var tlsConfig *tls.Config
 			if insecure {
-				tlsConfig, err = itls.InsecureTLSConfig()
+				tlsConfig, err = cryptoutil.InsecureTLSConfig()
 				if err != nil {
 					log.Fatalf("failed to generate tls config: %v", err)
 				}
 				log.Warn("Using insecure TLS configuration, this should be avoided in production environments")
 			} else {
-				tlsConfig, err = itls.ServerTLSConfig(caPath, certPath, keyPath)
+				tlsConfig, err = cryptoutil.ServerTLSConfig(caPath, certPath, keyPath)
 				if err != nil {
 					log.Fatalf("failed to generate tls config: %v", err)
 				}
