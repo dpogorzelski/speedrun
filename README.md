@@ -89,9 +89,6 @@ speedrun run whoami -c /path/to/config.toml
 
 Using certain flags repeteadly can be annoying, it's possible to persist their behavior via config file. Default config file is located at `~/.speedrun/config.toml` and can be re-initialized to it's default form via `speedrun init`.
 
-#### Run it as nomad job
-
-
 #### Run it as a systemd unit
 
 
