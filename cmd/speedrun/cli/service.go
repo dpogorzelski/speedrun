@@ -28,10 +28,7 @@ var restartCmd = &cobra.Command{
 	Short:   "Restart a service",
 	Example: "  speedrun service restart nginx",
 	Args:    cobra.MinimumNArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		initConfig()
-	},
-	RunE: action,
+	RunE:    action,
 }
 
 var startCmd = &cobra.Command{
@@ -39,10 +36,7 @@ var startCmd = &cobra.Command{
 	Short:   "Start a service",
 	Example: "  speedrun service start nginx",
 	Args:    cobra.MinimumNArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		initConfig()
-	},
-	RunE: action,
+	RunE:    action,
 }
 
 var stopCmd = &cobra.Command{
@@ -50,10 +44,7 @@ var stopCmd = &cobra.Command{
 	Short:   "Stop a service",
 	Example: "  speedrun service stop nginx",
 	Args:    cobra.MinimumNArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		initConfig()
-	},
-	RunE: action,
+	RunE:    action,
 }
 
 var statusCmd = &cobra.Command{
@@ -61,10 +52,7 @@ var statusCmd = &cobra.Command{
 	Short:   "Return the status of the service",
 	Example: "  speedrun service status nginx",
 	Args:    cobra.MinimumNArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		initConfig()
-	},
-	RunE: action,
+	RunE:    action,
 }
 
 func init() {

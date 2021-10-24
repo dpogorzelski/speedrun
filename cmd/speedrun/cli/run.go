@@ -21,12 +21,9 @@ import (
 var runCmd = &cobra.Command{
 	Use:     "run <command to run>",
 	Short:   "Run a shell command on remote servers",
-	Example: "  speedrun run whoami\n  speedrun run whoami --only-failures --target \"labels.foo = bar AND labels.environment = staging\"",
+	Example: "  speedrun run whoami\n  speedrun run whoami --target \"labels.foo = bar AND labels.environment = staging\"",
 	Args:    cobra.MinimumNArgs(1),
-	PreRun: func(cmd *cobra.Command, args []string) {
-		initConfig()
-	},
-	RunE: run,
+	RunE:    run,
 }
 
 func init() {
