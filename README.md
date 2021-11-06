@@ -17,10 +17,6 @@ Example (stop nginx across 3k machines):
 ```bash
 speedrun service stop nginx
 ```
-
-
-
-
 Features:
 
 * stateless
