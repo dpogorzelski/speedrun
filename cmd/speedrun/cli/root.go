@@ -55,6 +55,7 @@ func Execute() {
 	rootCmd.PersistentFlags().String("cert", "cert.crt", "Path to the client cert")
 	rootCmd.PersistentFlags().String("key", "key.key", "Path to the client key")
 	rootCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
+
 	viper.BindPFlag("logging.loglevel", rootCmd.PersistentFlags().Lookup("loglevel"))
 	viper.BindPFlag("logging.json", rootCmd.PersistentFlags().Lookup("json"))
 	viper.BindPFlag("tls.insecure", rootCmd.PersistentFlags().Lookup("insecure"))
