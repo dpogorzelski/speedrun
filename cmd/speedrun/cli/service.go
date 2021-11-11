@@ -9,8 +9,6 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
-	"github.com/speedrunsh/speedrun/pkg/common/cryptoutil"
-	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -61,72 +59,32 @@ func init() {
 	serviceCmd.AddCommand(startCmd)
 	serviceCmd.AddCommand(stopCmd)
 	serviceCmd.AddCommand(statusCmd)
-	serviceCmd.PersistentFlags().StringP("target", "t", "", "Select instances that match the given criteria")
-	serviceCmd.PersistentFlags().String("projectid", "", "Override GCP project id")
-	serviceCmd.PersistentFlags().Bool("insecure", false, "Skip server certificate verification")
-	serviceCmd.PersistentFlags().String("ca", "ca.crt", "Path to the CA cert")
-	serviceCmd.PersistentFlags().String("cert", "cert.crt", "Path to the client cert")
-	serviceCmd.PersistentFlags().String("key", "key.key", "Path to the client key")
-	serviceCmd.PersistentFlags().Bool("use-private-ip", false, "Connect to private IPs instead of public ones")
-
-	viper.BindPFlag("gcp.projectid", serviceCmd.PersistentFlags().Lookup("projectid"))
-	viper.BindPFlag("tls.insecure", serviceCmd.PersistentFlags().Lookup("insecure"))
-	viper.BindPFlag("tls.ca", serviceCmd.PersistentFlags().Lookup("ca"))
-	viper.BindPFlag("tls.cert", serviceCmd.PersistentFlags().Lookup("cert"))
-	viper.BindPFlag("tls.key", serviceCmd.PersistentFlags().Lookup("key"))
-	viper.BindPFlag("portal.use-private-ip", serviceCmd.PersistentFlags().Lookup("use-private-ip"))
 }
 
 func action(cmd *cobra.Command, args []string) error {
-	project := viper.GetString("gcp.projectid")
-	insecure := viper.GetBool("tls.insecure")
-	caPath := viper.GetString("tls.ca")
-	certPath := viper.GetString("tls.cert")
-	keyPath := viper.GetString("tls.key")
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
-	target, err := cmd.Flags().GetString("target")
+
+	tlsConfig, err := setupTLS()
 	if err != nil {
 		return err
 	}
 
-	gcpClient, err := cloud.NewGCPClient()
+	portals, err := getPortals(cmd)
 	if err != nil {
 		return err
-	}
-
-	log.Info("Fetching instance list")
-	instances, err := gcpClient.GetInstances(project, target)
-	if err != nil {
-		return err
-	}
-
-	if len(instances) == 0 {
-		log.Warn("No instances found")
-		return nil
-	}
-
-	var tlsConfig *tls.Config
-	if insecure {
-		log.Warn("Using insecure TLS configuration, this should be avoided in production environments")
-		tlsConfig, err = cryptoutil.InsecureTLSConfig()
-	} else {
-		tlsConfig, err = cryptoutil.ClientTLSConfig(caPath, certPath, keyPath)
-	}
-	if err != nil {
-		return fmt.Errorf("could not initialize TLS config: %v", err)
 	}
 
 	pool := pond.New(1000, 10000)
-	for _, i := range instances {
-		instance := i
+	for _, p := range portals {
+		portal := p
 		pool.Submit(func() {
 			fields := log.Fields{
-				"host":    instance.Name,
-				"address": instance.GetAddress(usePrivateIP),
+				"host":    portal.Name,
+				"address": portal.GetAddress(usePrivateIP),
 			}
 			log := log.WithFields(fields)
 
-			addr := fmt.Sprintf("%s:%d", instance.GetAddress(usePrivateIP), 1337)
+			addr := fmt.Sprintf("%s:%d", portal.GetAddress(usePrivateIP), 1337)
 			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
 				log.Error(err.Error())
