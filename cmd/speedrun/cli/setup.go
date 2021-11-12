@@ -13,7 +13,7 @@ import (
 
 func getPortals(cmd *cobra.Command) ([]cloud.Instance, error) {
 	project := viper.GetString("gcp.projectid")
-	target, err := cmd.Flags().GetString("target")
+	_, err := cmd.Flags().GetString("target")
 	if err != nil {
 		return nil, err
 	}
@@ -24,7 +24,7 @@ func getPortals(cmd *cobra.Command) ([]cloud.Instance, error) {
 	}
 
 	log.Info("Fetching instance list")
-	instances, err := gcpClient.GetInstances(project, target)
+	instances, err := gcpClient.GetInstances(project)
 	if err != nil {
 		return nil, err
 	}
