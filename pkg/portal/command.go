@@ -17,7 +17,7 @@ func (s *Server) RunCommand(ctx context.Context, in *portal.CommandRequest) (*po
 
 	log.Debugf("Received command: %s %s", in.GetName(), in.GetArgs())
 	cmd := exec.Command(in.GetName(), in.GetArgs()...)
-	stdout, err := cmd.Output()
+	stdout, err := cmd.CombinedOutput()
 
 	if err != nil {
 		log.Error(err.Error())
