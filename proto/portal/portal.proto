@@ -3,7 +3,7 @@ option go_package = "github.com/speedrunsh/speedrun/proto/portal";
 package portal;
 
 enum State {
-  STATELESS = 0;
+  UNKNOWN = 0;
   CHANGED = 1;
   UNCHANGED = 2;
 }
