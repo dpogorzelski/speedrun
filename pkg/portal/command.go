@@ -3,6 +3,7 @@ package portal
 import (
 	"context"
 	"os/exec"
+	"strings"
 
 	"github.com/apex/log"
 
@@ -23,5 +24,5 @@ func (s *Server) RunCommand(ctx context.Context, in *portal.CommandRequest) (*po
 		log.Error(err.Error())
 		return nil, err
 	}
-	return &portal.CommandResponse{Message: string(stdout)}, nil
+	return &portal.CommandResponse{Message: strings.TrimSpace(string(stdout))}, nil
 }
