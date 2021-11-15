@@ -27,7 +27,7 @@ func NewGCPClient() (*GoogleClient, error) {
 // GetInstances returns a list of external IP addresses used for the SHH connection
 func (c *GoogleClient) GetInstances(project string) ([]Instance, error) {
 	instances := []Instance{}
-	listCall := c.Instances.AggregatedList(project).Fields("nextPageToken", "items(Name,NetworkInterfaces)")
+	listCall := c.Instances.AggregatedList(project).Fields("nextPageToken", "items(Name,NetworkInterfaces,Labels)")
 	var ctx context.Context
 
 	listCall.Pages(ctx, func(list *compute.InstanceAggregatedList) error {
@@ -37,6 +37,7 @@ func (c *GoogleClient) GetInstances(project string) ([]Instance, error) {
 					Name:           instance.Name,
 					PrivateAddress: instance.NetworkInterfaces[0].NetworkIP,
 					PublicAddress:  instance.NetworkInterfaces[0].AccessConfigs[0].NatIP,
+					Labels:         instance.Labels,
 				}
 				instances = append(instances, i)
 			}
