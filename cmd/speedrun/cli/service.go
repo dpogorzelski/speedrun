@@ -132,7 +132,7 @@ func action(cmd *cobra.Command, args []string) error {
 					log.Error(err.Error())
 					return
 				}
-				log.WithField("state", r.GetState()).Infof("Service status is: loadstate: %s activestate: %s substate: %s", r.GetLoadstate(), r.GetActivestate(), r.GetSubstate())
+				log.WithField("state", r.GetState()).Infof("Loadstate: %s Activestate: %s Substate: %s", r.GetLoadstate(), r.GetActivestate(), r.GetSubstate())
 			}
 
 		})

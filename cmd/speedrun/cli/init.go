@@ -20,6 +20,7 @@ var initCmd = &cobra.Command{
 	Use:   "init",
 	Short: "Initialize speedrun",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		viper.SetDefault("gcp.projectid", "")
 		print, err := cmd.Flags().GetBool("print")
 		if err != nil {
 			return err
