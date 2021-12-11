@@ -9,6 +9,7 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
+	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
 	portalpb "github.com/speedrunsh/speedrun/proto/portal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
@@ -64,12 +65,17 @@ func init() {
 func action(cmd *cobra.Command, args []string) error {
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 
-	tlsConfig, err := setupTLS()
+	tlsConfig, err := cloud.SetupTLS()
 	if err != nil {
 		return err
 	}
 
-	portals, err := getPortals(cmd)
+	target, err := cmd.Flags().GetString("target")
+	if err != nil {
+		return err
+	}
+
+	portals, err := cloud.GetInstances(target)
 	if err != nil {
 		return err
 	}

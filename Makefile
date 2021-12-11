@@ -46,7 +46,7 @@ portal-linux: portal-linux-amd64 portal-linux-arm64
 
 portal: portal-linux
 
-dev: speedrun-darwin-amd64 portal-linux-amd64
+dev: speedrun-darwin-arm64 portal-linux-amd64
 
 proto:
 	protoc --go_out=paths=source_relative:. --go-grpc_out=paths=source_relative:. proto/portal/portal.proto
