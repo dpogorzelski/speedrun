@@ -4,6 +4,7 @@ import (
 	"crypto/tls"
 	"fmt"
 
+	"github.com/antonmedv/expr"
 	"github.com/apex/log"
 	"github.com/speedrunsh/speedrun/pkg/common/cryptoutil"
 	"github.com/spf13/viper"
@@ -38,6 +39,13 @@ func GetInstances(target string) ([]Instance, error) {
 		return nil, err
 	}
 
+	subset, err := filter(instances, target)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Infof("%v", subset)
+
 	if len(instances) == 0 {
 		return nil, fmt.Errorf("no instances found")
 	}
@@ -58,4 +66,31 @@ func SetupTLS() (*tls.Config, error) {
 		return cryptoutil.ClientTLSConfig(caPath, certPath, keyPath)
 	}
 
+}
+
+func filter(instnces []Instance, target string) ([]Instance, error) {
+	var subset []Instance
+
+	program, err := expr.Compile(target, expr.Env(Instance{}))
+	if err != nil {
+		return nil, err
+	}
+
+	for _, instance := range instnces {
+		output, err := expr.Run(program, instance)
+		if err != nil {
+			log.Error(err.Error())
+			continue
+		}
+
+		s, ok := output.(bool)
+		if !ok {
+			continue
+		}
+
+		if s {
+			subset = append(subset, instance)
+		}
+	}
+	return subset, nil
 }

@@ -39,6 +39,7 @@ require (
 require (
 	cloud.google.com/go v0.99.0 // indirect
 	github.com/godbus/dbus/v5 v5.0.6 // indirect
+	github.com/kr/text v0.2.0 // indirect
 	github.com/zeebo/errs v1.2.2 // indirect
 	golang.org/x/oauth2 v0.0.0-20211104180415-d3ed0bb246c8 // indirect
 	google.golang.org/genproto v0.0.0-20211208223120-3a66f561d7aa // indirect
@@ -46,6 +47,7 @@ require (
 )
 
 require (
+	github.com/antonmedv/expr v1.9.0
 	github.com/coreos/go-systemd/v22 v22.3.2
 	github.com/mitchellh/go-homedir v1.1.0
 	google.golang.org/protobuf v1.27.1
