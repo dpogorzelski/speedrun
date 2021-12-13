@@ -44,13 +44,11 @@ func GetInstances(target string) ([]Instance, error) {
 		return nil, err
 	}
 
-	log.Infof("%v", subset)
-
-	if len(instances) == 0 {
+	if len(subset) == 0 {
 		return nil, fmt.Errorf("no instances found")
 	}
 
-	return instances, nil
+	return subset, nil
 }
 
 func SetupTLS() (*tls.Config, error) {
@@ -83,12 +81,12 @@ func filter(instnces []Instance, target string) ([]Instance, error) {
 			continue
 		}
 
-		s, ok := output.(bool)
+		match, ok := output.(bool)
 		if !ok {
 			continue
 		}
 
-		if s {
+		if match {
 			subset = append(subset, instance)
 		}
 	}
