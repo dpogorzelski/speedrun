@@ -44,22 +44,22 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	portals, err := cloud.GetInstances(target)
+	instances, err := cloud.GetInstances(target)
 	if err != nil {
 		return err
 	}
 
 	pool := pond.New(1000, 10000)
-	for _, p := range portals {
-		portal := p
+	for _, p := range instances {
+		instance := p
 		pool.Submit(func() {
 			fields := log.Fields{
-				"host":    portal.Name,
-				"address": portal.GetAddress(usePrivateIP),
+				"host":    instance.Name,
+				"address": instance.GetAddress(usePrivateIP),
 			}
 			log := log.WithFields(fields)
 
-			addr := fmt.Sprintf("%s:%d", portal.GetAddress(usePrivateIP), 1337)
+			addr := fmt.Sprintf("%s:%d", instance.GetAddress(usePrivateIP), 1337)
 			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
 				log.Error(err.Error())
