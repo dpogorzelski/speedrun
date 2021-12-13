@@ -69,7 +69,7 @@ func SetupTLS() (*tls.Config, error) {
 func filter(instnces []Instance, target string) ([]Instance, error) {
 	var subset []Instance
 
-	program, err := expr.Compile(target, expr.Env(Instance{}))
+	program, err := expr.Compile(target, expr.Env(Instance{}), expr.AsBool())
 	if err != nil {
 		return nil, err
 	}
