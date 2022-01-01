@@ -77,7 +77,6 @@ func filter(instnces []Instance, target string) ([]Instance, error) {
 	for _, instance := range instnces {
 		output, err := expr.Run(program, instance)
 		if err != nil {
-			log.Error(err.Error())
 			continue
 		}
 

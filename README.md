@@ -4,8 +4,8 @@
   </a>
 </p>
 
-
 # Speedrun
+
 [![license](https://img.shields.io/badge/license-MPL2-blue.svg)](https://github.com/dpogorzelski/speedrun/blob/master/LICENSE)
 [![Go Report Card](https://goreportcard.com/badge/github.com/dpogorzelski/speedrun)](https://goreportcard.com/report/github.com/dpogorzelski/speedrun)
 [![Go](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml/badge.svg)](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml)
@@ -17,6 +17,7 @@ Example (stop nginx across 3k machines):
 ```bash
 speedrun service stop nginx
 ```
+
 Features:
 
 * stateless
@@ -24,19 +25,18 @@ Features:
 * idempotent
 * no complex configuration required
 * server discovery via native cloud integration (currently Google Cloud only, AWS and Azure coming up!)
+* extensible (plugin system is in the works)
 
 ## Installation
 
-#### Homebrew (MacOS, Linux)
-```bash
-brew install dpogorzelski/tap/speedrun
-```
+#### MacOS, Linux, Windows
 
-#### Manual (MacOS, Linux, Windows)
-Download the precompiled binary from here: [Releases](https://github.com/dpogorzelski/speedrun/releases)
+Download the precompiled binaries from here: [Releases](https://github.com/dpogorzelski/speedrun/releases)
+
 ## Usage
 
 #### Quickstart
+
 On a server:
 
 `sudo ./portal --insecure`
@@ -49,24 +49,32 @@ speedrun init
 speedrun run whoami --insecure
 ```
 
+## Architecture
+
+* picture first here
+
+* speedrun client
+
+* portal
+
+* protocols
+
+* service discovery
+
+* language definition [expr/Language-Definition.md at master · antonmedv/expr · GitHub](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md)
+
 ## Examples
 
-Use 1000 concurrent SSH workers
+Stop Nginx on VMs that have a label `role` with value `nginx` and a label named `project` with value `someproject`
 
 ```bash
-speedrun run "uname -r" --concurrency 1000
+speedrun service stop nginx --target "labels.role == 'nginx' and labels.project == 'someproject'r"
 ```
 
-Stop Nginx on VMs matching the target selector
+Run arbitrary shell command on the target machines. Ignore Portal's certificate and connect via private IP address.
 
 ```bash
-speedrun service stop nginx --target "labels.env=staging AND labels.app=foobar"
-```
-
-Ignore Portal's certificate and connect via private IP addresses
-
-```bash
-speedrun run "ls -la" --target "labels.env != prod" --insecure --use-private-ip
+speedrun run "ls -la" --target "labels.env != 'prod'" --insecure --use-private-ip
 ```
 
 Use a different config file
@@ -77,12 +85,11 @@ speedrun run whoami -c /path/to/config.toml
 
 ## Configuration
 
-Using certain flags repeteadly can be annoying, it's possible to persist their behavior via config file. Default config file is located at `~/.speedrun/config.toml` and can be re-initialized to it's default form via `speedrun init`.
+Instead of supplying certain flags repeatedly you can persist their behavior in the config file. Default config file is located at `~/.speedrun/config.toml` and default settings can be fetched via `speedrun init --print`.
 
-#### Run it as a systemd unit
+#### Run portal as a systemd unit
 
-
-#### Use self signed certificates
+#### Use self signed certificates during testing
 
 ## Contributing
 
