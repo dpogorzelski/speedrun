@@ -1,0 +1,17 @@
+[Unit]
+Description=Portal
+Documentation=https://speedrun.sh
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+ExecReload=/bin/kill -HUP $MAINPID
+ExecStart=/usr/local/bin/portal
+KillMode=process
+KillSignal=SIGINT
+Restart=on-failure
+RestartSec=2
+TasksMax=infinity
+
+[Install]
+WantedBy=multi-user.target
