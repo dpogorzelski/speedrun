@@ -68,7 +68,7 @@ speedrun run whoami --insecure
 Stop Nginx on VMs that have a label `role` with value `nginx` and a label named `project` with value `someproject`
 
 ```bash
-speedrun service stop nginx --target "labels.role == 'nginx' and labels.project == 'someproject'r"
+speedrun service stop nginx --target "labels.role == 'nginx' and labels.project == 'someproject'"
 ```
 
 Run arbitrary shell command on the target machines. Ignore Portal's certificate and connect via private IP address.
