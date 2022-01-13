@@ -6,6 +6,7 @@ import (
 
 	"github.com/antonmedv/expr"
 	"github.com/apex/log"
+	"github.com/pkg/errors"
 	"github.com/speedrunsh/speedrun/pkg/common/cryptoutil"
 	"github.com/spf13/viper"
 )
@@ -40,12 +41,13 @@ func GetInstances(target string) ([]Instance, error) {
 	}
 
 	subset, err := filter(instances, target)
-	if err != nil {
-		return nil, err
-	}
-
 	if len(subset) == 0 {
 		return nil, fmt.Errorf("no instances found")
+	}
+
+	if err != nil {
+		err = errors.Wrap(err, "could not filter instance list")
+		return nil, err
 	}
 
 	return subset, nil
@@ -67,6 +69,10 @@ func SetupTLS() (*tls.Config, error) {
 }
 
 func filter(instnces []Instance, target string) ([]Instance, error) {
+	if target == "" {
+		return instnces, nil
+	}
+
 	var subset []Instance
 
 	program, err := expr.Compile(target, expr.Env(Instance{}), expr.AsBool())
