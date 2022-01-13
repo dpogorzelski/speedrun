@@ -115,7 +115,39 @@ In the [scripts](scripts/) folder you can find scripts that will help you genera
 * Speedrun cert/key
 * Portal cert/key
 
-TODO
+Run them:
+```bash
+scripts/generate_fake_ca.sh
+scripts/generate_portal_cert.sh
+scripts/generate_speedrun_cert.sh
+```
+This will generate the required key/cert pairs:
+```
+ca.crt
+ca.key
+portal.crt
+portal.key
+speedrun.crt
+speedrun.key
+```
+Set the path in the `[tls]` config block:
+
+Portal:
+```toml
+[tls]
+  ca = "ca.crt"
+  cert = "portal.crt"
+  insecure = false
+  key = "portal.key"
+```
+Speedrun:
+```toml
+[tls]
+  ca = "ca.crt"
+  cert = "speedrun.crt"
+  insecure = false
+  key = "speedrun.key"
+```
 
 ## List of built-in Actions
 * [x] run: run arbitrary shell commands
