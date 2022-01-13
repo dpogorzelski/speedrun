@@ -77,7 +77,7 @@ This eliminates the need to deploy,maintain and operate a server and all problem
 Communication between Speedrun and Portals is performed via [dRPC](https://github.com/storj/drpc), a lightweight, drop-in replacement for gRPC. All dRPC interactions travel on top of TLS1.3 and can be mutually authenticated ([mTLS](https://en.wikipedia.org/wiki/Mutual_authentication)).
 
 #### Language Definition
-Speedrun supports a flexible yet simple expression language to filter Service Discovery results, it's based on [antonmedv/expr](https://github.com/antonmedv/expr). Full language definition can be found [here](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
+Speedrun supports a flexible yet simple expression language to filter Service Discovery results (`--target`), it's based on [antonmedv/expr](https://github.com/antonmedv/expr). Full language definition can be found [here](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
 
 #### Plugins
 TODO
