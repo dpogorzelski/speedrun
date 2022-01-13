@@ -32,7 +32,7 @@ This project satisfies a simple need: to be able to perform certain type of oper
 
 ## Installation
 
-#### MacOS, Linux
+#### MacOS, Linux, Windows
 
 Download the precompiled binaries from here: [Releases](https://github.com/dpogorzelski/speedrun/releases)
 
