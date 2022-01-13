@@ -1,6 +1,6 @@
 GITCOMMIT=$(shell git rev-parse --short HEAD 2>/dev/null)
 DATE=$(shell date -u +"%Y-%m-%dT%H:%M:%SZ")
-VERSION=$(shell git branch --show-current)
+VERSION=$(shell git describe --tags)
 DIST=dist
 LINUX_PATH=$(DIST)/linux
 DARWIN_PATH=$(DIST)/darwin

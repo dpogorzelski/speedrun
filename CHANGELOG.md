@@ -1,3 +1,8 @@
+## 0.3.0-beta1 (2022-01-13)
+
+### Breaking changes
+Pretty much complete project pivot and no retro compatibility with previous versions. SSH support was dropped completely and an agent (Portal) was introduced.
+You can refer to the README for updated installation and usage info.
 
 ## 0.2.2 (2021-08-01)
 

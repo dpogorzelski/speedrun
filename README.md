@@ -32,7 +32,7 @@ This project satisfies a simple need: to be able to perform certain type of oper
 
 ## Installation
 
-#### MacOS, Linux, Windows
+#### MacOS, Linux
 
 Download the precompiled binaries from here: [Releases](https://github.com/dpogorzelski/speedrun/releases)
 
@@ -63,12 +63,12 @@ speedrun run whoami --insecure
 </p>
 
 #### Speedrun
-Speedrun is the client. Speedrun is the CLI tool you run on your computer to send commands to your servers.
+Speedrun is the client. Speedrun is the CLI tool you run on your computer to send commands to your VMs.
 
 #### Portal
 Portal is the agent running on each server you want to send commands to. It will receive commands sent from Speedrun and respond with the outcome details accordingly.
 #### Service Discovery
-There is no server component in Speedrun's architecture. Service discovery is performed against native facilities of each supported provider such as GCP,AWS or Consul.
+There is no server component in Speedrun's architecture. Service discovery is performed against native facilities of each supported provider such as GCP, AWS or Consul.
 This eliminates the need to deploy,maintain and operate a server and all problems that would come with it as a consequence, such as: scalability, failure tolerance, redundancy, agent lifecycle management etc.
 ![Service Discovery](assets/service-discovery-sequence.png)
 
@@ -80,20 +80,20 @@ Communication between Speedrun and Portals is performed via [dRPC](https://githu
 Speedrun supports a flexible yet simple expression language to filter Service Discovery results (`--target`), it's based on [antonmedv/expr](https://github.com/antonmedv/expr). Full language definition can be found [here](https://github.com/antonmedv/expr/blob/master/docs/Language-Definition.md).
 
 #### Plugins
-TODO
+Plugins will allow you to add custom commands without altering the source code. This is not implemented yet.
 
 ## Examples
 
 Stop Nginx on VMs that have a label `role` with value `nginx` and a label named `project` with value `someproject`
 
 ```bash
-speedrun service stop nginx --target "labels.role == 'nginx' and labels.project == 'someproject'"
+speedrun service stop nginx --target "Labels.role == 'nginx' and Labels.project == 'someproject'"
 ```
 
 Run arbitrary shell command on the target machines. Ignore Portal's certificate and connect via private IP address.
 
 ```bash
-speedrun run "ls -la" --target "labels.env != 'prod'" --insecure --use-private-ip
+speedrun run "ls -la" --target "Labels.env != 'prod'" --insecure --use-private-ip
 ```
 
 Use a different config file
@@ -106,8 +106,8 @@ speedrun run whoami -c /path/to/config.toml
 
 Instead of supplying certain flags repeatedly you can persist their behavior in the config file. Default config file is located at `~/.speedrun/config.toml` and default settings can be fetched via `speedrun init --print`.
 
-#### Run portal as a systemd unit
-TODO
+#### Run Portal as a systemd service
+Find a sample unit [here](init/portal.service)
 
 #### Use self signed certificates during testing
 In the [scripts](scripts/) folder you can find scripts that will help you generate:
