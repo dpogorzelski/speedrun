@@ -1,17 +1,34 @@
 builds:
-  - goos:
+  - id: speedrun
+    main: ./cmd/speedrun
+    binary: speedrun
+    goos:
       - linux
-      - windows
       - darwin
     goarch:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X speedrun/cmd.version={{.Version}} -X speedrun/cmd.commit={{.ShortCommit}} -X speedrun/cmd.date={{.Date}}
+      - -s -w -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version={{.Version}} -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit={{.ShortCommit}} -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date={{.Date}}
+  - id: portal
+    main: ./cmd/portal
+    binary: portal
+    goos:
+      - linux
+    goarch:
+      - amd64
+      - arm64
 archives:
-  - replacements:
-      amd64: x86_64
+  - id: speedrun
     format: zip
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    builds:
+      - speedrun
+  - id: portal
+    format: zip
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    builds:
+      - portal
 checksum:
   name_template: "checksums.txt"
 snapshot:
