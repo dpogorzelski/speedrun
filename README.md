@@ -6,9 +6,9 @@
 
 # Speedrun
 
-[![license](https://img.shields.io/badge/license-MPL2-blue.svg)](https://github.com/dpogorzelski/speedrun/blob/master/LICENSE)
-[![Go Report Card](https://goreportcard.com/badge/github.com/dpogorzelski/speedrun)](https://goreportcard.com/report/github.com/dpogorzelski/speedrun)
-[![Go](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml/badge.svg)](https://github.com/dpogorzelski/speedrun/actions/workflows/go.yml)
+[![license](https://img.shields.io/badge/license-MPL2-blue.svg)](https://github.com/speedrunsh/speedrun/blob/master/LICENSE)
+[![Go Report Card](https://goreportcard.com/badge/github.com/speedrunsh/speedrun)](https://goreportcard.com/report/github.com/speedrunsh/speedrun)
+[![Go](https://github.com/speedrunsh/speedrun/actions/workflows/go.yml/badge.svg)](https://github.com/speedrunsh/speedrun/actions/workflows/go.yml)
 
 Speedrun helps you control your compute fleet with minimal effort.
 
