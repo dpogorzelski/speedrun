@@ -28,6 +28,9 @@ func (i Instance) GetAddress(private bool) string {
 
 func GetInstances(target string) ([]Instance, error) {
 	project := viper.GetString("gcp.projectid")
+	if project == "" {
+		return nil, fmt.Errorf("missing Google Cloud project ID, consider adding it to your config file: %s", viper.ConfigFileUsed())
+	}
 
 	gcpClient, err := NewGCPClient()
 	if err != nil {
