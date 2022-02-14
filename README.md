@@ -27,9 +27,6 @@ Features:
 * service discovery via native cloud integration (currently Google Cloud only, AWS, Azure and Consul coming up!)
 * extensible (plugin system is in the works)
 
-## Motivation
-This project satisfies a simple need: to be able to perform certain type of operations, such as a service restart, occasionally and on a large number of machines. It should allow you, the SRE/DevOps person, to act on a large scale infrastructure in case of immediate need. The solution attempts to be simple to use, require little maintenance and be easy to configure. It's inspired by Saltstack's execution modules.
-
 ## Installation
 
 #### MacOS, Linux, Windows
