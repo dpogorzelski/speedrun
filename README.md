@@ -100,8 +100,7 @@ speedrun run whoami -c /path/to/config.toml
 ```
 
 ## Configuration
-
-Instead of supplying certain flags repeatedly you can persist their behavior in the config file. Default config file is located at `~/.speedrun/config.toml` and default settings can be fetched via `speedrun init --print`.
+Default config file is located at `~/.speedrun/config.toml` and default settings can be generated via `speedrun init --print`.
 
 #### Run Portal as a systemd service
 Find a sample unit [here](init/portal.service)
