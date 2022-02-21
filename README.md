@@ -67,7 +67,14 @@ Portal is the agent running on each server you want to send commands to. It will
 #### Service Discovery
 There is no server component in Speedrun's architecture. Service discovery is performed against native facilities of each supported provider such as GCP, AWS or Consul.
 This eliminates the need to deploy,maintain and operate a server and all problems that would come with it as a consequence, such as: scalability, failure tolerance, redundancy, agent lifecycle management etc.
-![Service Discovery](assets/service-discovery-sequence.png)
+
+```mermaid
+sequenceDiagram
+Speedrun ->> GCP API: Get list of VMs
+GCP API ->> Speedrun: Return list of VMs
+Speedrun ->> Speedrun: Filter list of VMs
+Speedrun ->> Portals: Send command
+```
 
 #### Protocols
 
