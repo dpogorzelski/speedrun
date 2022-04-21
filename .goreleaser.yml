@@ -10,7 +10,7 @@ builds:
       - amd64
       - arm64
     ldflags:
-      - -s -w -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.version={{.Version}} -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.commit={{.ShortCommit}} -X github.com/speedrunsh/speedrun/cmd/speedrun/cli.date={{.Date}}
+      - -s -w -X github.com/dpogorzelski/speedrun/cmd/speedrun/cli.version={{.Version}} -X github.com/dpogorzelski/speedrun/cmd/speedrun/cli.commit={{.ShortCommit}} -X github.com/dpogorzelski/speedrun/cmd/speedrun/cli.date={{.Date}}
   - id: portal
     main: ./cmd/portal
     binary: portal

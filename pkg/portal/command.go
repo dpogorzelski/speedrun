@@ -7,7 +7,7 @@ import (
 
 	"github.com/apex/log"
 
-	"github.com/speedrunsh/speedrun/proto/portal"
+	"github.com/dpogorzelski/speedrun/proto/portal"
 )
 
 func (s *Server) RunCommand(ctx context.Context, in *portal.CommandRequest) (*portal.CommandResponse, error) {

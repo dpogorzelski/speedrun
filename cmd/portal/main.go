@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/speedrunsh/speedrun/cmd/portal/cli"
+	"github.com/dpogorzelski/speedrun/cmd/portal/cli"
 )
 
 func main() {

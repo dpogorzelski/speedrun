@@ -7,7 +7,7 @@ import (
 
 	"github.com/apex/log"
 	"github.com/coreos/go-systemd/v22/dbus"
-	"github.com/speedrunsh/speedrun/proto/portal"
+	"github.com/dpogorzelski/speedrun/proto/portal"
 )
 
 func (s *Server) ServiceRestart(ctx context.Context, service *portal.ServiceRequest) (*portal.ServiceResponse, error) {

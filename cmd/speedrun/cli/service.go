@@ -9,8 +9,8 @@ import (
 
 	"github.com/alitto/pond"
 	"github.com/apex/log"
-	"github.com/speedrunsh/speedrun/pkg/speedrun/cloud"
-	portalpb "github.com/speedrunsh/speedrun/proto/portal"
+	"github.com/dpogorzelski/speedrun/pkg/speedrun/cloud"
+	portalpb "github.com/dpogorzelski/speedrun/proto/portal"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 	"storj.io/drpc/drpcconn"

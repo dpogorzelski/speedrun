@@ -1,6 +1,6 @@
 package portal
 
-import "github.com/speedrunsh/speedrun/proto/portal"
+import "github.com/dpogorzelski/speedrun/proto/portal"
 
 type Server struct {
 	portal.DRPCPortalUnimplementedServer
