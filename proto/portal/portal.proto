@@ -1,5 +1,5 @@
 syntax = "proto3";
-option go_package = "github.com/speedrunsh/speedrun/proto/portal";
+option go_package = "github.com/dpogorzelski/speedrun/proto/portal";
 package portal;
 
 enum State {

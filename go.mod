@@ -1,4 +1,4 @@
-module github.com/speedrunsh/speedrun
+module github.com/dpogorzelski/speedrun
 
 go 1.17
 
