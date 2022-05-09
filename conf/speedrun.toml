@@ -1,0 +1,15 @@
+[gcp]
+  projectid = "yourproject" # GCP project ID
+
+[logging]
+  json = false # output logs in json format
+  loglevel = "info" # how much log output to spam
+
+[portal]
+  use-private-ip = false # try to connect to private IP of the instances rather than to the public
+
+[tls]
+  ca = "ca.crt" # certificate authority cert/bundle
+  cert = "speedrun.crt" # client certificate used during mTLS
+  key = "speedrun.key" # client key used during mTLS
+  insecure = false # setting this to true will make speedrun skip portal's certificate validation step
