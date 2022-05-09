@@ -47,7 +47,6 @@ On your machine:
 
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS=/path/to/serviceaccount.json
-speedrun init
 speedrun run whoami --insecure
 ```
 
@@ -107,7 +106,7 @@ speedrun run whoami -c /path/to/config.toml
 ```
 
 ## Configuration
-Default config file is located at `~/.speedrun/config.toml` and default settings can be generated via `speedrun init --print`.
+Config samples are located under [conf](conf/).
 
 #### Run Portal as a systemd service
 Find a sample unit [here](init/portal.service)

@@ -1,0 +1,12 @@
+address = "0.0.0.0" # address to which to bind
+port = 1337 # port on which to listen for incoming connections
+
+[logging]
+  json = false # output logs in json format
+  loglevel = "info" # how much log output to spam
+
+[tls]
+  ca = "ca.crt" # certificate authority cert/bundle
+  cert = "portal.crt" # client certificate used during mTLS
+  key = "portal.key" # client key used during mTLS
+  insecure = false # setting this to true will make speedrun skip portal's certificate validation step
