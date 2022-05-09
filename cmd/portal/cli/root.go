@@ -75,7 +75,6 @@ func Execute() {
 	configPath := filepath.Join(dir, "config.toml")
 
 	cobra.OnInitialize(initConfig)
-	rootCmd.AddCommand(initCmd)
 	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", configPath, "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
 	rootCmd.PersistentFlags().BoolP("json", "j", false, "Output logs in JSON format")
