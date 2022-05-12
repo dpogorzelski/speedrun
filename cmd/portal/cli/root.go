@@ -31,7 +31,7 @@ func Execute() {
 		Version:       fmt.Sprintf("%s, commit: %s, date: %s", version, commit, date),
 		SilenceUsage:  true,
 		SilenceErrors: true,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(_ *cobra.Command, _ []string) error {
 			insecure := viper.GetBool("tls.insecure")
 			caPath := viper.GetString("tls.ca")
 			certPath := viper.GetString("tls.cert")
