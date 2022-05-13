@@ -36,7 +36,7 @@ func Execute() {
 
 	cobra.OnInitialize(initConfig)
 	rootCmd.SetUsageTemplate(rootUsage)
-	rootCmd.AddCommand(runCmd, serviceCmd)
+	rootCmd.AddCommand(runCmd, serviceCmd, fileCmd)
 
 	home, err := homedir.Dir()
 	if err != nil {

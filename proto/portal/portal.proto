@@ -42,14 +42,24 @@ message CPUusageResponse {
   int32 loadavg15 = 3;
 }
 
+message FileReadRequest {
+  string path = 1;
+}
+
+message FileReadResponse {
+  State state = 1;
+  string content = 2;
+}
+
 service Portal {
   rpc ServiceRestart(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStart(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStop(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStatus(ServiceRequest) returns (ServiceStatusResponse) {}
   rpc RunCommand(CommandRequest) returns (CommandResponse) {}
-  rpc CPUusage(CPUusageRequest) returns (CPUusageResponse) {
-  }  // --target group1 --target group2
+  rpc CPUusage(CPUusageRequest) returns (CPUusageResponse) {}
+  rpc FileRead(FileReadRequest) returns (FileReadResponse) {}
+  // --target group1 --target group2
   // rpc CPUProfile(CPUProfileRequest) returns (CPUProfileResponse) {}
   // rpc MemProfile(MemProfileRequest) returns (MemProfileResponse) {}
   // rpc EnsureMountedDisk()
