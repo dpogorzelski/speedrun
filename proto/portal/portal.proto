@@ -58,6 +58,13 @@ message SystemRebootResponse {
   string message = 2;
 }
 
+message SystemShutdownRequest {}
+
+message SystemShutdownResponse {
+  State state = 1;
+  string message = 2;
+}
+
 service Portal {
   rpc ServiceRestart(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStart(ServiceRequest) returns (ServiceResponse) {}
@@ -67,6 +74,7 @@ service Portal {
   rpc CPUusage(CPUusageRequest) returns (CPUusageResponse) {}
   rpc FileRead(FileReadRequest) returns (FileReadResponse) {}
   rpc SystemReboot(SystemRebootRequest) returns (SystemRebootResponse) {}
+  rpc SystemShutdown(SystemShutdownRequest) returns (SystemShutdownResponse) {}
   // --target group1 --target group2
   // rpc CPUProfile(CPUProfileRequest) returns (CPUProfileResponse) {}
   // rpc MemProfile(MemProfileRequest) returns (MemProfileResponse) {}

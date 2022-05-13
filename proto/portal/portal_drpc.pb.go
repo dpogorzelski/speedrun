@@ -46,6 +46,7 @@ type DRPCPortalClient interface {
 	CPUusage(ctx context.Context, in *CPUusageRequest) (*CPUusageResponse, error)
 	FileRead(ctx context.Context, in *FileReadRequest) (*FileReadResponse, error)
 	SystemReboot(ctx context.Context, in *SystemRebootRequest) (*SystemRebootResponse, error)
+	SystemShutdown(ctx context.Context, in *SystemShutdownRequest) (*SystemShutdownResponse, error)
 }
 
 type drpcPortalClient struct {
@@ -130,6 +131,15 @@ func (c *drpcPortalClient) SystemReboot(ctx context.Context, in *SystemRebootReq
 	return out, nil
 }
 
+func (c *drpcPortalClient) SystemShutdown(ctx context.Context, in *SystemShutdownRequest) (*SystemShutdownResponse, error) {
+	out := new(SystemShutdownResponse)
+	err := c.cc.Invoke(ctx, "/portal.Portal/SystemShutdown", drpcEncoding_File_portal_portal_proto{}, in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type DRPCPortalServer interface {
 	ServiceRestart(context.Context, *ServiceRequest) (*ServiceResponse, error)
 	ServiceStart(context.Context, *ServiceRequest) (*ServiceResponse, error)
@@ -139,6 +149,7 @@ type DRPCPortalServer interface {
 	CPUusage(context.Context, *CPUusageRequest) (*CPUusageResponse, error)
 	FileRead(context.Context, *FileReadRequest) (*FileReadResponse, error)
 	SystemReboot(context.Context, *SystemRebootRequest) (*SystemRebootResponse, error)
+	SystemShutdown(context.Context, *SystemShutdownRequest) (*SystemShutdownResponse, error)
 }
 
 type DRPCPortalUnimplementedServer struct{}
@@ -175,9 +186,13 @@ func (s *DRPCPortalUnimplementedServer) SystemReboot(context.Context, *SystemReb
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
+func (s *DRPCPortalUnimplementedServer) SystemShutdown(context.Context, *SystemShutdownRequest) (*SystemShutdownResponse, error) {
+	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
+}
+
 type DRPCPortalDescription struct{}
 
-func (DRPCPortalDescription) NumMethods() int { return 8 }
+func (DRPCPortalDescription) NumMethods() int { return 9 }
 
 func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver, interface{}, bool) {
 	switch n {
@@ -253,6 +268,15 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 						in1.(*SystemRebootRequest),
 					)
 			}, DRPCPortalServer.SystemReboot, true
+	case 8:
+		return "/portal.Portal/SystemShutdown", drpcEncoding_File_portal_portal_proto{},
+			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
+				return srv.(DRPCPortalServer).
+					SystemShutdown(
+						ctx,
+						in1.(*SystemShutdownRequest),
+					)
+			}, DRPCPortalServer.SystemShutdown, true
 	default:
 		return "", nil, nil, nil, false
 	}
@@ -384,6 +408,22 @@ type drpcPortal_SystemRebootStream struct {
 }
 
 func (x *drpcPortal_SystemRebootStream) SendAndClose(m *SystemRebootResponse) error {
+	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
+		return err
+	}
+	return x.CloseSend()
+}
+
+type DRPCPortal_SystemShutdownStream interface {
+	drpc.Stream
+	SendAndClose(*SystemShutdownResponse) error
+}
+
+type drpcPortal_SystemShutdownStream struct {
+	drpc.Stream
+}
+
+func (x *drpcPortal_SystemShutdownStream) SendAndClose(m *SystemShutdownResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}
