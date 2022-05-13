@@ -5,7 +5,6 @@ import (
 	"crypto/tls"
 	"fmt"
 	"os"
-	"path/filepath"
 
 	"github.com/apex/log"
 	jsonhandler "github.com/apex/log/handlers/json"
@@ -71,11 +70,8 @@ func Execute() {
 		},
 	}
 
-	dir := "/etc/portal"
-	configPath := filepath.Join(dir, "config.toml")
-
 	cobra.OnInitialize(initConfig)
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", configPath, "config file")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "config.toml", "config file")
 	rootCmd.PersistentFlags().StringP("loglevel", "l", "info", "Log level")
 	rootCmd.PersistentFlags().BoolP("json", "j", false, "Output logs in JSON format")
 	rootCmd.Flags().IntP("port", "p", 1337, "Port to listen on for connections")
