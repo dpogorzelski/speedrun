@@ -26,15 +26,24 @@ var rebootCmd = &cobra.Command{
 	Short:   "Reboot the system",
 	Example: "  speedrun system reboot",
 	Args:    cobra.NoArgs,
-	RunE:    reboot,
+	RunE:    systemAction,
+}
+
+var shutdownCmd = &cobra.Command{
+	Use:     "shutdown",
+	Short:   "Shutdown the system",
+	Example: "  speedrun system shutdown",
+	Args:    cobra.NoArgs,
+	RunE:    systemAction,
 }
 
 func init() {
 	systemCmd.SetUsageTemplate(usage)
 	systemCmd.AddCommand(rebootCmd)
+	systemCmd.AddCommand(shutdownCmd)
 }
 
-func reboot(cmd *cobra.Command, _ []string) error {
+func systemAction(cmd *cobra.Command, _ []string) error {
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 
 	tlsConfig, err := cloud.SetupTLS()
@@ -76,13 +85,23 @@ func reboot(cmd *cobra.Command, _ []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
-			r, err := c.SystemReboot(ctx, &portalpb.SystemRebootRequest{})
-			if err != nil {
-				log.Error(err.Error())
-				return
-			}
-			log.WithField("state", r.GetState()).Infof(r.GetMessage())
+			switch cmd.Name() {
+			case "reboot":
+				r, err := c.SystemReboot(ctx, &portalpb.SystemRebootRequest{})
+				if err != nil {
+					log.Error(err.Error())
+					return
+				}
+				log.WithField("state", r.GetState()).Infof(r.GetMessage())
 
+			case "shutdown":
+				r, err := c.SystemShutdown(ctx, &portalpb.SystemShutdownRequest{})
+				if err != nil {
+					log.Error(err.Error())
+					return
+				}
+				log.WithField("state", r.GetState()).Infof(r.GetMessage())
+			}
 		})
 	}
 	pool.StopAndWait()
