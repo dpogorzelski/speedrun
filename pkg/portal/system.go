@@ -10,7 +10,7 @@ import (
 	"github.com/dpogorzelski/speedrun/proto/portal"
 )
 
-func (s *Server) SystemReboot(ctx context.Context, file *portal.SystemRebootRequest) (*portal.SystemRebootResponse, error) {
+func (s *Server) SystemReboot(ctx context.Context, system *portal.SystemRebootRequest) (*portal.SystemRebootResponse, error) {
 	fields := log.Fields{
 		"context": "system",
 		"command": "reboot",
