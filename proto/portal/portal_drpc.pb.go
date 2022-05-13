@@ -45,6 +45,7 @@ type DRPCPortalClient interface {
 	RunCommand(ctx context.Context, in *CommandRequest) (*CommandResponse, error)
 	CPUusage(ctx context.Context, in *CPUusageRequest) (*CPUusageResponse, error)
 	FileRead(ctx context.Context, in *FileReadRequest) (*FileReadResponse, error)
+	SystemReboot(ctx context.Context, in *SystemRebootRequest) (*SystemRebootResponse, error)
 }
 
 type drpcPortalClient struct {
@@ -120,6 +121,15 @@ func (c *drpcPortalClient) FileRead(ctx context.Context, in *FileReadRequest) (*
 	return out, nil
 }
 
+func (c *drpcPortalClient) SystemReboot(ctx context.Context, in *SystemRebootRequest) (*SystemRebootResponse, error) {
+	out := new(SystemRebootResponse)
+	err := c.cc.Invoke(ctx, "/portal.Portal/SystemReboot", drpcEncoding_File_portal_portal_proto{}, in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type DRPCPortalServer interface {
 	ServiceRestart(context.Context, *ServiceRequest) (*ServiceResponse, error)
 	ServiceStart(context.Context, *ServiceRequest) (*ServiceResponse, error)
@@ -128,6 +138,7 @@ type DRPCPortalServer interface {
 	RunCommand(context.Context, *CommandRequest) (*CommandResponse, error)
 	CPUusage(context.Context, *CPUusageRequest) (*CPUusageResponse, error)
 	FileRead(context.Context, *FileReadRequest) (*FileReadResponse, error)
+	SystemReboot(context.Context, *SystemRebootRequest) (*SystemRebootResponse, error)
 }
 
 type DRPCPortalUnimplementedServer struct{}
@@ -160,9 +171,13 @@ func (s *DRPCPortalUnimplementedServer) FileRead(context.Context, *FileReadReque
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
+func (s *DRPCPortalUnimplementedServer) SystemReboot(context.Context, *SystemRebootRequest) (*SystemRebootResponse, error) {
+	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
+}
+
 type DRPCPortalDescription struct{}
 
-func (DRPCPortalDescription) NumMethods() int { return 7 }
+func (DRPCPortalDescription) NumMethods() int { return 8 }
 
 func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver, interface{}, bool) {
 	switch n {
@@ -229,6 +244,15 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 						in1.(*FileReadRequest),
 					)
 			}, DRPCPortalServer.FileRead, true
+	case 7:
+		return "/portal.Portal/SystemReboot", drpcEncoding_File_portal_portal_proto{},
+			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
+				return srv.(DRPCPortalServer).
+					SystemReboot(
+						ctx,
+						in1.(*SystemRebootRequest),
+					)
+			}, DRPCPortalServer.SystemReboot, true
 	default:
 		return "", nil, nil, nil, false
 	}
@@ -344,6 +368,22 @@ type drpcPortal_FileReadStream struct {
 }
 
 func (x *drpcPortal_FileReadStream) SendAndClose(m *FileReadResponse) error {
+	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
+		return err
+	}
+	return x.CloseSend()
+}
+
+type DRPCPortal_SystemRebootStream interface {
+	drpc.Stream
+	SendAndClose(*SystemRebootResponse) error
+}
+
+type drpcPortal_SystemRebootStream struct {
+	drpc.Stream
+}
+
+func (x *drpcPortal_SystemRebootStream) SendAndClose(m *SystemRebootResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}

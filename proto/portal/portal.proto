@@ -51,6 +51,13 @@ message FileReadResponse {
   string content = 2;
 }
 
+message SystemRebootRequest {}
+
+message SystemRebootResponse {
+  State state = 1;
+  string message = 2;
+}
+
 service Portal {
   rpc ServiceRestart(ServiceRequest) returns (ServiceResponse) {}
   rpc ServiceStart(ServiceRequest) returns (ServiceResponse) {}
@@ -59,6 +66,7 @@ service Portal {
   rpc RunCommand(CommandRequest) returns (CommandResponse) {}
   rpc CPUusage(CPUusageRequest) returns (CPUusageResponse) {}
   rpc FileRead(FileReadRequest) returns (FileReadResponse) {}
+  rpc SystemReboot(SystemRebootRequest) returns (SystemRebootResponse) {}
   // --target group1 --target group2
   // rpc CPUProfile(CPUProfileRequest) returns (CPUProfileResponse) {}
   // rpc MemProfile(MemProfileRequest) returns (MemProfileResponse) {}

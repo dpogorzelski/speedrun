@@ -5,7 +5,7 @@ Usage:{{if .Runnable}}
 Core Commands:{{range .Commands}}{{if (or (eq .Name "help") (eq .Name "completion"))}}
   {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}
 
-Action Commands:{{range .Commands}}{{if (or (eq .Name "run") (eq .Name "exec") (eq .Name "service") (eq .Name "file"))}}
+Action Commands:{{range .Commands}}{{if (or (eq .Name "run") (eq .Name "exec") (eq .Name "service") (eq .Name "file") (eq .Name "system") )}}
   {{rpad .Name .NamePadding }} {{.Short}}{{end}}{{end}}
 {{if .HasAvailableLocalFlags}}
 Flags:
