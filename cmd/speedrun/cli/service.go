@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -90,7 +90,7 @@ func action(cmd *cobra.Command, args []string) error {
 			}
 			log := log.WithFields(fields)
 
-			addr := fmt.Sprintf("%s:%d", portal.GetAddress(usePrivateIP), 1337)
+			addr := net.JoinHostPort(portal.GetAddress(usePrivateIP), "1337")
 			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
 				log.Error(err.Error())

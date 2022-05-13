@@ -3,7 +3,7 @@ package cli
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
+	"net"
 	"strings"
 	"time"
 
@@ -44,22 +44,22 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	instances, err := cloud.GetInstances(target)
+	portals, err := cloud.GetInstances(target)
 	if err != nil {
 		return err
 	}
 
 	pool := pond.New(1000, 10000)
-	for _, p := range instances {
-		instance := p
+	for _, p := range portals {
+		portal := p
 		pool.Submit(func() {
 			fields := log.Fields{
-				"host":    instance.Name,
-				"address": instance.GetAddress(usePrivateIP),
+				"host":    portal.Name,
+				"address": portal.GetAddress(usePrivateIP),
 			}
 			log := log.WithFields(fields)
 
-			addr := fmt.Sprintf("%s:%d", instance.GetAddress(usePrivateIP), 1337)
+			addr := net.JoinHostPort(portal.GetAddress(usePrivateIP), "1337")
 			rawconn, err := tls.Dial("tcp", addr, tlsConfig)
 			if err != nil {
 				log.Error(err.Error())
