@@ -14,8 +14,8 @@ import (
 type Instance struct {
 	PublicAddress  string
 	PrivateAddress string
-	Name           string
-	Labels         map[string]string
+	Name           string            `expr:"name"`
+	Labels         map[string]string `expr:"labels"`
 }
 
 func (i Instance) GetAddress(private bool) string {
