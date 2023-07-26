@@ -115,9 +115,15 @@ func cp(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	content, err := os.ReadFile(args[0])
-	if err != nil {
-		return err
+	remoteSrc := strings.HasPrefix(args[0], ":")
+	remoteDst := strings.HasPrefix(args[1], ":")
+
+	var content []byte
+	if !remoteSrc {
+		content, err = os.ReadFile(args[0])
+		if err != nil {
+			return err
+		}
 	}
 
 	portals, err := cloud.GetInstances(target)
@@ -149,11 +155,21 @@ func cp(cmd *cobra.Command, args []string) error {
 			ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
 			defer cancel()
 
-			r, err := c.FileCp(ctx, &portalpb.FileCpRequest{Path: args[1], Content: content})
+			var r *portalpb.FileCpResponse
+
+			r, err = c.FileCp(ctx, &portalpb.FileCpRequest{Src: strings.TrimPrefix(args[0], ":"), Dst: strings.TrimPrefix(args[1], ":"), Content: content, RemoteSrc: remoteSrc, RemoteDst: remoteDst})
 			if err != nil {
 				log.Error(err.Error())
 				return
 			}
+			if len(r.GetContent()) > 0 {
+				err := os.WriteFile(args[1], r.GetContent(), 0644)
+				if err != nil {
+					log.Error(err.Error())
+					return
+				}
+			}
+
 			log.WithField("state", r.GetState()).Infof("Done")
 		})
 	}

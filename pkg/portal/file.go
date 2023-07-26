@@ -30,16 +30,37 @@ func (s *Server) FileCp(ctx context.Context, file *portal.FileCpRequest) (*porta
 	fields := log.Fields{
 		"context": "file",
 		"command": "cp",
-		"name":    file.GetPath(),
+		"name":    file.GetDst(),
 	}
 	log := log.WithFields(fields)
 	log.Debug("Received file cp request")
 
-	err := os.WriteFile(file.GetPath(), file.GetContent(), 0644)
-	if err != nil {
-		log.Error(err.Error())
-		return nil, err
-	}
+	if file.GetRemoteSrc() && file.GetRemoteDst() {
+		content, err := os.ReadFile(file.GetSrc())
+		if err != nil {
+			log.Error(err.Error())
+			return nil, err
+		}
 
+		err = os.WriteFile(file.GetDst(), content, 0644)
+		if err != nil {
+			log.Error(err.Error())
+			return nil, err
+		}
+
+	} else if file.GetRemoteDst() {
+		err := os.WriteFile(file.GetDst(), file.GetContent(), 0644)
+		if err != nil {
+			log.Error(err.Error())
+			return nil, err
+		}
+	} else if file.GetRemoteSrc() {
+		content, err := os.ReadFile(file.GetSrc())
+		if err != nil {
+			log.Error(err.Error())
+			return nil, err
+		}
+		return &portal.FileCpResponse{State: portal.State_UNKNOWN, Content: content}, nil
+	}
 	return &portal.FileCpResponse{State: portal.State_UNKNOWN}, nil
 }

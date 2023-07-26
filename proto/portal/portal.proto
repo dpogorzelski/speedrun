@@ -52,12 +52,16 @@ message FileReadResponse {
 }
 
 message FileCpRequest {
-  string path = 1;
-  bytes content = 2;
+  string src = 1;
+  string dst = 2;
+  bytes content = 3;
+  bool remoteSrc = 4;
+  bool remoteDst =5;
 }
 
 message FileCpResponse {
   State state = 1;
+  bytes content = 2;
 }
 
 message SystemRebootRequest {}
