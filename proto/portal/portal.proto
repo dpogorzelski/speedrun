@@ -51,6 +51,15 @@ message FileReadResponse {
   string content = 2;
 }
 
+message FileCpRequest {
+  string path = 1;
+  bytes content = 2;
+}
+
+message FileCpResponse {
+  State state = 1;
+}
+
 message SystemRebootRequest {}
 
 message SystemRebootResponse {
@@ -73,6 +82,7 @@ service Portal {
   rpc RunCommand(CommandRequest) returns (CommandResponse) {}
   rpc CPUusage(CPUusageRequest) returns (CPUusageResponse) {}
   rpc FileRead(FileReadRequest) returns (FileReadResponse) {}
+  rpc FileCp(FileCpRequest) returns (FileCpResponse) {}
   rpc SystemReboot(SystemRebootRequest) returns (SystemRebootResponse) {}
   rpc SystemShutdown(SystemShutdownRequest) returns (SystemShutdownResponse) {}
   // --target group1 --target group2

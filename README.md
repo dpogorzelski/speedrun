@@ -154,7 +154,7 @@ Speedrun:
 ## List of built-in Actions
 * [x] run: run arbitrary shell commands
 * [X] service: control systemd services
-* [ ] file: perform file operations such as read or tail
+* [X] file: perform file operations such as read or cp
 * [ ] disk: perform storage operations such as listing partitions and available disk space
 * [ ] ps: fetch process information
 * [ ] top: fetch or stream high level system stats
