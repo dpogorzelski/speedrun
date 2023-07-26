@@ -64,6 +64,15 @@ message FileCpResponse {
   bytes content = 2;
 }
 
+message FileChmodRequest {
+  string path = 1;
+  uint32 filemode = 2;
+}
+
+message FileChmodResponse {
+  State state = 1;
+}
+
 message SystemRebootRequest {}
 
 message SystemRebootResponse {
@@ -87,6 +96,7 @@ service Portal {
   rpc CPUusage(CPUusageRequest) returns (CPUusageResponse) {}
   rpc FileRead(FileReadRequest) returns (FileReadResponse) {}
   rpc FileCp(FileCpRequest) returns (FileCpResponse) {}
+  rpc FileChmod(FileChmodRequest) returns (FileChmodResponse) {}
   rpc SystemReboot(SystemRebootRequest) returns (SystemRebootResponse) {}
   rpc SystemShutdown(SystemShutdownRequest) returns (SystemShutdownResponse) {}
   // --target group1 --target group2

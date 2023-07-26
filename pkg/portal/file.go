@@ -2,6 +2,7 @@ package portal
 
 import (
 	"context"
+	"io/fs"
 	"os"
 
 	"github.com/apex/log"
@@ -63,4 +64,22 @@ func (s *Server) FileCp(ctx context.Context, file *portal.FileCpRequest) (*porta
 		return &portal.FileCpResponse{State: portal.State_UNKNOWN, Content: content}, nil
 	}
 	return &portal.FileCpResponse{State: portal.State_UNKNOWN}, nil
+}
+
+func (s *Server) FileChmod(ctx context.Context, file *portal.FileChmodRequest) (*portal.FileChmodResponse, error) {
+	fields := log.Fields{
+		"context": "file",
+		"command": "read",
+		"name":    file.GetPath(),
+	}
+	log := log.WithFields(fields)
+	log.Debug("Received file chmod request")
+
+	err := os.Chmod(file.GetPath(), fs.FileMode(file.GetFilemode()))
+	if err != nil {
+		log.Error(err.Error())
+		return nil, err
+	}
+
+	return &portal.FileChmodResponse{State: portal.State_UNKNOWN}, nil
 }

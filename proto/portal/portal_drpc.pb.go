@@ -46,6 +46,7 @@ type DRPCPortalClient interface {
 	CPUusage(ctx context.Context, in *CPUusageRequest) (*CPUusageResponse, error)
 	FileRead(ctx context.Context, in *FileReadRequest) (*FileReadResponse, error)
 	FileCp(ctx context.Context, in *FileCpRequest) (*FileCpResponse, error)
+	FileChmod(ctx context.Context, in *FileChmodRequest) (*FileChmodResponse, error)
 	SystemReboot(ctx context.Context, in *SystemRebootRequest) (*SystemRebootResponse, error)
 	SystemShutdown(ctx context.Context, in *SystemShutdownRequest) (*SystemShutdownResponse, error)
 }
@@ -132,6 +133,15 @@ func (c *drpcPortalClient) FileCp(ctx context.Context, in *FileCpRequest) (*File
 	return out, nil
 }
 
+func (c *drpcPortalClient) FileChmod(ctx context.Context, in *FileChmodRequest) (*FileChmodResponse, error) {
+	out := new(FileChmodResponse)
+	err := c.cc.Invoke(ctx, "/portal.Portal/FileChmod", drpcEncoding_File_portal_portal_proto{}, in, out)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *drpcPortalClient) SystemReboot(ctx context.Context, in *SystemRebootRequest) (*SystemRebootResponse, error) {
 	out := new(SystemRebootResponse)
 	err := c.cc.Invoke(ctx, "/portal.Portal/SystemReboot", drpcEncoding_File_portal_portal_proto{}, in, out)
@@ -159,6 +169,7 @@ type DRPCPortalServer interface {
 	CPUusage(context.Context, *CPUusageRequest) (*CPUusageResponse, error)
 	FileRead(context.Context, *FileReadRequest) (*FileReadResponse, error)
 	FileCp(context.Context, *FileCpRequest) (*FileCpResponse, error)
+	FileChmod(context.Context, *FileChmodRequest) (*FileChmodResponse, error)
 	SystemReboot(context.Context, *SystemRebootRequest) (*SystemRebootResponse, error)
 	SystemShutdown(context.Context, *SystemShutdownRequest) (*SystemShutdownResponse, error)
 }
@@ -197,6 +208,10 @@ func (s *DRPCPortalUnimplementedServer) FileCp(context.Context, *FileCpRequest) 
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
 
+func (s *DRPCPortalUnimplementedServer) FileChmod(context.Context, *FileChmodRequest) (*FileChmodResponse, error) {
+	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
+}
+
 func (s *DRPCPortalUnimplementedServer) SystemReboot(context.Context, *SystemRebootRequest) (*SystemRebootResponse, error) {
 	return nil, drpcerr.WithCode(errors.New("Unimplemented"), drpcerr.Unimplemented)
 }
@@ -207,7 +222,7 @@ func (s *DRPCPortalUnimplementedServer) SystemShutdown(context.Context, *SystemS
 
 type DRPCPortalDescription struct{}
 
-func (DRPCPortalDescription) NumMethods() int { return 10 }
+func (DRPCPortalDescription) NumMethods() int { return 11 }
 
 func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver, interface{}, bool) {
 	switch n {
@@ -284,6 +299,15 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 					)
 			}, DRPCPortalServer.FileCp, true
 	case 8:
+		return "/portal.Portal/FileChmod", drpcEncoding_File_portal_portal_proto{},
+			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
+				return srv.(DRPCPortalServer).
+					FileChmod(
+						ctx,
+						in1.(*FileChmodRequest),
+					)
+			}, DRPCPortalServer.FileChmod, true
+	case 9:
 		return "/portal.Portal/SystemReboot", drpcEncoding_File_portal_portal_proto{},
 			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
 				return srv.(DRPCPortalServer).
@@ -292,7 +316,7 @@ func (DRPCPortalDescription) Method(n int) (string, drpc.Encoding, drpc.Receiver
 						in1.(*SystemRebootRequest),
 					)
 			}, DRPCPortalServer.SystemReboot, true
-	case 9:
+	case 10:
 		return "/portal.Portal/SystemShutdown", drpcEncoding_File_portal_portal_proto{},
 			func(srv interface{}, ctx context.Context, in1, in2 interface{}) (drpc.Message, error) {
 				return srv.(DRPCPortalServer).
@@ -432,6 +456,22 @@ type drpcPortal_FileCpStream struct {
 }
 
 func (x *drpcPortal_FileCpStream) SendAndClose(m *FileCpResponse) error {
+	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
+		return err
+	}
+	return x.CloseSend()
+}
+
+type DRPCPortal_FileChmodStream interface {
+	drpc.Stream
+	SendAndClose(*FileChmodResponse) error
+}
+
+type drpcPortal_FileChmodStream struct {
+	drpc.Stream
+}
+
+func (x *drpcPortal_FileChmodStream) SendAndClose(m *FileChmodResponse) error {
 	if err := x.MsgSend(m, drpcEncoding_File_portal_portal_proto{}); err != nil {
 		return err
 	}
