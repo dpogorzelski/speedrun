@@ -27,11 +27,17 @@ var runCmd = &cobra.Command{
 
 func init() {
 	runCmd.SetUsageTemplate(usage)
+	runCmd.Flags().BoolP("quiet", "q", false, "Suppress command output")
 }
 
 func run(cmd *cobra.Command, args []string) error {
 	command := strings.Join(args, " ")
 	s := strings.Split(command, " ")
+	quiet, err := cmd.Flags().GetBool("quiet")
+	if err != nil {
+		return err
+	}
+
 	usePrivateIP := viper.GetBool("portal.use-private-ip")
 
 	tlsConfig, err := cloud.SetupTLS()
@@ -78,7 +84,11 @@ func run(cmd *cobra.Command, args []string) error {
 				log.Error(err.Error())
 				return
 			}
-			log.WithField("state", r.GetState()).Info(r.GetMessage())
+
+			log.WithField("state", r.GetState()).Info("Done")
+			if !quiet {
+				println(r.GetMessage())
+			}
 		})
 	}
 	pool.StopAndWait()

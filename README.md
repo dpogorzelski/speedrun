@@ -159,7 +159,7 @@ Speedrun:
 * [ ] ps: fetch process information
 * [ ] top: fetch or stream high level system stats
 * [ ] pkg: manage packages via default package manager
-* [ ] system: host control operations such as reboot, shutdown etc.
+* [X] system: host control operations such as reboot, shutdown etc.
 ...
 ## Contributing
 
